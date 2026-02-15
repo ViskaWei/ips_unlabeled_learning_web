@@ -1,6 +1,7 @@
 /**
- * Delta-t Slider Demo — shows how observation interval affects MLE vs Self-Test.
- * Uses data from dt_obs_sweep.json for Model A.
+ * Delta-t Slider Demo — dot-on-gradient gauge showing error severity.
+ * Left (green) = low error = good. Right (red) = high error = bad.
+ * NN Self-Test (our method) is green.
  */
 
 const vizContainer = document.getElementById('dt-slider-viz');
@@ -8,138 +9,225 @@ const slider = document.getElementById('dt-slider') as HTMLInputElement;
 const dtValueLabel = document.getElementById('dt-value');
 
 if (vizContainer && slider) {
-  const dtValues = [0.001, 0.01, 0.1];
   const dtLabels = ['0.001', '0.01', '0.1'];
 
   // Model A data from paper Table 1
   const modelAData = {
-    oracle_mle_V:   [6.08, 20.3, 0.49],
-    oracle_mle_Phi: [12.5, 52.9, 92.2],
-    oracle_selftest_V:   [0.78, 0.82, 8.03],
-    oracle_selftest_Phi: [1.72, 2.69, 2.84],
-    nn_selftest_V:   [0.45, 1.95, 5.69],
-    nn_selftest_Phi: [3.81, 4.03, 8.86],
+    oracle_mle_V:       [6.08, 20.3, 0.49],
+    oracle_mle_Phi:     [12.5, 52.9, 92.2],
+    oracle_selftest_V:  [0.78, 0.82, 8.03],
+    oracle_selftest_Phi:[1.72, 2.69, 2.84],
+    nn_selftest_V:      [0.45, 1.95, 5.69],
+    nn_selftest_Phi:    [3.81, 4.03, 8.86],
   };
 
-  function render(dtIdx: number) {
-    if (dtValueLabel) dtValueLabel.textContent = dtLabels[dtIdx];
+  const canvas = document.createElement('canvas');
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  vizContainer.style.position = 'relative';
+  vizContainer.replaceChildren(canvas);
 
-    // Clear previous content
-    while (vizContainer!.firstChild) vizContainer!.removeChild(vizContainer!.firstChild);
+  let currentIdx = 1;
+  // For smooth animation
+  let animatedValues: Record<string, number> = {};
 
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'grid';
-    wrapper.style.gridTemplateColumns = '1fr 1fr';
-    wrapper.style.gap = '2rem';
+  const methods = [
+    { key: 'nn',      name: 'NN Self-Test (ours)', dot: '#22c55e', ring: '#16a34a', label: '#22c55e' },
+    { key: 'oracle',  name: 'Oracle Self-Test',    dot: '#f59e0b', ring: '#d97706', label: '#f59e0b' },
+    { key: 'mle',     name: 'Oracle MLE',          dot: '#94a3b8', ring: '#64748b', label: '#94a3b8' },
+  ];
 
-    // Create two panels: grad_V and grad_Phi
-    const panels = [
-      { title: '\u2207V Error (%)', key: 'V' },
-      { title: '\u2207\u03A6 Error (%)', key: 'Phi' },
-    ];
+  function getValues(dtIdx: number) {
+    return {
+      nn_V: modelAData.nn_selftest_V[dtIdx],
+      nn_Phi: modelAData.nn_selftest_Phi[dtIdx],
+      oracle_V: modelAData.oracle_selftest_V[dtIdx],
+      oracle_Phi: modelAData.oracle_selftest_Phi[dtIdx],
+      mle_V: modelAData.oracle_mle_V[dtIdx],
+      mle_Phi: modelAData.oracle_mle_Phi[dtIdx],
+    };
+  }
 
-    for (const panel of panels) {
-      const div = document.createElement('div');
+  function resize() {
+    const rect = vizContainer!.getBoundingClientRect();
+    const dpr = window.devicePixelRatio;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d')!;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
 
-      const title = document.createElement('h4');
-      title.textContent = panel.title;
-      Object.assign(title.style, {
-        fontSize: '0.85rem',
-        color: 'var(--text-muted)',
-        marginBottom: '1rem',
-        textAlign: 'center',
-      });
-      div.appendChild(title);
+  function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
-      const methods = [
-        { name: 'Oracle MLE', color: '#22c55e', values: panel.key === 'V' ? modelAData.oracle_mle_V : modelAData.oracle_mle_Phi },
-        { name: 'Oracle Self-Test', color: '#f59e0b', values: panel.key === 'V' ? modelAData.oracle_selftest_V : modelAData.oracle_selftest_Phi },
-        { name: 'NN Self-Test (ours)', color: '#3b82f6', values: panel.key === 'V' ? modelAData.nn_selftest_V : modelAData.nn_selftest_Phi },
-      ];
+  function errorToColor(val: number): string {
+    if (val <= 5) return `rgb(${Math.round(lerp(34, 200, val / 5))}, ${Math.round(lerp(197, 180, val / 5))}, ${Math.round(lerp(94, 20, val / 5))})`;
+    if (val <= 30) return `rgb(${Math.round(lerp(200, 239, (val - 5) / 25))}, ${Math.round(lerp(180, 100, (val - 5) / 25))}, ${Math.round(lerp(20, 20, (val - 5) / 25))})`;
+    return `rgb(239, ${Math.round(lerp(100, 50, Math.min((val - 30) / 70, 1)))}, ${Math.round(lerp(20, 50, Math.min((val - 30) / 70, 1)))})`;
+  }
 
-      const maxVal = Math.max(...methods.flatMap((m) => m.values));
-      const barMax = Math.min(maxVal * 1.1, 100);
+  function draw() {
+    const ctx = canvas.getContext('2d')!;
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    ctx.clearRect(0, 0, w, h);
 
-      for (const method of methods) {
-        const row = document.createElement('div');
-        Object.assign(row.style, {
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          marginBottom: '0.75rem',
-        });
+    const vals = getValues(currentIdx);
 
-        const label = document.createElement('span');
-        label.textContent = method.name;
-        Object.assign(label.style, {
-          fontSize: '0.8rem',
-          color: 'var(--text-secondary)',
-          minWidth: '130px',
-          textAlign: 'right',
-        });
-        row.appendChild(label);
-
-        const barOuter = document.createElement('div');
-        Object.assign(barOuter.style, {
-          flex: '1',
-          height: '24px',
-          background: 'rgba(255,255,255,0.04)',
-          borderRadius: '4px',
-          position: 'relative',
-          overflow: 'hidden',
-        });
-
-        const barInner = document.createElement('div');
-        const val = method.values[dtIdx];
-        const pct = Math.min((val / barMax) * 100, 100);
-        Object.assign(barInner.style, {
-          height: '100%',
-          width: `${pct}%`,
-          background: method.color,
-          opacity: '0.6',
-          borderRadius: '4px',
-          transition: 'width 0.4s ease',
-        });
-        barOuter.appendChild(barInner);
-
-        const valLabel = document.createElement('span');
-        valLabel.textContent = `${val.toFixed(1)}%`;
-        Object.assign(valLabel.style, {
-          position: 'absolute',
-          right: '8px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: '0.8rem',
-          fontFamily: 'var(--font-mono)',
-          color: 'var(--text-primary)',
-          fontWeight: '600',
-        });
-        barOuter.appendChild(valLabel);
-
-        row.appendChild(barOuter);
-        div.appendChild(row);
-      }
-
-      wrapper.appendChild(div);
+    // Animate values smoothly
+    for (const [k, target] of Object.entries(vals)) {
+      if (!(k in animatedValues)) animatedValues[k] = target;
+      animatedValues[k] += (target - animatedValues[k]) * 0.12;
     }
 
-    vizContainer!.appendChild(wrapper);
+    const padL = 150, padR = 40, padT = 10, padB = 20;
+    const rowH = 44;
+    const gaugeH = 18;
+    const gaugeW = w - padL - padR;
+    const maxError = 100; // scale cap
+
+    const panels = [
+      { title: '\u2207V Error', rows: [
+        { method: methods[0], val: animatedValues.nn_V, target: vals.nn_V },
+        { method: methods[1], val: animatedValues.oracle_V, target: vals.oracle_V },
+        { method: methods[2], val: animatedValues.mle_V, target: vals.mle_V },
+      ]},
+      { title: '\u2207\u03A6 Error', rows: [
+        { method: methods[0], val: animatedValues.nn_Phi, target: vals.nn_Phi },
+        { method: methods[1], val: animatedValues.oracle_Phi, target: vals.oracle_Phi },
+        { method: methods[2], val: animatedValues.mle_Phi, target: vals.mle_Phi },
+      ]},
+    ];
+
+    let y = padT;
+
+    for (const panel of panels) {
+      // Panel title
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(panel.title, padL, y + 14);
+      y += 22;
+
+      for (const row of panel.rows) {
+        const gaugeY = y + (rowH - gaugeH) / 2;
+
+        // Method label
+        ctx.fillStyle = row.method.label;
+        ctx.font = '12px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(row.method.name, padL - 12, gaugeY + gaugeH / 2 + 4);
+
+        // Gauge background: green → yellow → red gradient
+        const grad = ctx.createLinearGradient(padL, 0, padL + gaugeW, 0);
+        grad.addColorStop(0, 'rgba(34, 197, 94, 0.15)');
+        grad.addColorStop(0.1, 'rgba(34, 197, 94, 0.12)');
+        grad.addColorStop(0.3, 'rgba(245, 158, 11, 0.12)');
+        grad.addColorStop(0.6, 'rgba(239, 68, 68, 0.12)');
+        grad.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(padL, gaugeY, gaugeW, gaugeH, 4);
+        ctx.fill();
+
+        // Gauge outline
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // "Good" zone indicator: subtle green tint on left
+        const goodZoneW = (5 / maxError) * gaugeW; // 0-5% is "good"
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
+        ctx.beginPath();
+        ctx.roundRect(padL, gaugeY, goodZoneW, gaugeH, [4, 0, 0, 4]);
+        ctx.fill();
+
+        // Filled bar from left to error position — colored by error severity
+        const errorPct = Math.min(row.val / maxError, 1);
+        const barW = errorPct * gaugeW;
+        const barColor = errorToColor(row.val);
+
+        ctx.fillStyle = barColor;
+        ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        ctx.roundRect(padL, gaugeY, barW, gaugeH, 4);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Dot marker at error position
+        const dotX = padL + errorPct * gaugeW;
+        const dotY = gaugeY + gaugeH / 2;
+        const dotR = 8;
+
+        // Glow
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, dotR + 4, 0, Math.PI * 2);
+        ctx.fillStyle = `${row.method.dot}33`;
+        ctx.fill();
+
+        // Dot
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = row.method.dot;
+        ctx.fill();
+
+        // Ring
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2);
+        ctx.strokeStyle = row.method.ring;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Value label next to dot
+        const valText = `${row.target.toFixed(1)}%`;
+        const valX = dotX + dotR + 8;
+        ctx.fillStyle = row.val > 30 ? '#ef4444' : row.val > 10 ? '#f59e0b' : '#22c55e';
+        ctx.font = 'bold 11px JetBrains Mono, monospace';
+        ctx.textAlign = 'left';
+        // If dot is too far right, put label on the left side
+        if (errorPct > 0.85) {
+          ctx.textAlign = 'right';
+          ctx.fillText(valText, dotX - dotR - 6, dotY + 4);
+        } else {
+          ctx.fillText(valText, valX, dotY + 4);
+        }
+
+        y += rowH;
+      }
+
+      y += 8; // gap between panels
+    }
+
+    // Axis labels at bottom
+    const axisY = y + 2;
+    ctx.fillStyle = '#22c55e';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Good (0%)', padL, axisY);
+
+    ctx.fillStyle = '#ef4444';
+    ctx.textAlign = 'right';
+    ctx.fillText('Bad (100%)', padL + gaugeW, axisY);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.textAlign = 'center';
+    ctx.fillText('10%', padL + gaugeW * 0.1, axisY);
+    ctx.fillText('50%', padL + gaugeW * 0.5, axisY);
 
     // Subtitle
-    const subtitle = document.createElement('p');
-    subtitle.textContent = `Model A at \u0394t = ${dtLabels[dtIdx]} (d=2, M=2000, N=10)`;
-    Object.assign(subtitle.style, {
-      textAlign: 'center',
-      fontSize: '0.8rem',
-      color: 'var(--text-muted)',
-      marginTop: '1rem',
-    });
-    vizContainer!.appendChild(subtitle);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.font = '11px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Model A at \u0394t = ${dtLabels[currentIdx]}  (d=2, M=2000, N=10)`, w / 2, axisY + 20);
+
+    requestAnimationFrame(draw);
   }
 
   slider.addEventListener('input', () => {
-    render(parseInt(slider.value));
+    currentIdx = parseInt(slider.value);
+    if (dtValueLabel) dtValueLabel.textContent = dtLabels[currentIdx];
   });
 
-  render(1); // Start at dt=0.01
+  resize();
+  window.addEventListener('resize', () => { resize(); });
+  draw();
 }
