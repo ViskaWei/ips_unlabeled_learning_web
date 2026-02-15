@@ -1,9 +1,10 @@
 /**
  * Energy Balance Visualization — animated energy ledger with V/Phi sliders.
  * Shows how wrong potentials break the energy balance.
+ * Uses Model B (Double-Well + Inverse) for dynamic orbital motion.
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
-import { QuadraticConfinement, PiecewiseInteraction } from '../sim/potentials';
+import { DoubleWellPotential, InverseInteraction } from '../sim/potentials';
 
 const canvas = document.getElementById('energy-canvas') as HTMLCanvasElement;
 const vSlider = document.getElementById('v-scale') as HTMLInputElement;
@@ -13,16 +14,19 @@ if (canvas && vSlider && phiSlider) {
   const ctx = canvas.getContext('2d')!;
   const N = 10;
   const d = 2;
-  const sigma = 0.1;
-  const dt = 0.005;
+  const sigma = 0.15;
+  const dt = 0.008;
 
-  // True potentials
-  const trueV = new QuadraticConfinement(-1.0, 2.0);
-  const truePhi = new PiecewiseInteraction(-3.0, 2.0);
+  // True potentials — Model B: double-well ring + inverse interaction
+  const trueV = new DoubleWellPotential();
+  const truePhi = new InverseInteraction(0.5);
 
   // Simulation with true potentials
   const system = new ParticleSystem(trueV, truePhi, sigma, dt, N, d, 77);
-  const state = system.initialize(0.8);
+  const state = system.initialize(1.0);
+
+  // Warmup so particles settle onto the double-well ring
+  for (let i = 0; i < 300; i++) system.step(state);
 
   // Running averages for the energy ledger
   let dissipation = 0;
@@ -109,8 +113,8 @@ if (canvas && vSlider && phiSlider) {
     const vScale = parseFloat(vSlider.value);
     const phiScale = parseFloat(phiSlider.value);
 
-    // Step simulation (using TRUE potentials for dynamics)
-    system.step(state);
+    // Step simulation (multiple substeps for smoother motion)
+    for (let s = 0; s < 3; s++) system.step(state);
 
     // Compute energy terms with GUESSED potentials (scaled)
     const E_prev = computeEnergy(prevPositions, vScale, phiScale);
@@ -134,16 +138,30 @@ if (canvas && vSlider && phiSlider) {
     const ledgerX = simW + 30;
 
     // Left: Particle simulation
-    const scale = simW * 0.2;
+    const simScale = Math.min(simW, h) / 5.5;
     const cx = simW / 2;
     const cy = h / 2;
 
-    for (let i = 0; i < N; i++) {
-      const sx = cx + state.positions[i * 2] * scale;
-      const sy = cy - state.positions[i * 2 + 1] * scale;
+    // Faint ring at |x|=1 (double-well equilibrium)
+    ctx.beginPath();
+    ctx.arc(cx, cy, simScale, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
+    for (let i = 0; i < N; i++) {
+      const sx = cx + state.positions[i * 2] * simScale;
+      const sy = cy - state.positions[i * 2 + 1] * simScale;
+
+      // Glow
       ctx.beginPath();
-      ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+      ctx.arc(sx, sy, 14, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
+      ctx.fill();
+
+      // Particle
+      ctx.beginPath();
+      ctx.arc(sx, sy, 8, 0, Math.PI * 2);
       ctx.fillStyle = '#3b82f6';
       ctx.globalAlpha = 0.7;
       ctx.fill();
