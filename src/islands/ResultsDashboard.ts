@@ -19,9 +19,9 @@ if (container) {
   });
 
   async function loadAndRender() {
-    const base = import.meta.env.BASE_URL || '/ips-unlabeled-learning/';
+    const base = import.meta.env.BASE_URL || '/ips_unlabeled_learning_web';
     try {
-      const resp = await fetch(`${base}data/${currentTable}.json`);
+      const resp = await fetch(`${base}/data/${currentTable}.json`);
       const data = await resp.json();
       renderHeatmap(data);
     } catch {
