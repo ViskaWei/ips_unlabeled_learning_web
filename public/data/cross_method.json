@@ -1,0 +1,23 @@
+{
+  "caption": "Best relative gradient errors (%) across method families",
+  "params": { "delta_t_fine": 1e-4, "dt_obs": 0.01, "M": 2000, "N": 10 },
+  "columns": ["model", "d", "oracle_V", "oracle_Phi", "rbf_V", "rbf_Phi", "nn_V", "nn_Phi"],
+  "data": [
+    { "model": "A", "d": 2,  "oracle_V": 0.82, "oracle_Phi": 2.69,  "rbf_V": 23.0, "rbf_Phi": 27.5,   "nn_V": 1.95, "nn_Phi": 4.03 },
+    { "model": "A", "d": 5,  "oracle_V": 0.62, "oracle_Phi": 1.70,  "rbf_V": 15.1, "rbf_Phi": 40.0,   "nn_V": 1.55, "nn_Phi": 5.11 },
+    { "model": "A", "d": 10, "oracle_V": 1.09, "oracle_Phi": 2.17,  "rbf_V": 6.34, "rbf_Phi": 59.0,   "nn_V": 0.95, "nn_Phi": 6.92 },
+    { "model": "A", "d": 20, "oracle_V": 1.01, "oracle_Phi": 4.41,  "rbf_V": 5.33, "rbf_Phi": 61.7,   "nn_V": 1.30, "nn_Phi": 7.85 },
+    { "model": "B", "d": 2,  "oracle_V": 3.53, "oracle_Phi": 32.0,  "rbf_V": 18.2, "rbf_Phi": 147.7,  "nn_V": 18.5, "nn_Phi": 24.6 },
+    { "model": "B", "d": 5,  "oracle_V": 1.61, "oracle_Phi": 19.0,  "rbf_V": 7.47, "rbf_Phi": 175.1,  "nn_V": 1.67, "nn_Phi": 59.4 },
+    { "model": "B", "d": 10, "oracle_V": 2.49, "oracle_Phi": 6.78,  "rbf_V": 7.54, "rbf_Phi": 235.2,  "nn_V": 2.96, "nn_Phi": 13.4 },
+    { "model": "B", "d": 20, "oracle_V": 3.41, "oracle_Phi": 36.3,  "rbf_V": 8.74, "rbf_Phi": 716.0,  "nn_V": 4.61, "nn_Phi": 55.9 },
+    { "model": "C", "d": 2,  "oracle_V": 5.08, "oracle_Phi": 8.52,  "rbf_V": 16.5, "rbf_Phi": 61.6,   "nn_V": 4.06, "nn_Phi": 10.0 },
+    { "model": "C", "d": 5,  "oracle_V": 1.22, "oracle_Phi": 12.1,  "rbf_V": 7.44, "rbf_Phi": 79.0,   "nn_V": 1.03, "nn_Phi": 10.8 },
+    { "model": "C", "d": 10, "oracle_V": 0.15, "oracle_Phi": 71.4,  "rbf_V": 5.25, "rbf_Phi": 288.7,  "nn_V": 1.05, "nn_Phi": 98.4 },
+    { "model": "C", "d": 20, "oracle_V": 0.07, "oracle_Phi": 100.0, "rbf_V": 3.38, "rbf_Phi": 25864,  "nn_V": 1.21, "nn_Phi": 929.6 },
+    { "model": "D", "d": 2,  "oracle_V": 5.37, "oracle_Phi": 7.25,  "rbf_V": 19.8, "rbf_Phi": 18.2,   "nn_V": 3.89, "nn_Phi": 2.68 },
+    { "model": "D", "d": 5,  "oracle_V": 2.30, "oracle_Phi": 3.34,  "rbf_V": 7.73, "rbf_Phi": 28.2,   "nn_V": 1.76, "nn_Phi": 15.9 },
+    { "model": "D", "d": 10, "oracle_V": 3.01, "oracle_Phi": 21.0,  "rbf_V": 5.74, "rbf_Phi": 81.5,   "nn_V": 1.46, "nn_Phi": 21.1 },
+    { "model": "D", "d": 20, "oracle_V": 3.25, "oracle_Phi": 55.0,  "rbf_V": 8.94, "rbf_Phi": 399.8,  "nn_V": 3.22, "nn_Phi": 50.7 }
+  ]
+}

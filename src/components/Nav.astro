@@ -1,0 +1,145 @@
+---
+const sections = [
+  { id: 'problem', label: 'The Problem' },
+  { id: 'challenge', label: 'Why It\'s Hard' },
+  { id: 'insight', label: 'Our Insight' },
+  { id: 'models', label: 'Models' },
+  { id: 'results', label: 'Results' },
+  { id: 'deep-dive', label: 'Deep Dive' },
+];
+---
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-brand">IPS</a>
+    <div class="nav-links">
+      {sections.map((s) => (
+        <a href={`#${s.id}`} class="nav-link">{s.label}</a>
+      ))}
+    </div>
+    <div class="nav-actions">
+      <button id="lang-toggle" class="toggle-btn active" title="Toggle language">EN</button>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.3s ease;
+  }
+
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.25rem;
+    flex: 1;
+    overflow-x: auto;
+  }
+
+  .nav-link {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #lang-toggle {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  #lang-toggle:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+  }
+</style>
+
+<script>
+  // Language toggle
+  const langBtn = document.getElementById('lang-toggle');
+  let currentLang = localStorage.getItem('ips-lang') || 'en';
+
+  function updateLang() {
+    if (langBtn) langBtn.textContent = currentLang.toUpperCase();
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n-en]').forEach((el) => {
+      const text = currentLang === 'en'
+        ? el.getAttribute('data-i18n-en')
+        : el.getAttribute('data-i18n-zh');
+      if (text) el.textContent = text;
+    });
+  }
+
+  langBtn?.addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'zh' : 'en';
+    localStorage.setItem('ips-lang', currentLang);
+    updateLang();
+  });
+
+  updateLang();
+
+  // Active section highlighting
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.nav-link').forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+          });
+        }
+      });
+    },
+    { rootMargin: '-20% 0px -70% 0px' },
+  );
+
+  document.querySelectorAll('section[id]').forEach((sec) => observer.observe(sec));
+</script>

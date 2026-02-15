@@ -1,0 +1,19 @@
+{
+  "caption": "Effect of observation interval dt on gradient errors (%) for all four models at d=2",
+  "params": { "delta_t_fine": 1e-4, "M": 2000, "N": 10 },
+  "columns": ["model", "dt_obs", "oracle_mle_V", "oracle_mle_Phi", "oracle_selftest_V", "oracle_selftest_Phi", "nn_selftest_V", "nn_selftest_Phi"],
+  "data": [
+    { "model": "A", "dt_obs": 0.001, "oracle_mle_V": 6.08, "oracle_mle_Phi": 12.5, "oracle_selftest_V": 0.78, "oracle_selftest_Phi": 1.72, "nn_selftest_V": 0.45, "nn_selftest_Phi": 3.81 },
+    { "model": "A", "dt_obs": 0.01,  "oracle_mle_V": 20.3, "oracle_mle_Phi": 52.9, "oracle_selftest_V": 0.82, "oracle_selftest_Phi": 2.69, "nn_selftest_V": 1.95, "nn_selftest_Phi": 4.03 },
+    { "model": "A", "dt_obs": 0.1,   "oracle_mle_V": 0.49, "oracle_mle_Phi": 92.2, "oracle_selftest_V": 8.03, "oracle_selftest_Phi": 2.84, "nn_selftest_V": 5.69, "nn_selftest_Phi": 8.86 },
+    { "model": "B", "dt_obs": 0.001, "oracle_mle_V": 0.08, "oracle_mle_Phi": 3.88, "oracle_selftest_V": 2.69, "oracle_selftest_Phi": 70.2, "nn_selftest_V": 4.36, "nn_selftest_Phi": 14.3 },
+    { "model": "B", "dt_obs": 0.01,  "oracle_mle_V": 3.91, "oracle_mle_Phi": 32.0, "oracle_selftest_V": 3.53, "oracle_selftest_Phi": 79.4, "nn_selftest_V": 18.5, "nn_selftest_Phi": 24.6 },
+    { "model": "B", "dt_obs": 0.1,   "oracle_mle_V": 21.7, "oracle_mle_Phi": 60.8, "oracle_selftest_V": 2.99, "oracle_selftest_Phi": 100.2, "nn_selftest_V": 28.8, "nn_selftest_Phi": 35.3 },
+    { "model": "C", "dt_obs": 0.001, "oracle_mle_V": 25.6, "oracle_mle_Phi": 39.9, "oracle_selftest_V": 9.42, "oracle_selftest_Phi": 10.4, "nn_selftest_V": 0.77, "nn_selftest_Phi": 14.1 },
+    { "model": "C", "dt_obs": 0.01,  "oracle_mle_V": 5.08, "oracle_mle_Phi": 78.0, "oracle_selftest_V": 7.33, "oracle_selftest_Phi": 8.52, "nn_selftest_V": 4.06, "nn_selftest_Phi": 10.0 },
+    { "model": "C", "dt_obs": 0.1,   "oracle_mle_V": 43.7, "oracle_mle_Phi": 95.9, "oracle_selftest_V": 11.3, "oracle_selftest_Phi": 11.7, "nn_selftest_V": 1.08, "nn_selftest_Phi": 21.8 },
+    { "model": "D", "dt_obs": 0.001, "oracle_mle_V": 2.56, "oracle_mle_Phi": 6.18, "oracle_selftest_V": 8.58, "oracle_selftest_Phi": 8.50, "nn_selftest_V": 1.94, "nn_selftest_Phi": 4.57 },
+    { "model": "D", "dt_obs": 0.01,  "oracle_mle_V": 11.8, "oracle_mle_Phi": 31.2, "oracle_selftest_V": 7.14, "oracle_selftest_Phi": 7.25, "nn_selftest_V": 3.89, "nn_selftest_Phi": 2.68 },
+    { "model": "D", "dt_obs": 0.1,   "oracle_mle_V": 29.0, "oracle_mle_Phi": 77.4, "oracle_selftest_V": 7.65, "oracle_selftest_Phi": 4.03, "nn_selftest_V": 7.91, "nn_selftest_Phi": 5.49 }
+  ]
+}

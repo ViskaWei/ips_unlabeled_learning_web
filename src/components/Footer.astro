@@ -1,0 +1,134 @@
+---
+const bibtex = `@article{wei2026learning,
+  title={Learning from Unlabeled Data for Interacting Particle Systems},
+  author={Wei, Sijia and Lu, Fei},
+  journal={arXiv preprint},
+  year={2026}
+}`;
+---
+
+<footer class="footer" id="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <h4>Paper</h4>
+        <div class="footer-links">
+          <a href="#" class="footer-link">PDF (arXiv)</a>
+          <a href="https://github.com/ViskaWei/ips_unlabeled_learning_web" class="footer-link">GitHub</a>
+        </div>
+      </div>
+
+      <div>
+        <h4>Authors</h4>
+        <p class="footer-text">Sijia Wei &amp; Fei Lu</p>
+        <p class="footer-text footer-muted">Johns Hopkins University</p>
+      </div>
+
+      <div>
+        <h4>Citation</h4>
+        <div class="bibtex-wrap">
+          <pre class="bibtex"><code>{bibtex}</code></pre>
+          <button id="copy-bibtex" class="btn btn-outline btn-sm" data-bibtex={bibtex}>Copy BibTeX</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-muted">&copy; 2026 Wei &amp; Lu. Built with Astro, Three.js, and D3.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 4rem 1.5rem 2rem;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-link {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+  .footer-link:hover {
+    color: var(--accent-cyan);
+  }
+
+  .footer-text {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .footer-muted {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .bibtex-wrap {
+    position: relative;
+  }
+
+  .bibtex {
+    background: var(--bg-code);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    overflow-x: auto;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 1.5rem;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+  }
+</style>
+
+<script>
+  document.getElementById('copy-bibtex')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    const text = btn.dataset.bibtex || '';
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy BibTeX'; }, 2000);
+    });
+  });
+</script>
