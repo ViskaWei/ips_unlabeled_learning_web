@@ -259,7 +259,70 @@ import Footer from '../components/Footer.astro';
 
   <div class="section-divider"></div>
 
-  <!-- ═══ Section 7: Deep Dive ═══ -->
+  <!-- ═══ Section 7: L-curve Regularization ═══ -->
+  <section id="lcurve" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Regularization"
+      data-i18n-zh="正则化">Regularization</p>
+    <h2 data-i18n-en="The L-Curve: Automatic Regularization"
+        data-i18n-zh="L-曲线：自动正则化">The L-Curve: Automatic Regularization</h2>
+    <p data-i18n-en="Solving the basis regression (A + &lambda;I)x = b requires choosing the regularization parameter &lambda;. Too small &rarr; noise amplified. Too large &rarr; solution over-smoothed. The L-curve method finds the optimal &lambda; at the point of maximum curvature on the log-log trade-off curve between solution norm and residual norm."
+       data-i18n-zh="求解基函数回归 (A + &lambda;I)x = b 需要选择正则化参数 &lambda;。太小 &rarr; 噪声被放大。太大 &rarr; 解被过度平滑。L-曲线方法在解范数和残差范数的对数-对数权衡曲线上寻找最大曲率点，从而找到最优 &lambda;。">
+      Solving the basis regression (A + &lambda;I)x = b requires choosing the regularization parameter &lambda;. Too small &rarr; noise amplified. Too large &rarr; solution over-smoothed. The L-curve method finds the optimal &lambda; at the point of maximum curvature on the log-log trade-off curve between solution norm and residual norm.
+    </p>
+
+    <div class="demo-container">
+      <div id="lcurve-viz" style="padding: 1rem; min-height: 420px; aspect-ratio: 16/9;">
+        <!-- Canvas injected by LcurveDemo.ts -->
+      </div>
+      <div class="demo-controls" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+          <label style="flex: 1; min-width: 200px;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);"
+              data-i18n-en="&lambda; (regularization strength)"
+              data-i18n-zh="&lambda;（正则化强度）">&lambda; (regularization strength)</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="range" id="lambda-slider" min="-8" max="4" step="0.05" value="-2"
+                style="flex: 1; accent-color: var(--accent-amber);" />
+              <span id="lambda-value" style="font-family: var(--font-mono); min-width: 5em; font-size: 0.85rem; color: var(--accent-amber);">0.0100</span>
+            </div>
+          </label>
+          <label style="flex: 1; min-width: 200px;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);"
+              data-i18n-en="Noise level"
+              data-i18n-zh="噪声水平">Noise level</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="range" id="noise-slider" min="0.01" max="5" step="0.01" value="0.5"
+                style="flex: 1; accent-color: var(--accent-purple);" />
+              <span id="noise-value" style="font-family: var(--font-mono); min-width: 3em; font-size: 0.85rem; color: var(--accent-purple);">0.50</span>
+            </div>
+          </label>
+          <label style="flex: 1; min-width: 200px;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);"
+              data-i18n-en="Condition number (10^x)"
+              data-i18n-zh="条件数 (10^x)">Condition number (10^x)</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="range" id="cond-slider" min="0" max="8" step="0.1" value="4"
+                style="flex: 1; accent-color: var(--accent-cyan);" />
+              <span id="cond-value" style="font-family: var(--font-mono); min-width: 3.5em; font-size: 0.85rem; color: var(--accent-cyan);">10^4.0</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1.5rem;">
+      <p style="margin:0;"
+        data-i18n-en="The L-curve's characteristic &lsquo;L&rsquo; shape emerges from two regimes: the vertical arm (small &lambda;, noise dominates) and the horizontal arm (large &lambda;, regularization bias dominates). The corner is the sweet spot. Try increasing the condition number to see how ill-conditioning sharpens the L-curve."
+        data-i18n-zh="L-曲线特征性的'L'形状来自两种区域：竖直臂（小&lambda;，噪声主导）和水平臂（大&lambda;，正则化偏差主导）。拐角就是最佳点。尝试增大条件数，观察病态性如何使L-曲线更加尖锐。">
+        The L-curve's characteristic &lsquo;L&rsquo; shape emerges from two regimes: the vertical arm (small &lambda;, noise dominates) and the horizontal arm (large &lambda;, regularization bias dominates). The corner is the sweet spot. Try increasing the condition number to see how ill-conditioning sharpens the L-curve.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 8: Deep Dive ═══ -->
   <section id="deep-dive" class="section">
     <p class="section-label"
       data-i18n-en="Deep Dive"
@@ -325,6 +388,7 @@ import Footer from '../components/Footer.astro';
   <script src="../islands/ResultsDashboard.ts"></script>
   <script src="../islands/MathRenderer.ts"></script>
   <script src="../islands/DtSliderDemo.ts"></script>
+  <script src="../islands/LcurveDemo.ts"></script>
 </BaseLayout>
 
 <style>
