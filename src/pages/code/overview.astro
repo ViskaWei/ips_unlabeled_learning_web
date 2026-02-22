@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CodeNav from '../../components/CodeNav.astro';
+import Footer from '../../components/Footer.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="Code Overview — IPS Pipeline">
+  <CodeNav active="overview" />
+  <main class="code-page">
+    <div class="code-page-header">
+      <span class="code-page-label">Code Understanding</span>
+      <h2>Pipeline Overview</h2>
+      <p>High-level view of the IPS computational pipeline. Click expandable nodes to reveal quality gates.</p>
+    </div>
+    <div class="iframe-container">
+      <iframe
+        src={`${base}/code/overview.html`}
+        title="IPS Pipeline Overview Flowchart"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .code-page {
+    padding-top: 56px;
+    min-height: 100vh;
+  }
+
+  .code-page-header {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 1.5rem;
+  }
+
+  .code-page-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent-cyan);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .code-page-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .code-page-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .iframe-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+  }
+
+  .iframe-container iframe {
+    width: 100%;
+    height: 80vh;
+    min-height: 600px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: #0A0E17;
+  }
+</style>

@@ -7,6 +7,7 @@ const sections = [
   { id: 'results', label: 'Results' },
   { id: 'deep-dive', label: 'Deep Dive' },
 ];
+const base = import.meta.env.BASE_URL;
 ---
 
 <nav class="nav">
@@ -16,6 +17,8 @@ const sections = [
       {sections.map((s) => (
         <a href={`#${s.id}`} class="nav-link">{s.label}</a>
       ))}
+      <span class="nav-separator"></span>
+      <a href={`${base}/code/overview/`} class="nav-link nav-link-page">Code</a>
     </div>
     <div class="nav-actions">
       <button id="lang-toggle" class="toggle-btn active" title="Toggle language">EN</button>
@@ -75,6 +78,23 @@ const sections = [
   .nav-link.active {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.05);
+  }
+
+  .nav-separator {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .nav-link-page {
+    color: var(--accent-cyan);
+    font-weight: 500;
+  }
+  .nav-link-page:hover {
+    color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.1);
   }
 
   .nav-actions {
