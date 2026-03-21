@@ -213,32 +213,36 @@ if (container) {
       ctx.fill();
     }
 
+    // Compute positions for both markers
+    const optX = lcX(points[optIdx].logSol);
+    const optY = lcY(points[optIdx].logRes);
+    const curPt = points[clampedIdx];
+    const curDotX = lcX(curPt.logSol);
+    const curDotY = lcY(curPt.logRes);
+    const markerDist = Math.sqrt((optX - curDotX) ** 2 + (optY - curDotY) ** 2);
+
     // Optimal λ — green star
     {
-      const x = lcX(points[optIdx].logSol);
-      const y = lcY(points[optIdx].logRes);
       // Glow
-      ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(optX, optY, 14, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(34, 197, 94, 0.2)'; ctx.fill();
       // Circle
-      ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(optX, optY, 8, 0, Math.PI * 2);
       ctx.fillStyle = '#22c55e'; ctx.fill();
       ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2; ctx.stroke();
-      // Label
+      // Label — offset vertically if current λ is nearby
+      const labelOffsetY = markerDist < 30 ? -18 : 4;
       ctx.fillStyle = '#22c55e';
       ctx.font = 'bold 11px JetBrains Mono, monospace';
       ctx.textAlign = 'left';
-      ctx.fillText(`\u03BB* = ${points[optIdx].lambda.toExponential(1)}`, x + 14, y + 4);
+      ctx.fillText(`\u03BB* = ${points[optIdx].lambda.toExponential(1)}`, optX + 14, optY + labelOffsetY);
     }
 
     // Current λ — amber dot
     {
-      const pt = points[clampedIdx];
-      const x = lcX(pt.logSol);
-      const y = lcY(pt.logRes);
-      ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(curDotX, curDotY, 10, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(245, 158, 11, 0.3)'; ctx.fill();
-      ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(curDotX, curDotY, 6, 0, Math.PI * 2);
       ctx.fillStyle = '#f59e0b'; ctx.fill();
       ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2; ctx.stroke();
     }

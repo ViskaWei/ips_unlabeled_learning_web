@@ -8,13 +8,10 @@ const shuffleBtn = document.getElementById('shuffle-btn') as HTMLButtonElement;
 
 if (canvas && shuffleBtn) {
   const ctx = canvas.getContext('2d')!;
-  const N = 8;
+  const N = 4;
   const prng = new PRNG(123);
 
-  const COLORS = [
-    '#ef4444', '#f59e0b', '#22c55e', '#3b82f6',
-    '#8b5cf6', '#ec4899', '#06b6d4', '#f97316',
-  ];
+  const COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6'];
 
   // Two snapshots: slightly shifted positions
   const snapshot1: [number, number][] = [];
@@ -51,9 +48,10 @@ if (canvas && shuffleBtn) {
 
   function resize() {
     const rect = canvas.parentElement!.getBoundingClientRect();
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const dpr = window.devicePixelRatio;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   function toScreen(x: number, y: number, cx: number, cy: number, scale: number): [number, number] {
@@ -64,7 +62,7 @@ if (canvas && shuffleBtn) {
     const w = canvas.width / window.devicePixelRatio;
     const h = canvas.height / window.devicePixelRatio;
     const halfW = w / 2;
-    const scale = Math.min(halfW, h) * 0.35;
+    const scale = Math.min(halfW, h) * 0.55;
 
     ctx.clearRect(0, 0, w, h);
 
@@ -78,7 +76,7 @@ if (canvas && shuffleBtn) {
     ctx.fillRect(0, 0, halfW - 1, h);
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.font = '13px Inter, sans-serif';
+    ctx.font = '15px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Snapshot t₁', halfW / 2, 25);
 
@@ -114,7 +112,7 @@ if (canvas && shuffleBtn) {
     }
 
     // Draw particles
-    const r = 14;
+    const r = 20;
     for (let i = 0; i < N; i++) {
       // Left (t₁)
       const [x1, y1] = toScreen(snapshot1[i][0], snapshot1[i][1], halfW / 2, h / 2, scale);
@@ -123,7 +121,7 @@ if (canvas && shuffleBtn) {
       ctx.fillStyle = COLORS[i];
       ctx.fill();
       ctx.fillStyle = 'white';
-      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.font = 'bold 14px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`${i + 1}`, x1, y1);

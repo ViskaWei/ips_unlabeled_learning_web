@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Math from '../components/Math.astro';
 ---
 
 <BaseLayout>
@@ -23,7 +24,7 @@ import Footer from '../components/Footer.astro';
         </h1>
         <p class="hero-authors">Viska Wei &amp; Fei Lu</p>
         <div class="hero-buttons">
-          <a href="#" class="btn btn-primary">Paper PDF</a>
+          <span class="btn btn-outline" style="opacity: 0.4; cursor: default; pointer-events: none;" title="Under Review">Paper PDF</span>
           <a href="https://github.com/ViskaWei/ips_unlabeled_learning_web" class="btn btn-outline">GitHub</a>
           <a href="#insight" class="btn btn-outline"
             data-i18n-en="Explore"
@@ -33,24 +34,77 @@ import Footer from '../components/Footer.astro';
     </div>
   </section>
 
+  <!-- SDE Formula Card -->
+  <div class="formula-card" style="max-width: 680px; margin: -2rem auto 0; position: relative; z-index: 10; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem 2rem; text-align: center;">
+    <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent-cyan); margin-bottom: 0.75rem;"
+      data-i18n-en="The Governing Equation"
+      data-i18n-zh="控制方程">The Governing Equation</p>
+    <div class="math-block" style="margin: 0;">
+      <Math tex={String.raw`dX_t^i = \Big(-\nabla V(X_t^i) - \frac{1}{N}\sum_{j \neq i} \nabla\Phi(X_t^i - X_t^j)\Big) dt + \sigma\, dW_t^i`} />
+    </div>
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-muted);">
+      <span><span style="color: #3b82f6; font-weight: 600;">V</span>
+        <span data-i18n-en=" = confinement (pulls each particle toward center)"
+              data-i18n-zh=" = 束缚势（把每个粒子往中心拉）"> = confinement (pulls each particle toward center)</span></span>
+      <span><span style="color: #8b5cf6; font-weight: 600;">&Phi;</span>
+        <span data-i18n-en=" = interaction (pushes particles apart)"
+              data-i18n-zh=" = 交互势（让粒子互相排斥）"> = interaction (pushes particles apart)</span></span>
+      <span><span style="color: #94a3b8; font-weight: 600;">&sigma;dW</span>
+        <span data-i18n-en=" = random noise"
+              data-i18n-zh=" = 随机噪声"> = random noise</span></span>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--accent-cyan); margin-top: 0.75rem; margin-bottom: 0; font-weight: 500;"
+      data-i18n-en="Goal: learn V and &Phi; from unlabeled snapshots — without knowing which particle is which"
+      data-i18n-zh="目标：从无标签快照学习 V 和 &Phi; — 不知道哪个粒子是哪个">Goal: learn V and &Phi; from unlabeled snapshots — without knowing which particle is which</p>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 1b: What are V and Φ? ═══ -->
+  <section id="forces" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="The Setup"
+      data-i18n-zh="物理设定">The Setup</p>
+    <h2 data-i18n-en="What are V and &Phi;?"
+        data-i18n-zh="V 和 &Phi; 是什么？">What are V and &Phi;?</h2>
+    <p data-i18n-en="Three particles under two forces. The blue arrows pull each particle toward the center (confinement V). The purple arrows push particles apart (interaction &Phi;). The gray arrows are random noise. The combined effect produces the complex motion you see."
+       data-i18n-zh="三个粒子在两种力的作用下运动。蓝色箭头把每个粒子往中心拉（束缚势 V）。紫色箭头让粒子互相排斥（交互势 &Phi;）。灰色箭头是随机噪声。三种力的合力产生了你看到的复杂运动。">
+      Three particles under two forces. The blue arrows pull each particle toward the center (confinement V). The purple arrows push particles apart (interaction &Phi;). The gray arrows are random noise. The combined effect produces the complex motion you see.
+    </p>
+
+    <div class="demo-container">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 16/9;">
+        <canvas id="force-viz-canvas" style="min-height: 380px;"></canvas>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1.5rem;">
+      <p style="margin: 0;"
+        data-i18n-en="We observe the particle positions, but we don't know V or &Phi;. Our goal: reverse-engineer these forces from the data alone."
+        data-i18n-zh="我们能观测粒子的位置，但不知道 V 和 &Phi;。我们的目标：仅从数据反推这些力。">
+        We observe the particle positions, but we don't know V or &Phi;. Our goal: reverse-engineer these forces from the data alone.
+      </p>
+    </div>
+  </section>
+
   <div class="section-divider"></div>
 
   <!-- ═══ Section 2: The Problem ═══ -->
-  <section id="problem" class="section">
+  <section id="problem" class="section section-wide">
     <p class="section-label"
       data-i18n-en="The Problem"
       data-i18n-zh="核心问题">The Problem</p>
-    <h2 data-i18n-en="What is Unlabeled Data?"
-        data-i18n-zh="什么是无标签数据？">What is Unlabeled Data?</h2>
-    <p data-i18n-en="Imagine photographing a flock of birds at two different times. Each snapshot shows where every bird is — but you can't tell which bird is which across photos. With N=15 particles, there are 15! &approx; 1.3 trillion possible matchings per pair."
-       data-i18n-zh="想象你在两个不同时间拍摄一群鸟。每张快照都显示了每只鸟的位置——但你无法分辨不同照片中哪只鸟是哪只。当N=15个粒子时，每一对快照有 15! &approx; 1.3万亿种可能的匹配方式。">
-      Imagine photographing a flock of birds at two different times. Each snapshot shows where every bird is — but you can't tell which bird is which across photos. With N=15 particles, there are 15! &approx; 1.3 trillion possible matchings per pair.
+    <h2 data-i18n-en="The Problem: Unlabeled Data"
+        data-i18n-zh="问题：无标签数据">The Problem: Unlabeled Data</h2>
+    <p data-i18n-en="Imagine photographing a flock of birds at two different times. Each snapshot shows where every bird is — but you can't tell which bird is which across photos. Even with just 4 particles, there are 4! = 24 possible matchings. In real experiments with N=100, that's 100! &approx; 10&sup1;&sup5;&sup8; — more than the atoms in the universe."
+       data-i18n-zh="想象你在两个不同时间拍摄一群鸟。每张快照都显示了每只鸟的位置——但你无法分辨不同照片中哪只鸟是哪只。即使只有 4 个粒子，也有 4! = 24 种可能的匹配。在真实实验中 N=100，那就是 100! &approx; 10&sup1;&sup5;&sup8; — 比宇宙中的原子还多。">
+      Imagine photographing a flock of birds at two different times. Each snapshot shows where every bird is — but you can't tell which bird is which across photos. Even with just 4 particles, there are 4! = 24 possible matchings. In real experiments with N=100, that's 100! &approx; 10&sup1;&sup5;&sup8; — more than the atoms in the universe.
     </p>
 
     <!-- Demo A: Label Toggle -->
     <div class="demo-container">
       <div class="demo-canvas-wrap">
-        <canvas id="label-demo-canvas"></canvas>
+        <canvas id="label-demo-canvas" style="min-height: 380px;"></canvas>
       </div>
       <div class="demo-controls">
         <div class="toggle-group">
@@ -65,7 +119,7 @@ import Footer from '../components/Footer.astro';
 
     <!-- Demo B: Shuffle -->
     <div class="demo-container" style="margin-top: 2rem;">
-      <div class="demo-canvas-wrap" style="aspect-ratio: 2/1;">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 2/1; min-height: 300px;">
         <canvas id="shuffle-demo-canvas"></canvas>
       </div>
       <div class="demo-controls">
@@ -94,21 +148,21 @@ import Footer from '../components/Footer.astro';
     <p class="section-label"
       data-i18n-en="The Challenge"
       data-i18n-zh="挑战">The Challenge</p>
-    <h2 data-i18n-en="Methods Break at Large Time Steps"
-        data-i18n-zh="大时间步长下方法失效">Methods Break at Large Time Steps</h2>
-    <p data-i18n-en="Drag the slider to see how observation interval affects accuracy. At large time steps, MLE errors explode while our self-test loss remains stable."
-       data-i18n-zh="拖动滑块查看观测间隔如何影响精度。在大时间步长下，MLE误差剧增，而我们的自测损失保持稳定。">
-      Drag the slider to see how observation interval affects accuracy. At large time steps, MLE errors explode while our self-test loss remains stable.
+    <h2 data-i18n-en="Why Existing Methods Fail"
+        data-i18n-zh="现有方法为什么失败">Why Existing Methods Fail</h2>
+    <p data-i18n-en="Traditional methods estimate velocity as v &approx; &Delta;X/&Delta;t. This creates two fatal problems: when &Delta;t is small, noise explodes (&prop; &sigma;/&radic;&Delta;t); when &Delta;t is large, discretization bias grows as O(&Delta;t) and Sinkhorn matching accuracy drops to random chance. Drag the slider to see the collapse:"
+       data-i18n-zh="传统方法将速度估计为 v &approx; &Delta;X/&Delta;t。这造成两个致命问题：&Delta;t 小时噪声爆炸（&prop; &sigma;/&radic;&Delta;t）；&Delta;t 大时离散化偏差为 O(&Delta;t)，且 Sinkhorn 匹配精度降至随机水平。拖动滑块查看崩溃：">
+      Traditional methods estimate velocity as v &approx; &Delta;X/&Delta;t. This creates two fatal problems: when &Delta;t is small, noise explodes (&prop; &sigma;/&radic;&Delta;t); when &Delta;t is large, discretization bias grows as O(&Delta;t) and Sinkhorn matching accuracy drops to random chance. Drag the slider to see the collapse:
     </p>
 
     <div class="demo-container">
-      <div id="dt-slider-viz" style="padding: 2rem; min-height: 350px;">
+      <div id="dt-slider-viz" style="padding: 1rem 2rem; min-height: 240px;">
         <!-- D3 chart injected here -->
       </div>
       <div class="demo-controls">
         <label style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.75rem;">
           <span>&Delta;t</span>
-          <input type="range" id="dt-slider" min="0" max="2" step="1" value="1"
+          <input type="range" id="dt-slider" min="0" max="3" step="1" value="2"
             style="width: 200px; accent-color: var(--accent-cyan);" />
           <span id="dt-value" style="font-family: var(--font-mono); min-width: 3.5em;">0.01</span>
         </label>
@@ -127,20 +181,29 @@ import Footer from '../components/Footer.astro';
   <div class="section-divider"></div>
 
   <!-- ═══ Section 4: Our Insight ═══ -->
-  <section id="insight" class="section">
+  <section id="insight" class="section section-wide">
     <p class="section-label"
       data-i18n-en="Our Insight"
       data-i18n-zh="核心洞察">Our Insight</p>
-    <h2 data-i18n-en="Energy Balance: The System's Ledger"
-        data-i18n-zh="能量平衡：系统的记账本">Energy Balance: The System's Ledger</h2>
-    <p data-i18n-en="Think of the particle system as a bank account. Energy has three flows: dissipation (spending), diffusion (income), and net energy change (balance). For the correct potentials, the books must balance."
-       data-i18n-zh="把粒子系统想象成一个银行账户。能量有三种流动：耗散（支出）、扩散（收入）和净能量变化（余额）。对于正确的势函数，账本必须平衡。">
-      Think of the particle system as a bank account. Energy has three flows: dissipation (spending), diffusion (income), and net energy change (balance). For the correct potentials, the books must balance.
+    <h2 data-i18n-en="The Self-Test Loss"
+        data-i18n-zh="自测损失函数">The Self-Test Loss</h2>
+
+    <div class="callout callout-insight" style="margin-bottom: 2rem; border-left: 3px solid var(--accent-cyan);">
+      <p style="margin: 0; font-size: 0.95rem;"
+        data-i18n-en="Key shift: stop trying to recover individual trajectories. The empirical distribution &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) is directly observable from unlabeled snapshots — no labels needed. And &mu;&#8346; satisfies a PDE that is linear in V and &Phi;. This transforms a combinatorial matching problem into a functional optimization."
+        data-i18n-zh="关键转变：停止尝试恢复个体轨迹。经验分布 &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) 可以从无标签快照直接观测——不需要标签。而且 &mu;&#8346; 满足一个关于 V 和 &Phi; 线性的 PDE。这将组合匹配问题转化为泛函优化。">
+        Key shift: stop trying to recover individual trajectories. The empirical distribution &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) is directly observable from unlabeled snapshots — no labels needed. And &mu;&#8346; satisfies a PDE that is linear in V and &Phi;. This transforms a combinatorial matching problem into a functional optimization.
+      </p>
+    </div>
+
+    <p data-i18n-en="Think of the particle system as a bank account. Energy has three flows: dissipation (spending), diffusion (income), and net energy change (balance). For the correct potentials, the books must balance — this is the self-test."
+       data-i18n-zh="把粒子系统想象成一个银行账户。能量有三种流动：耗散（支出）、扩散（收入）和净能量变化（余额）。对于正确的势函数，账本必须平衡——这就是自测。">
+      Think of the particle system as a bank account. Energy has three flows: dissipation (spending), diffusion (income), and net energy change (balance). For the correct potentials, the books must balance — this is the self-test.
     </p>
 
     <!-- Energy Balance Demo -->
     <div class="demo-container">
-      <div class="demo-canvas-wrap" style="aspect-ratio: 16/9;">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 16/9; min-height: 380px;">
         <canvas id="energy-canvas"></canvas>
       </div>
       <div class="demo-controls" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
@@ -179,30 +242,201 @@ import Footer from '../components/Footer.astro';
     </div>
 
     <div class="math-block">
-      <div id="math-selftest"></div>
+      <Math tex={String.raw`\mathcal{L}(\theta) = \frac{1}{2}\, J_{\text{diss}}\, \Delta t \;-\; \frac{\sigma^2}{2}\, J_{\text{diff}}\, \Delta t \;+\; \delta E_{\text{tot}}`} />
+    </div>
+
+    <!-- Loss Anatomy -->
+    <h3 style="margin-top: 2.5rem;"
+      data-i18n-en="Anatomy of the Loss"
+      data-i18n-zh="损失函数解剖">Anatomy of the Loss</h3>
+    <p data-i18n-en="Each term has a clear physical meaning. The loss balances three energy flows:"
+       data-i18n-zh="每一项都有清晰的物理含义。损失函数平衡三种能量流：">
+      Each term has a clear physical meaning. The loss balances three energy flows:
+    </p>
+
+    <div class="loss-anatomy">
+      <div class="loss-anatomy-header">
+        <div class="math-block" style="margin: 0; border-left-color: var(--accent-cyan);">
+          <Math tex={String.raw`\mathcal{L} = \underbrace{\tfrac{1}{2}\, J_{\text{diss}}\, \Delta t}_{\color{#ef4444}\text{dissipation}} \;-\; \underbrace{\tfrac{\sigma^2}{2}\, J_{\text{diff}}\, \Delta t}_{\color{#3b82f6}\text{diffusion}} \;+\; \underbrace{\delta E_{\text{tot}}}_{\color{#f59e0b}\text{energy change}}`} />
+        </div>
+      </div>
+
+      <div class="loss-component">
+        <div class="lc-color" style="background: #ef4444;"></div>
+        <div class="lc-body">
+          <h4 style="color: #ef4444;">
+            J<sub>diss</sub> = &Sigma;&Vert;drift&Vert;&sup2; / N
+          </h4>
+          <p data-i18n-en="Energy dissipation: how much work the drift forces do. Always positive — stronger forces mean more dissipation."
+             data-i18n-zh="能量耗散：漂移力做了多少功。始终为正——力越强，耗散越大。">
+            Energy dissipation: how much work the drift forces do. Always positive — stronger forces mean more dissipation.
+          </p>
+        </div>
+      </div>
+
+      <div class="loss-component">
+        <div class="lc-color" style="background: #3b82f6;"></div>
+        <div class="lc-body">
+          <h4 style="color: #3b82f6;">
+            J<sub>diff</sub> = &Sigma;[&Delta;V + &Delta;&Phi;] / N
+          </h4>
+          <p data-i18n-en="Diffusion contribution: entropy increase driven by noise. Depends on the Laplacian of the potential — how curved the energy landscape is."
+             data-i18n-zh="扩散贡献：噪声驱动的熵增。取决于势函数的拉普拉斯量——能量曲面的曲率。">
+            Diffusion contribution: entropy increase driven by noise. Depends on the Laplacian of the potential — how curved the energy landscape is.
+          </p>
+        </div>
+      </div>
+
+      <div class="loss-component">
+        <div class="lc-color" style="background: #f59e0b;"></div>
+        <div class="lc-body">
+          <h4 style="color: #f59e0b;">
+            &delta;E<sub>tot</sub> = E(t+&Delta;t) &minus; E(t)
+          </h4>
+          <p data-i18n-en="Energy change between two snapshots. Directly observable from unlabeled data — no trajectory information needed!"
+             data-i18n-zh="两个快照之间的能量变化。可直接从无标签数据观测——无需轨迹信息！">
+            Energy change between two snapshots. Directly observable from unlabeled data — no trajectory information needed!
+          </p>
+        </div>
+      </div>
+
+      <div class="loss-anatomy-footer">
+        <div class="math-block" style="margin: 0 0 0.5rem; padding: 0.75rem; background: transparent; border-left-color: var(--accent-green);">
+          <Math tex={String.raw`\mathbb{E}[\mathcal{L}(V^*, \Phi^*)] = -\tfrac{1}{2}\,\mathbb{E}[J_{\text{diss}}^*\,\Delta t] < 0 \qquad \text{vs.} \qquad \mathcal{L}(0, 0) = 0`} />
+        </div>
+        <p style="margin: 0; color: #22c55e; font-size: 0.85rem;"
+          data-i18n-en="The true potentials are strictly below the trivial solution — this breaks the degeneracy."
+          data-i18n-zh="真势严格低于平凡解——打破退化。">
+          The true potentials are strictly below the trivial solution — this breaks the degeneracy.
+        </p>
+      </div>
     </div>
   </section>
 
   <div class="section-divider"></div>
 
-  <!-- ═══ Section 5: Models ═══ -->
+  <!-- ═══ Section 5b: From Theory to Practice ═══ -->
+  <section id="implementations" class="section">
+    <p class="section-label"
+      data-i18n-en="Two Implementations"
+      data-i18n-zh="两种实现">Two Implementations</p>
+    <h2 data-i18n-en="From Theory to Practice"
+        data-i18n-zh="从理论到实践">From Theory to Practice</h2>
+    <p data-i18n-en="The self-test loss is agnostic to how V and &Phi; are parameterized. We implement it two ways:"
+       data-i18n-zh="自测损失函数不关心 V 和 &Phi; 的参数化方式。我们用两种方式实现：">
+      The self-test loss is agnostic to how V and &Phi; are parameterized. We implement it two ways:
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0;">
+      <!-- Oracle Self-Test card -->
+      <div style="background: rgba(74, 222, 128, 0.06); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.5rem;">&#x1F4D0;</span>
+          <h3 style="margin: 0; font-size: 1.05rem; color: #4ade80;"
+            data-i18n-en="Self-Test (Basis)"
+            data-i18n-zh="自测（基函数）">Self-Test (Basis)</h3>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;"
+          data-i18n-en="Expand V, &Phi; in known polynomial/exponential basis functions. Solve via linear least squares — exact, fast, but requires prior knowledge of the potential form."
+          data-i18n-zh="用已知的多项式/指数基函数展开 V、&Phi;。通过线性最小二乘求解——精确、快速，但需要预先知道势函数形式。">
+          Expand V, &Phi; in known polynomial/exponential basis functions. Solve via linear least squares — exact, fast, but requires prior knowledge of the potential form.
+        </p>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          <span style="color: #22c55e;">&check;</span>
+          <span data-i18n-en="Exact solution" data-i18n-zh="精确解">Exact solution</span><br/>
+          <span style="color: #f59e0b;">&times;</span>
+          <span data-i18n-en="Needs known basis" data-i18n-zh="需要已知基函数">Needs known basis</span>
+        </div>
+      </div>
+
+      <!-- NN Self-Test card -->
+      <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+          <span style="font-size: 1.5rem;">&#x1F9E0;</span>
+          <h3 style="margin: 0; font-size: 1.05rem; color: #22c55e;"
+            data-i18n-en="Self-Test (NN)"
+            data-i18n-zh="自测（神经网络）">Self-Test (NN)</h3>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;"
+          data-i18n-en="Parameterize V, &Phi; with MLPs. Optimize via gradient descent — flexible, no prior knowledge needed, but requires training."
+          data-i18n-zh="用 MLP 参数化 V、&Phi;。通过梯度下降优化——灵活，不需要先验知识，但需要训练。">
+          Parameterize V, &Phi; with MLPs. Optimize via gradient descent — flexible, no prior knowledge needed, but requires training.
+        </p>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          <span style="color: #22c55e;">&check;</span>
+          <span data-i18n-en="No prior knowledge" data-i18n-zh="无需先验知识">No prior knowledge</span><br/>
+          <span style="color: #f59e0b;">&times;</span>
+          <span data-i18n-en="Requires training" data-i18n-zh="需要训练">Requires training</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 1rem; background: rgba(34, 197, 94, 0.05); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.15);">
+      <p style="margin: 0; font-size: 0.95rem; color: #22c55e; font-weight: 600;"
+        data-i18n-en="&#x2193; Same self-test loss &#x2193;"
+        data-i18n-zh="&#x2193; 同一个自测损失 &#x2193;">&#x2193; Same self-test loss &#x2193;</p>
+      <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--text-muted);"
+        data-i18n-en="The loss is our contribution, not the parameterization. Both implementations share the same theoretical guarantee."
+        data-i18n-zh="损失函数是我们的贡献，不是参数化方式。两种实现共享同一个理论保证。">
+        The loss is our contribution, not the parameterization. Both implementations share the same theoretical guarantee.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 6: Models ═══ -->
   <section id="models" class="section section-wide">
     <p class="section-label"
-      data-i18n-en="The Models"
-      data-i18n-zh="模型">The Models</p>
-    <h2 data-i18n-en="Potential Explorer"
-        data-i18n-zh="势函数浏览器">Potential Explorer</h2>
-    <p data-i18n-en="We test on four distinct physical models with different confinement and interaction potentials. Click to explore each."
-       data-i18n-zh="我们在四种不同物理模型上进行测试，每种模型具有不同的束缚势和交互势。点击探索每种模型。">
-      We test on four distinct physical models with different confinement and interaction potentials. Click to explore each.
+      data-i18n-en="Stress Tests"
+      data-i18n-zh="压力测试">Stress Tests</p>
+    <h2 data-i18n-en="Stress Tests: Four Models"
+        data-i18n-zh="压力测试：四种模型">Stress Tests: Four Models</h2>
+    <p data-i18n-en="Each model tests a different theoretical boundary. The Reference model (E) is our main benchmark; models A-D each stress-test a specific assumption."
+       data-i18n-zh="每个模型测试一个不同的理论边界。参考模型（E）是主要基准；模型A-D各自压力测试一个特定假设。">
+      Each model tests a different theoretical boundary. The Reference model (E) is our main benchmark; models A-D each stress-test a specific assumption.
     </p>
 
     <div class="model-tabs" style="margin-bottom: 1.5rem;">
       <div class="toggle-group">
-        <button class="toggle-btn active" data-model="model_a">A: Quadratic</button>
-        <button class="toggle-btn" data-model="model_b">B: Double-Well</button>
-        <button class="toggle-btn" data-model="model_lj">C: Lennard-Jones</button>
-        <button class="toggle-btn" data-model="model_morse">D: Morse</button>
+        <button class="toggle-btn active" data-model="model_e" style="border-color: rgba(34,197,94,0.4); color: #22c55e;">E: Reference ★</button>
+        <button class="toggle-btn" data-model="model_a">A: Smoothness</button>
+        <button class="toggle-btn" data-model="model_b">B: Conditioning</button>
+        <button class="toggle-btn" data-model="model_lj">C: Singularity</button>
+        <button class="toggle-btn" data-model="model_morse">D: Decay</button>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.75rem;">
+      <div style="padding: 0.5rem; background: rgba(34,197,94,0.06); border-radius: 6px; border: 1px solid rgba(34,197,94,0.15);">
+        <span style="color: #22c55e; font-weight: 600;">E: Reference</span><br/>
+        <span style="color: var(--text-muted);"
+          data-i18n-en="Main benchmark"
+          data-i18n-zh="主基准">Main benchmark</span>
+      </div>
+      <div style="padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+        <span style="color: var(--text-secondary); font-weight: 600;">A: Smoothness</span><br/>
+        <span style="color: var(--text-muted);"
+          data-i18n-en="Non-smooth piecewise &Phi;"
+          data-i18n-zh="非光滑分段 &Phi;">Non-smooth piecewise &Phi;</span>
+      </div>
+      <div style="padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+        <span style="color: var(--text-secondary); font-weight: 600;">B: Conditioning</span><br/>
+        <span style="color: var(--text-muted);"
+          data-i18n-en="1/r divergence near origin"
+          data-i18n-zh="1/r 在原点附近发散">1/r divergence near origin</span>
+      </div>
+      <div style="padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+        <span style="color: var(--text-secondary); font-weight: 600;">C: Singularity</span><br/>
+        <span style="color: var(--text-muted);"
+          data-i18n-en="r&sup{-12} LJ explosion"
+          data-i18n-zh="r&sup{-12} LJ 爆炸">r&supmin;&sup1;&sup2; LJ explosion</span>
+      </div>
+      <div style="padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+        <span style="color: var(--text-secondary); font-weight: 600;">D: Decay</span><br/>
+        <span style="color: var(--text-muted);"
+          data-i18n-en="Fast exponential decay"
+          data-i18n-zh="快速指数衰减">Fast exponential decay</span>
       </div>
     </div>
 
@@ -210,49 +444,233 @@ import Footer from '../components/Footer.astro';
       <div class="grid-2" style="padding: 1.5rem;">
         <div>
           <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Potential Curves</h4>
-          <canvas id="potential-curves-canvas" width="500" height="300"></canvas>
+          <canvas id="potential-curves-canvas" style="width:100%; aspect-ratio:5/3;"></canvas>
         </div>
         <div>
-          <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Live Simulation</h4>
-          <canvas id="model-sim-canvas" width="500" height="300"></canvas>
+          <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Live Simulation (N=6)</h4>
+          <canvas id="model-sim-canvas" style="width:100%; aspect-ratio:5/3;"></canvas>
         </div>
+      </div>
+    </div>
+
+    <!-- Stress Test Result Cards -->
+    <h3 style="margin-top: 2rem;"
+      data-i18n-en="Results by Model"
+      data-i18n-zh="各模型结果">Results by Model</h3>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;"
+      data-i18n-en="Each model tests one theoretical assumption. Data at d=2, Self-Test basis vs NN."
+      data-i18n-zh="每个模型测试一个理论假设。数据为 d=2，自测基函数 vs 神经网络。">
+      Each model tests one theoretical assumption. Data at d=2, Self-Test basis vs NN.
+    </p>
+
+    <div class="stress-cards">
+      <!-- A: Smoothness -->
+      <div class="stress-card" style="border-left-color: #22c55e;">
+        <p class="sc-title" style="color: #22c55e;">A: Smoothness Test</p>
+        <p class="sc-hypothesis"
+          data-i18n-en="&Phi; = piecewise constant &rarr; violates C&sup4;"
+          data-i18n-zh="&Phi; = 分段常数 &rarr; 违反 C&sup4;">&Phi; = piecewise constant &rarr; violates C&sup4;</p>
+        <p class="sc-result">&nabla;V: Basis 0.74% &middot; NN 0.45%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 1.73% &middot; NN 3.81%</p>
+        <p class="sc-verdict" style="color: #22c55e;"
+          data-i18n-en="&check; Both handle non-smoothness well"
+          data-i18n-zh="&check; 两种方法均良好应对非光滑">&check; Both handle non-smoothness well</p>
+      </div>
+
+      <!-- B: Conditioning -->
+      <div class="stress-card" style="border-left-color: #f59e0b;">
+        <p class="sc-title" style="color: #f59e0b;">B: Conditioning Test</p>
+        <p class="sc-hypothesis"
+          data-i18n-en="&Phi; = &gamma;/(r+1) &rarr; &kappa;(A)=146K, near singular"
+          data-i18n-zh="&Phi; = &gamma;/(r+1) &rarr; &kappa;(A)=146K，接近奇异">&Phi; = &gamma;/(r+1) &rarr; &kappa;(A)=146K, near singular</p>
+        <p class="sc-result">&nabla;V: Basis 0.39% &middot; NN 4.36%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 9.45% &middot; NN 14.3%</p>
+        <p class="sc-verdict" style="color: #f59e0b;"
+          data-i18n-en="&triangle; High condition number degrades both"
+          data-i18n-zh="&triangle; 高条件数使两者退化">&triangle; High condition number degrades both</p>
+      </div>
+
+      <!-- C: Singularity (LJ) -->
+      <div class="stress-card" style="border-left-color: #8b5cf6;">
+        <p class="sc-title" style="color: #8b5cf6;">C: Singularity Test (Lennard-Jones)</p>
+        <p class="sc-hypothesis"
+          data-i18n-en="&Phi; = r⁻¹² &minus; r⁻⁶ &rarr; gradient explosion"
+          data-i18n-zh="&Phi; = r⁻¹² &minus; r⁻⁶ &rarr; 梯度爆炸">&Phi; = r&supmin;&sup1;&sup2; &minus; r&supmin;&sup6; &rarr; gradient explosion</p>
+        <p class="sc-result">&nabla;V: Basis 11.5% &middot; NN 0.77%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 16.6% &middot; NN 14.1%</p>
+        <p class="sc-verdict" style="color: #8b5cf6;"
+          data-i18n-en="&starf; NN outperforms basis on singular &Phi;"
+          data-i18n-zh="&starf; NN 在奇异 &Phi; 上超越基函数">&starf; NN outperforms basis on singular &Phi;</p>
+      </div>
+
+      <!-- D: Smooth Control (Morse) -->
+      <div class="stress-card" style="border-left-color: #22d3ee;">
+        <p class="sc-title" style="color: #22d3ee;">D: Smooth Control (Morse)</p>
+        <p class="sc-hypothesis"
+          data-i18n-en="All assumptions satisfied &rarr; baseline"
+          data-i18n-zh="所有假设满足 &rarr; 基准"
+          >All assumptions satisfied &rarr; baseline</p>
+        <p class="sc-result">&nabla;V: Basis 0.74% &middot; NN 1.94%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 2.24% &middot; NN 4.57%</p>
+        <p class="sc-verdict" style="color: #22d3ee;"
+          data-i18n-en="&check; Both excellent on smooth potentials"
+          data-i18n-zh="&check; 两者在光滑势上均表现优异">&check; Both excellent on smooth potentials</p>
       </div>
     </div>
   </section>
 
   <div class="section-divider"></div>
 
-  <!-- ═══ Section 6: Results ═══ -->
+  <!-- ═══ Experiments: Setup ═══ -->
+  <section id="experiments" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Experiments"
+      data-i18n-zh="实验">Experiments</p>
+    <h2 data-i18n-en="Experimental Setup"
+        data-i18n-zh="实验设置">Experimental Setup</h2>
+    <p data-i18n-en="Shared protocol for all experiments. Reference model E (Gaussian &Phi;) satisfies all theoretical assumptions; models A-D each stress one boundary."
+       data-i18n-zh="所有实验的共享协议。参考模型 E（高斯 &Phi;）满足所有理论假设；模型 A-D 各自压力测试一个边界。">
+      Shared protocol for all experiments. Reference model E (Gaussian &Phi;) satisfies all theoretical assumptions; models A-D each stress one boundary.
+    </p>
+
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-value">10</div>
+        <div class="stat-label"
+          data-i18n-en="N particles"
+          data-i18n-zh="N 粒子数">N particles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">2–20</div>
+        <div class="stat-label"
+          data-i18n-en="d dimensions"
+          data-i18n-zh="d 维度">d dimensions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1.0</div>
+        <div class="stat-label"
+          data-i18n-en="&sigma; noise"
+          data-i18n-zh="&sigma; 噪声">&sigma; noise</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">2K</div>
+        <div class="stat-label"
+          data-i18n-en="M snapshots"
+          data-i18n-zh="M 快照数">M snapshots</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">10&supmin;&sup4;</div>
+        <div class="stat-label"
+          data-i18n-en="&delta;t fine step"
+          data-i18n-zh="&delta;t 精细步长">&delta;t fine step</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Error Bound & Scaling ═══ -->
+  <section id="error-bound" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Theory Validation"
+      data-i18n-zh="理论验证">Theory Validation</p>
+    <h2 data-i18n-en="Error Bound &amp; Scaling"
+        data-i18n-zh="误差界与标度律">Error Bound &amp; Scaling</h2>
+
+    <div class="math-block" style="border-left-color: var(--accent-green);">
+      <Math tex={String.raw`|\widehat{\theta}_{M,\Delta t} - \theta_*| \;\le\; C\!\left(\underbrace{\Delta t}_{\text{discretization}} + \underbrace{\frac{1}{\sqrt{M}}}_{\text{statistical}}\right)`} />
+    </div>
+    <p data-i18n-en="More snapshots M &rarr; statistical error drops as 1/&radic;M. Larger observation gap &Delta;t &rarr; discretization bias grows linearly. The self-test avoids velocity estimation, so its &Delta;t bias is weaker than MLE/Sinkhorn."
+       data-i18n-zh="更多快照 M &rarr; 统计误差按 1/&radic;M 下降。更大观测间隔 &Delta;t &rarr; 离散化偏差线性增长。自测避免了速度估计，所以 &Delta;t 偏差比 MLE/Sinkhorn 更小。">
+      More snapshots M &rarr; statistical error drops as 1/&radic;M. Larger observation gap &Delta;t &rarr; discretization bias grows linearly. The self-test avoids velocity estimation, so its &Delta;t bias is weaker than MLE/Sinkhorn.
+    </p>
+
+    <!-- Condition Number Table -->
+    <h3 style="margin-top: 2rem;"
+      data-i18n-en="Condition Number &kappa;(A) by Model"
+      data-i18n-zh="各模型条件数 &kappa;(A)">Condition Number &kappa;(A) by Model</h3>
+    <p style="font-size: 0.85rem; color: var(--text-muted);"
+      data-i18n-en="d=2, &Delta;t=10&supmin;&sup2;, M=2000, oracle basis. Proposition 3 predicts &kappa; = O(N)."
+      data-i18n-zh="d=2, &Delta;t=10&supmin;&sup2;, M=2000, oracle 基函数。命题 3 预测 &kappa; = O(N)。">
+      d=2, &Delta;t=10&supmin;&sup2;, M=2000, oracle basis. Proposition 3 predicts &kappa; = O(N).
+    </p>
+
+    <div class="demo-container" style="padding: 1.25rem;">
+      <div style="overflow-x: auto;">
+        <table class="cond-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;"
+                data-i18n-en="Model" data-i18n-zh="模型">Model</th>
+              <th>N=5</th><th>N=10</th><th>N=20</th><th>N=50</th><th>N=100</th>
+              <th data-i18n-en="Rate" data-i18n-zh="速率">Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>E: Reference</td>
+              <td class="cond-low">37</td><td class="cond-low">53</td><td class="cond-low">80</td><td class="cond-med">123</td><td class="cond-med">155</td>
+              <td style="color: var(--accent-green); font-weight: 700;">0.5</td>
+            </tr>
+            <tr>
+              <td>A: Smoothness</td>
+              <td class="cond-low">42</td><td class="cond-low">46</td><td class="cond-low">88</td><td class="cond-med">208</td><td class="cond-med">396</td>
+              <td>0.8</td>
+            </tr>
+            <tr>
+              <td>B: Conditioning</td>
+              <td class="cond-high">81K</td><td class="cond-high">146K</td><td class="cond-high">262K</td><td class="cond-high">564K</td><td class="cond-high">962K</td>
+              <td>0.8</td>
+            </tr>
+            <tr>
+              <td>C: Singularity</td>
+              <td class="cond-high">10.8K</td><td class="cond-high">12.1K</td><td class="cond-high">11.8K</td><td class="cond-high">12.1K</td><td class="cond-high">11.8K</td>
+              <td style="font-style: italic;">0.0</td>
+            </tr>
+            <tr>
+              <td>D: Smooth ctrl</td>
+              <td class="cond-high">7.9K</td><td class="cond-high">14.2K</td><td class="cond-high">25.4K</td><td class="cond-high">53.5K</td><td class="cond-high">89.5K</td>
+              <td>0.8</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1rem;">
+      <p style="margin:0; font-size: 0.9rem;"
+        data-i18n-en="Reference model has &kappa; = O(N&sup0;&middot;&sup5;), well below the O(N) ceiling. Conditioning test (B) is 3 orders of magnitude worse — the only setting where MLE outperforms self-test on &nabla;&Phi;. LJ singularity (C) has constant &kappa; driven by r&supmin;&sup1;&sup2; blowup, not N."
+        data-i18n-zh="参考模型 &kappa; = O(N⁰·⁵)，远低于 O(N) 上限。条件测试 (B) 差 3 个数量级——唯一 MLE 在 &nabla;&Phi; 上优于自测的设置。LJ 奇异性 (C) 的 &kappa; 恒定，由 r⁻¹² 爆炸驱动，与 N 无关。">
+        Reference model has &kappa; = O(N&sup0;&middot;&sup5;), well below the O(N) ceiling. Conditioning test (B) is 3 orders of magnitude worse — the only setting where MLE outperforms self-test on &nabla;&Phi;. LJ singularity (C) has constant &kappa; driven by r&supmin;&sup1;&sup2; blowup, not N.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ NN Results ═══ -->
   <section id="results" class="section section-wide">
     <p class="section-label"
       data-i18n-en="Results"
       data-i18n-zh="实验结果">Results</p>
-    <h2 data-i18n-en="Interactive Results Dashboard"
-        data-i18n-zh="交互式结果仪表板">Interactive Results Dashboard</h2>
-    <p data-i18n-en="Hover over cells to see details. The NN achieves best &nabla;V in 7/16 settings despite using only unlabeled data."
-       data-i18n-zh="悬停单元格查看详情。尽管仅使用无标签数据，神经网络在16个设置中的7个上取得了最佳 &nabla;V。">
-      Hover over cells to see details. The NN achieves best &nabla;V in 7/16 settings despite using only unlabeled data.
+    <h2 data-i18n-en="NN vs Basis: Who Wins?"
+        data-i18n-zh="NN vs 基函数：谁赢了？">NN vs Basis: Who Wins?</h2>
+    <p data-i18n-en="The neural network knows nothing about the potential form, yet matches or beats the oracle basis in many settings. Below: Self-Test (Basis) vs Self-Test (NN), all dimensions."
+       data-i18n-zh="神经网络对势函数形式一无所知，却在许多设置中匹配或超越 oracle 基函数。下方：自测（基函数）vs 自测（NN），所有维度。">
+      The neural network knows nothing about the potential form, yet matches or beats the oracle basis in many settings. Below: Self-Test (Basis) vs Self-Test (NN), all dimensions.
     </p>
 
     <div class="demo-container" style="padding: 1.5rem;">
-      <div class="toggle-group" style="margin-bottom: 1.5rem;">
-        <button class="toggle-btn active" data-table="cross_method"
-          data-i18n-en="Cross-Method (Table 2)"
-          data-i18n-zh="跨方法比较（表2）">Cross-Method (Table 2)</button>
-        <button class="toggle-btn" data-table="dt_obs_sweep"
-          data-i18n-en="&Delta;t Sweep (Table 1)"
-          data-i18n-zh="&Delta;t扫描（表1）">&Delta;t Sweep (Table 1)</button>
-      </div>
-      <div id="results-heatmap" style="min-height: 400px;">
-        <!-- D3 heatmap injected here -->
+      <div id="results-heatmap" style="min-height: 200px;">
+        <!-- ResultsDashboard.ts injects here -->
       </div>
     </div>
 
     <div class="callout callout-insight" style="margin-top: 1.5rem;">
       <p style="margin:0;"
-        data-i18n-en="Key finding: V is universally learnable (NN &nabla;V < 5% in 15/16 settings), but &Phi; is the bottleneck — model-dependent and dimension-sensitive."
-        data-i18n-zh="关键发现：V普遍可学（NN &nabla;V 在15/16个设置中 < 5%），但 &Phi; 是瓶颈——依赖模型且对维度敏感。">
-        Key finding: V is universally learnable (NN &nabla;V &lt; 5% in 15/16 settings), but &Phi; is the bottleneck — model-dependent and dimension-sensitive.
+        data-i18n-en="Key finding: V is universally learnable (NN &nabla;V < 5% in 15/16 settings), but &Phi; is the bottleneck — model-dependent and dimension-sensitive. NN wins &nabla;V in 7/16 settings without knowing the potential form."
+        data-i18n-zh="关键发现：V 普遍可学（NN &nabla;V 在 15/16 个设置中 < 5%），但 &Phi; 是瓶颈——依赖模型且对维度敏感。NN 在 7/16 个设置中赢得 &nabla;V，且无需知道势函数形式。">
+        Key finding: V is universally learnable (NN &nabla;V &lt; 5% in 15/16 settings), but &Phi; is the bottleneck — model-dependent and dimension-sensitive. NN wins &nabla;V in 7/16 settings without knowing the potential form.
       </p>
     </div>
   </section>
@@ -272,7 +690,7 @@ import Footer from '../components/Footer.astro';
     </p>
 
     <div class="demo-container">
-      <div id="lcurve-viz" style="padding: 1rem; min-height: 420px; aspect-ratio: 16/9;">
+      <div id="lcurve-viz" style="padding: 1rem; min-height: 300px; aspect-ratio: 16/9;">
         <!-- Canvas injected by LcurveDemo.ts -->
       </div>
       <div class="demo-controls" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
@@ -334,7 +752,7 @@ import Footer from '../components/Footer.astro';
       <summary data-i18n-en="SDE Formulation"
                data-i18n-zh="随机微分方程形式">SDE Formulation</summary>
       <div class="math-block">
-        <div id="math-sde"></div>
+        <Math tex={String.raw`dX_t^i = \left(-\nabla V(X_t^i) - \frac{1}{N}\sum_{j \neq i} \nabla\Phi(X_t^i - X_t^j)\right) dt + \sigma\, dW_t^i`} />
       </div>
       <p data-i18n-en="Each particle's motion is governed by three forces: confinement V, mean-field interaction &Phi;, and Brownian noise &sigma;."
          data-i18n-zh="每个粒子的运动受三种力支配：束缚势V、平均场交互&Phi;和布朗噪声&sigma;。">
@@ -346,7 +764,7 @@ import Footer from '../components/Footer.astro';
       <summary data-i18n-en="Energy Balance via Ito's Formula"
                data-i18n-zh="通过伊藤公式的能量平衡">Energy Balance via Ito's Formula</summary>
       <div class="math-block">
-        <div id="math-ito"></div>
+        <Math tex={String.raw`\underbrace{\delta E_{\text{tot}}}_{\text{energy change}} \;=\; \underbrace{\frac{\sigma^2}{2}\, J_{\text{diff}}\, \Delta t}_{\text{diffusion (income)}} \;-\; \underbrace{J_{\text{diss}}\, \Delta t}_{\text{dissipation (spending)}} \;+\; \text{martingale}`} />
       </div>
       <p data-i18n-en="Applying Ito's formula to the energy functional E = &lt;V + &Phi;*&mu;, &mu;&gt; gives the balance equation: energy change = diffusion income - dissipation spending."
          data-i18n-zh="将伊藤公式应用于能量泛函 E = &lt;V + &Phi;*&mu;, &mu;&gt; 得到平衡方程：能量变化 = 扩散收入 - 耗散支出。">
@@ -358,7 +776,7 @@ import Footer from '../components/Footer.astro';
       <summary data-i18n-en="Self-Test Loss Function"
                data-i18n-zh="自测损失函数">Self-Test Loss Function</summary>
       <div class="math-block">
-        <div id="math-loss"></div>
+        <Math tex={String.raw`\mathbb{E}\!\left[\mathcal{L}(V^*, \Phi^*)\right] = -\frac{1}{2}\,\mathbb{E}\!\left[J_{\text{diss}}^*\, \Delta t\right] < 0 \qquad \text{vs.} \qquad \mathcal{L}(0, 0) = 0`} />
       </div>
       <p data-i18n-en="The key innovation: the (1/2) coefficient on the dissipation term means L(V*, &Phi;*) = -(1/2) E[J_diss &Delta;t] < 0, while L(0,0) = 0. This breaks the trivial-solution degeneracy."
          data-i18n-zh="关键创新：耗散项上的(1/2)系数意味着 L(V*, &Phi;*) = -(1/2) E[J_diss &Delta;t] < 0，而 L(0,0) = 0。这打破了平凡解的退化性。">
@@ -369,9 +787,9 @@ import Footer from '../components/Footer.astro';
     <details>
       <summary data-i18n-en="Neural Network Architecture"
                data-i18n-zh="神经网络架构">Neural Network Architecture</summary>
-      <p data-i18n-en="Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions and Softplus activations (C&sup2; smooth for Laplacian computation). The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters."
-         data-i18n-zh="V和&Phi;均由3层MLP参数化，隐藏维度为[64, 64, 64]，使用Softplus激活函数（C&sup2;光滑，适合拉普拉斯计算）。对称性 &Phi;(x) = &Phi;(-x) 通过架构强制实现。总参数：约17,000。">
-        Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions and Softplus activations (C&sup2; smooth for Laplacian computation). The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters.
+      <p data-i18n-en="Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions and Tanh activations (C&sup2; smooth for Laplacian computation). The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters."
+         data-i18n-zh="V和&Phi;均由3层MLP参数化，隐藏维度为[64, 64, 64]，使用Tanh激活函数（C&sup2;光滑，适合拉普拉斯计算）。对称性 &Phi;(x) = &Phi;(-x) 通过架构强制实现。总参数：约17,000。">
+        Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions and Tanh activations (C&sup2; smooth for Laplacian computation). The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters.
       </p>
     </details>
   </section>
@@ -380,13 +798,14 @@ import Footer from '../components/Footer.astro';
 
   <!-- ═══ Island Scripts ═══ -->
   <script src="../islands/HeroParticles.ts"></script>
+  <script src="../islands/ForceViz.ts"></script>
   <script src="../islands/ParticleLabelDemo.ts"></script>
   <script src="../islands/ShuffleDemo.ts"></script>
   <script src="../islands/EnergyBalanceViz.ts"></script>
   <script src="../islands/LossLandscape.ts"></script>
   <script src="../islands/PotentialExplorer.ts"></script>
   <script src="../islands/ResultsDashboard.ts"></script>
-  <script src="../islands/MathRenderer.ts"></script>
+  <!-- MathRenderer.ts replaced by SSR Math.astro component -->
   <script src="../islands/DtSliderDemo.ts"></script>
   <script src="../islands/LcurveDemo.ts"></script>
 </BaseLayout>
@@ -454,5 +873,18 @@ import Footer from '../components/Footer.astro';
   /* ─── Model tabs ─── */
   .model-tabs .toggle-group {
     flex-wrap: wrap;
+  }
+
+  /* ─── Responsive grids ─── */
+  @media (max-width: 640px) {
+    #implementations [style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+    #models [style*="grid-template-columns: repeat(5"] {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .stress-cards {
+      grid-template-columns: 1fr !important;
+    }
   }
 </style>

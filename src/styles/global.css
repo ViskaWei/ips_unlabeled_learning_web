@@ -13,7 +13,7 @@
   --text-muted: #64748b;
 
   --accent-blue: #3b82f6;
-  --accent-cyan: #06b6d4;
+  --accent-cyan: #22d3ee;
   --accent-teal: #14b8a6;
   --accent-purple: #8b5cf6;
   --accent-green: #22c55e;
@@ -30,7 +30,7 @@
   --font-serif: 'Merriweather', Georgia, serif;
 
   /* Spacing */
-  --section-gap: 6rem;
+  --section-gap: 3rem;
   --content-width: 800px;
   --wide-width: 1100px;
 
@@ -69,11 +69,11 @@ h1, h2, h3, h4 {
 }
 
 h1 { font-size: 3rem; }
-h2 { font-size: 2rem; margin-bottom: 1rem; }
-h3 { font-size: 1.4rem; margin-bottom: 0.75rem; }
+h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
 
 p {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   color: var(--text-secondary);
 }
 
@@ -108,10 +108,10 @@ a:hover {
 
 .section-divider {
   width: 60px;
-  height: 3px;
+  height: 2px;
   background: var(--gradient-accent);
   border-radius: 2px;
-  margin: 3rem auto;
+  margin: 1rem auto;
 }
 
 /* ─── Cards ─── */
@@ -190,7 +190,7 @@ a:hover {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   overflow: hidden;
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 .demo-canvas-wrap {
@@ -216,8 +216,8 @@ a:hover {
 
 /* ─── Math (KaTeX) ─── */
 .math-block {
-  margin: 1.5rem 0;
-  padding: 1.5rem;
+  margin: 0.75rem 0;
+  padding: 1rem;
   background: var(--bg-code);
   border-radius: 8px;
   border-left: 3px solid var(--accent-purple);
@@ -229,9 +229,9 @@ a:hover {
 
 /* ─── Callout ─── */
 .callout {
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
-  margin: 1.5rem 0;
+  margin: 0.75rem 0;
   font-size: 0.95rem;
 }
 
@@ -282,9 +282,254 @@ details[open] summary {
 @media (max-width: 768px) {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.5rem; }
-  .section { padding: 3rem 1rem; }
+  .section { padding: 2rem 1rem; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   :root { --content-width: 100%; }
+}
+
+/* ─── Accessibility ─── */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* ─── Stat Cards (Experiment Setup) ─── */
+.stat-cards {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.stat-card {
+  flex: 1 1 120px;
+  max-width: 160px;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-card .stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+}
+
+.stat-card .stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.25rem;
+}
+
+/* ─── Loss Anatomy ─── */
+.loss-anatomy {
+  margin: 2rem 0;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.loss-anatomy-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.loss-component {
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.loss-component:last-of-type {
+  border-bottom: none;
+}
+
+.loss-component .lc-color {
+  width: 6px;
+  border-radius: 3px;
+  align-self: stretch;
+  min-height: 2.5rem;
+}
+
+.loss-component .lc-body h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.loss-component .lc-body p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.loss-anatomy-footer {
+  padding: 0.75rem 1.5rem;
+  background: rgba(34, 197, 94, 0.06);
+  border-top: 1px solid rgba(34, 197, 94, 0.15);
+  font-size: 0.85rem;
+}
+
+/* ─── Stress Test Cards ─── */
+.stress-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.stress-card {
+  padding: 1rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border-left: 3px solid var(--text-muted);
+}
+
+.stress-card .sc-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.stress-card .sc-hypothesis {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+}
+
+.stress-card .sc-result {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+  font-family: var(--font-mono);
+}
+
+.stress-card .sc-verdict {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ─── Condition Number Table ─── */
+.cond-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+.cond-table th,
+.cond-table td {
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.cond-table thead th {
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.cond-table tbody td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cond-table tbody td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+.cond-low { color: #22c55e; }
+.cond-med { color: #f59e0b; }
+.cond-high { color: #ef4444; }
+
+/* ─── NN Results (Bar Chart + Grid) ─── */
+.nn-bar-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+}
+
+.nn-bar-row:last-child {
+  border-bottom: none;
+}
+
+.nn-bar-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.nn-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nn-bar-track {
+  height: 18px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: white;
+  min-width: 2px;
+  transition: width 0.4s ease;
+}
+
+.dim-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(4, 1fr);
+  gap: 2px;
+  font-size: 0.8rem;
+}
+
+.dim-grid-header {
+  padding: 6px 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.dim-grid-cell {
+  padding: 6px 8px;
+  text-align: center;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.dim-grid-model {
+  padding: 6px 8px;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .stress-cards { grid-template-columns: 1fr; }
+  .stat-cards { gap: 0.5rem; }
+  .stat-card { flex: 1 1 80px; max-width: none; padding: 0.5rem; }
+  .stat-card .stat-value { font-size: 1rem; }
+  .nn-bar-row { grid-template-columns: 60px 1fr 1fr; font-size: 0.7rem; }
+  .dim-grid { font-size: 0.7rem; }
 }
 
 /* ─── Animations ─── */

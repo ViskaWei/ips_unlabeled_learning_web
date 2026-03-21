@@ -1,10 +1,10 @@
 /**
  * Energy Balance Visualization — animated energy ledger with V/Phi sliders.
  * Shows how wrong potentials break the energy balance.
- * Uses Model B (Double-Well + Inverse) for dynamic orbital motion.
+ * Uses Reference model (Model E) — quadratic confinement + Gaussian interaction.
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
-import { DoubleWellPotential, InverseInteraction } from '../sim/potentials';
+import { MODELS } from '../sim/potentials';
 
 const canvas = document.getElementById('energy-canvas') as HTMLCanvasElement;
 const vSlider = document.getElementById('v-scale') as HTMLInputElement;
@@ -12,20 +12,21 @@ const phiSlider = document.getElementById('phi-scale') as HTMLInputElement;
 
 if (canvas && vSlider && phiSlider) {
   const ctx = canvas.getContext('2d')!;
-  const N = 10;
+  const N = 4;
   const d = 2;
-  const sigma = 0.15;
+  const ref = MODELS.model_e;
+  const sigma = 0.25;
   const dt = 0.008;
 
-  // True potentials — Model B: double-well ring + inverse interaction
-  const trueV = new DoubleWellPotential();
-  const truePhi = new InverseInteraction(0.5);
+  // True potentials — Reference model (Model E)
+  const trueV = ref.V;
+  const truePhi = ref.Phi;
 
   // Simulation with true potentials
   const system = new ParticleSystem(trueV, truePhi, sigma, dt, N, d, 77);
   const state = system.initialize(1.0);
 
-  // Warmup so particles settle onto the double-well ring
+  // Warmup
   for (let i = 0; i < 300; i++) system.step(state);
 
   // Running averages for the energy ledger
@@ -97,9 +98,10 @@ if (canvas && vSlider && phiSlider) {
 
   function resize() {
     const rect = canvas.parentElement!.getBoundingClientRect();
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const dpr = window.devicePixelRatio;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   // Save previous positions for energy change
@@ -138,7 +140,7 @@ if (canvas && vSlider && phiSlider) {
     const ledgerX = simW + 30;
 
     // Left: Particle simulation
-    const simScale = Math.min(simW, h) / 5.5;
+    const simScale = Math.min(simW, h) / 3.0;
     const cx = simW / 2;
     const cy = h / 2;
 
@@ -155,13 +157,13 @@ if (canvas && vSlider && phiSlider) {
 
       // Glow
       ctx.beginPath();
-      ctx.arc(sx, sy, 14, 0, Math.PI * 2);
+      ctx.arc(sx, sy, 20, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
       ctx.fill();
 
       // Particle
       ctx.beginPath();
-      ctx.arc(sx, sy, 8, 0, Math.PI * 2);
+      ctx.arc(sx, sy, 12, 0, Math.PI * 2);
       ctx.fillStyle = '#3b82f6';
       ctx.globalAlpha = 0.7;
       ctx.fill();
@@ -190,7 +192,11 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillRect(ledgerX, row1Y, dissBar, barH);
     ctx.fillStyle = '#ef4444';
     ctx.font = '11px Inter, sans-serif';
-    ctx.fillText(`Dissipation (spending): ${dissipation.toFixed(5)}`, ledgerX + 5, row1Y + 15);
+    ctx.fillText('Dissipation (spending)', ledgerX + 5, row1Y + 15);
+    // Value label at bar end
+    ctx.textAlign = 'right';
+    ctx.fillText(dissipation.toFixed(5), ledgerX + ledgerW - 4, row1Y + 15);
+    ctx.textAlign = 'left';
 
     // Energy change bar (blue - balance)
     const row2Y = row1Y + barH + 8;
@@ -201,7 +207,10 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = energyChange < 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(59, 130, 246, 0.6)';
     ctx.fillRect(ledgerX, row2Y, eBar, barH);
     ctx.fillStyle = '#3b82f6';
-    ctx.fillText(`Energy change (balance): ${energyChange.toFixed(5)}`, ledgerX + 5, row2Y + 15);
+    ctx.fillText('Energy change (balance)', ledgerX + 5, row2Y + 15);
+    ctx.textAlign = 'right';
+    ctx.fillText(energyChange.toFixed(5), ledgerX + ledgerW - 4, row2Y + 15);
+    ctx.textAlign = 'left';
 
     // Residual (self-test loss)
     const row3Y = row2Y + barH + 15;

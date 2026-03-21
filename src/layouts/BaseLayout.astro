@@ -35,10 +35,22 @@ const base = import.meta.env.BASE_URL;
       crossorigin="anonymous"
     />
 
+    <!-- Google Scholar -->
+    <meta name="citation_title" content="Learning from Unlabeled Data for Interacting Particle Systems" />
+    <meta name="citation_author" content="Viska Wei" />
+    <meta name="citation_author" content="Fei Lu" />
+    <meta name="citation_date" content="2026" />
+    <meta name="citation_technical_report_institution" content="Johns Hopkins University" />
+
     <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
 
     <!-- Favicon -->
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />

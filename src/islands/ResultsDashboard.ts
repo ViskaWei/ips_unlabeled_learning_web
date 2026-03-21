@@ -1,192 +1,280 @@
 /**
- * Interactive Results Dashboard — renders paper Tables 1 and 2 as colored heatmaps.
- * Uses safe DOM construction (no innerHTML) to prevent XSS.
+ * NN Results Dashboard — replaces the old 16-row heatmap with two focused views:
+ * 1. NN vs Basis bar chart (per-model, d=2 only)
+ * 2. Dimension scaling color grid (4 models × 4 dims, NN ∇V)
+ * Uses safe DOM construction (no innerHTML).
  */
 
 const container = document.getElementById('results-heatmap');
-const tableBtns = document.querySelectorAll('[data-table]');
 
 if (container) {
-  let currentTable = 'cross_method';
-
-  tableBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      tableBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentTable = (btn as HTMLElement).dataset.table || 'cross_method';
-      loadAndRender();
-    });
-  });
+  loadAndRender();
 
   async function loadAndRender() {
     const base = import.meta.env.BASE_URL || '/ips_unlabeled_learning_web';
     try {
-      const resp = await fetch(`${base}/data/${currentTable}.json`);
+      const resp = await fetch(`${base}/data/cross_method.json`);
       const data = await resp.json();
-      renderHeatmap(data);
+      render(data.data);
     } catch {
       container!.textContent = 'Loading results data...';
     }
   }
 
-  function getColor(value: number): string {
-    if (value <= 5) return `rgba(34, 197, 94, ${0.3 + 0.7 * (1 - value / 5)})`;
-    if (value <= 20) return `rgba(245, 158, 11, ${0.3 + 0.4 * ((value - 5) / 15)})`;
-    if (value <= 50) return `rgba(239, 68, 68, ${0.3 + 0.3 * ((value - 20) / 30)})`;
-    return `rgba(239, 68, 68, 0.8)`;
-  }
-
-  function el(tag: string, styles?: Record<string, string>, text?: string): HTMLElement {
+  function el(tag: string, cls?: string, text?: string): HTMLElement {
     const e = document.createElement(tag);
-    if (styles) Object.assign(e.style, styles);
+    if (cls) e.className = cls;
     if (text) e.textContent = text;
     return e;
   }
 
-  function renderHeatmap(data: any) {
-    const rows = data.data;
-    if (!rows || rows.length === 0) return;
+  function getColor(value: number): string {
+    if (value <= 5) return 'rgba(34, 197, 94, 0.85)';
+    if (value <= 20) return 'rgba(245, 158, 11, 0.75)';
+    if (value <= 50) return 'rgba(239, 68, 68, 0.7)';
+    return 'rgba(239, 68, 68, 0.9)';
+  }
+
+  function getCellBg(value: number): string {
+    if (value <= 5) return `rgba(34, 197, 94, ${0.15 + 0.25 * (1 - value / 5)})`;
+    if (value <= 20) return `rgba(245, 158, 11, ${0.1 + 0.2 * ((value - 5) / 15)})`;
+    if (value <= 50) return `rgba(239, 68, 68, ${0.1 + 0.2 * ((value - 20) / 30)})`;
+    return 'rgba(239, 68, 68, 0.35)';
+  }
+
+  const MODEL_LABELS: Record<string, string> = {
+    A: 'A: Smooth',
+    B: 'B: Cond.',
+    C: 'C: LJ',
+    D: 'D: Morse',
+  };
+
+  function render(rows: any[]) {
     container!.replaceChildren();
-    if (currentTable === 'cross_method') {
-      renderCrossMethodTable(rows);
-    } else {
-      renderDtSweepTable(rows);
-    }
-  }
 
-  function makeTable(): HTMLTableElement {
-    const table = document.createElement('table');
-    Object.assign(table.style, { width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' });
-    return table;
-  }
-
-  function addHeaderRow(thead: HTMLTableSectionElement, cells: { text: string; colspan?: number; color?: string }[]) {
-    const tr = document.createElement('tr');
-    tr.style.borderBottom = '2px solid rgba(255,255,255,0.1)';
-    for (const c of cells) {
-      const th = document.createElement('th');
-      th.textContent = c.text;
-      th.style.padding = '8px';
-      th.style.textAlign = c.colspan ? 'center' : 'left';
-      th.style.color = c.color || 'var(--text-muted)';
-      if (c.colspan) th.colSpan = c.colspan;
-      tr.appendChild(th);
-    }
-    thead.appendChild(tr);
-  }
-
-  function addSubHeaderRow(thead: HTMLTableSectionElement, labels: string[]) {
-    const tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
-    for (const label of labels) {
-      const th = document.createElement('th');
-      th.textContent = label;
-      th.style.padding = '4px 8px';
-      th.style.fontSize = '0.75rem';
-      th.style.color = 'var(--text-muted)';
-      tr.appendChild(th);
-    }
-    thead.appendChild(tr);
-  }
-
-  function addDataCell(tr: HTMLTableRowElement, value: number, isBest: boolean) {
-    const td = document.createElement('td');
-    td.textContent = value >= 100 ? value.toFixed(0) : value.toFixed(1);
-    td.title = `${value}%`;
-    Object.assign(td.style, {
-      padding: '6px 8px',
-      textAlign: 'center',
-      background: getColor(value),
-      fontWeight: isBest ? '700' : 'normal',
+    // === Section 1: NN vs Basis Bar Chart (d=2 only) ===
+    const d2Rows = rows.filter((r: any) => r.d === 2);
+    const barSection = el('div');
+    const barTitle = el('h3', undefined, 'Self-Test: Basis vs NN (d=2)');
+    Object.assign(barTitle.style, {
+      fontSize: '1rem',
+      fontWeight: '600',
+      marginBottom: '0.75rem',
+      color: '#e2e8f0',
     });
-    tr.appendChild(td);
-  }
+    barSection.appendChild(barTitle);
 
-  function renderCrossMethodTable(rows: any[]) {
-    const table = makeTable();
-    const thead = document.createElement('thead');
-    addHeaderRow(thead, [
-      { text: 'Model' },
-      { text: 'd' },
-      { text: 'Oracle Best', colspan: 2, color: '#22c55e' },
-      { text: 'RBF Best', colspan: 2, color: '#f59e0b' },
-      { text: 'NN Best (ours)', colspan: 2, color: '#3b82f6' },
-    ]);
-    addSubHeaderRow(thead, ['', '', '\u2207V', '\u2207\u03A6', '\u2207V', '\u2207\u03A6', '\u2207V', '\u2207\u03A6']);
-    table.appendChild(thead);
+    // Header row
+    const headerRow = el('div', 'nn-bar-row');
+    headerRow.style.borderBottom = '2px solid rgba(255,255,255,0.1)';
+    headerRow.style.paddingBottom = '0.25rem';
+    headerRow.appendChild(el('div', undefined, ''));
+    const hV = el('div', undefined, '∇V error %');
+    Object.assign(hV.style, { fontSize: '0.75rem', color: '#64748b', textAlign: 'center' });
+    const hPhi = el('div', undefined, '∇Φ error %');
+    Object.assign(hPhi.style, { fontSize: '0.75rem', color: '#64748b', textAlign: 'center' });
+    headerRow.appendChild(hV);
+    headerRow.appendChild(hPhi);
+    barSection.appendChild(headerRow);
 
-    const tbody = document.createElement('tbody');
-    for (const row of rows) {
-      const tr = document.createElement('tr');
-      tr.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+    let nnWinsV = 0;
+    const maxV = 15; // scale for bar widths
+    const maxPhi = 20;
 
-      const modelTd = el('td', { padding: '6px 8px', fontWeight: '600' }, row.model);
-      tr.appendChild(modelTd);
+    for (const row of d2Rows) {
+      const label = MODEL_LABELS[row.model] || row.model;
+      const barRow = el('div', 'nn-bar-row');
 
-      const dimTd = el('td', { padding: '6px 8px', textAlign: 'center', color: 'var(--text-muted)' }, String(row.d));
-      tr.appendChild(dimTd);
+      // Model label
+      barRow.appendChild(el('div', 'nn-bar-label', label));
 
-      const minV = Math.min(row.oracle_V, row.rbf_V, row.nn_V);
-      const minPhi = Math.min(row.oracle_Phi, row.rbf_Phi, row.nn_Phi);
+      // ∇V group
+      const vGroup = el('div', 'nn-bar-group');
+      vGroup.appendChild(makeBar(row.oracle_selftest_V, maxV, '#4ade80', 'Basis'));
+      vGroup.appendChild(makeBar(row.nn_V, maxV, '#22c55e', 'NN'));
+      barRow.appendChild(vGroup);
 
-      addDataCell(tr, row.oracle_V, row.oracle_V === minV);
-      addDataCell(tr, row.oracle_Phi, row.oracle_Phi === minPhi);
-      addDataCell(tr, row.rbf_V, row.rbf_V === minV);
-      addDataCell(tr, row.rbf_Phi, row.rbf_Phi === minPhi);
-      addDataCell(tr, row.nn_V, row.nn_V === minV);
-      addDataCell(tr, row.nn_Phi, row.nn_Phi === minPhi);
+      // ∇Φ group
+      const phiGroup = el('div', 'nn-bar-group');
+      phiGroup.appendChild(makeBar(row.oracle_selftest_Phi, maxPhi, '#a78bfa', 'Basis'));
+      phiGroup.appendChild(makeBar(row.nn_Phi, maxPhi, '#8b5cf6', 'NN'));
+      barRow.appendChild(phiGroup);
 
-      tbody.appendChild(tr);
+      barSection.appendChild(barRow);
+
+      if (row.nn_V < row.oracle_selftest_V) nnWinsV++;
     }
-    table.appendChild(tbody);
-    container!.replaceChildren(table);
-  }
 
-  function renderDtSweepTable(rows: any[]) {
-    const table = makeTable();
-    const thead = document.createElement('thead');
-    addHeaderRow(thead, [
-      { text: 'Model' },
-      { text: '\u0394t' },
-      { text: 'Oracle MLE', colspan: 2, color: '#22c55e' },
-      { text: 'Oracle Self-Test', colspan: 2, color: '#f59e0b' },
-      { text: 'NN Self-Test', colspan: 2, color: '#3b82f6' },
-    ]);
-    addSubHeaderRow(thead, ['', '', '\u2207V', '\u2207\u03A6', '\u2207V', '\u2207\u03A6', '\u2207V', '\u2207\u03A6']);
-    table.appendChild(thead);
+    // Summary line
+    const summary = el('div');
+    Object.assign(summary.style, {
+      marginTop: '0.75rem',
+      padding: '0.5rem 0.75rem',
+      background: 'rgba(34, 197, 94, 0.08)',
+      borderRadius: '6px',
+      fontSize: '0.8rem',
+      color: '#22c55e',
+      fontWeight: '600',
+    });
+    summary.textContent = `NN wins ∇V in ${nnWinsV}/${d2Rows.length} models at d=2 — without knowing the potential form`;
+    barSection.appendChild(summary);
 
-    const tbody = document.createElement('tbody');
-    for (const row of rows) {
-      const tr = document.createElement('tr');
-      tr.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+    container!.appendChild(barSection);
 
-      const modelTd = el('td', { padding: '6px 8px', fontWeight: '600' }, row.model);
-      tr.appendChild(modelTd);
+    // === Divider ===
+    const divider = el('div');
+    Object.assign(divider.style, {
+      width: '60px',
+      height: '2px',
+      background: 'linear-gradient(135deg, #3b82f6, #22d3ee)',
+      borderRadius: '2px',
+      margin: '2rem auto',
+    });
+    container!.appendChild(divider);
 
-      const dtTd = el('td', {
-        padding: '6px 8px',
-        textAlign: 'center',
-        fontFamily: 'var(--font-mono)',
-        fontSize: '0.8rem',
-        color: 'var(--text-muted)',
-      }, String(row.dt_obs));
-      tr.appendChild(dtTd);
+    // === Section 2: Dimension Scaling Grid (NN ∇V) ===
+    const gridSection = el('div');
+    const gridTitle = el('h3', undefined, 'Dimension Scaling: NN ∇V (%)');
+    Object.assign(gridTitle.style, {
+      fontSize: '1rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      color: '#e2e8f0',
+    });
+    gridSection.appendChild(gridTitle);
 
-      const minV = Math.min(row.oracle_mle_V, row.oracle_selftest_V, row.nn_selftest_V);
-      const minPhi = Math.min(row.oracle_mle_Phi, row.oracle_selftest_Phi, row.nn_selftest_Phi);
+    const gridSub = el('p');
+    Object.assign(gridSub.style, { fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem' });
+    gridSub.textContent = 'Green ≤5%  ·  Amber 5–20%  ·  Red >20%';
+    gridSection.appendChild(gridSub);
 
-      addDataCell(tr, row.oracle_mle_V, row.oracle_mle_V === minV);
-      addDataCell(tr, row.oracle_mle_Phi, row.oracle_mle_Phi === minPhi);
-      addDataCell(tr, row.oracle_selftest_V, row.oracle_selftest_V === minV);
-      addDataCell(tr, row.oracle_selftest_Phi, row.oracle_selftest_Phi === minPhi);
-      addDataCell(tr, row.nn_selftest_V, row.nn_selftest_V === minV);
-      addDataCell(tr, row.nn_selftest_Phi, row.nn_selftest_Phi === minPhi);
+    const dims = [2, 5, 10, 20];
+    const models = ['A', 'B', 'C', 'D'];
 
-      tbody.appendChild(tr);
+    const grid = el('div', 'dim-grid');
+
+    // Header
+    grid.appendChild(el('div', 'dim-grid-header', ''));
+    for (const d of dims) {
+      grid.appendChild(el('div', 'dim-grid-header', `d=${d}`));
     }
-    table.appendChild(tbody);
-    container!.replaceChildren(table);
+
+    // Data rows
+    for (const m of models) {
+      const label = MODEL_LABELS[m] || m;
+      grid.appendChild(el('div', 'dim-grid-model', label));
+      for (const d of dims) {
+        const row = rows.find((r: any) => r.model === m && r.d === d);
+        const val = row?.nn_V ?? null;
+        const cell = el('div', 'dim-grid-cell');
+        if (val != null) {
+          cell.textContent = val < 10 ? val.toFixed(1) : val.toFixed(0);
+          cell.style.background = getCellBg(val);
+          cell.style.color = val <= 5 ? '#22c55e' : val <= 20 ? '#f59e0b' : '#ef4444';
+          cell.title = `NN ∇V = ${val}%`;
+        } else {
+          cell.textContent = '—';
+          cell.style.color = '#64748b';
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    gridSection.appendChild(grid);
+
+    // Summary for grid
+    const gridSummary = el('div');
+    Object.assign(gridSummary.style, {
+      marginTop: '0.75rem',
+      padding: '0.5rem 0.75rem',
+      background: 'rgba(34, 197, 94, 0.08)',
+      borderRadius: '6px',
+      fontSize: '0.8rem',
+      color: '#22c55e',
+      fontWeight: '600',
+    });
+
+    // Count cells ≤ 5%
+    let under5 = 0;
+    const total = models.length * dims.length;
+    for (const m of models) {
+      for (const d of dims) {
+        const row = rows.find((r: any) => r.model === m && r.d === d);
+        if (row?.nn_V != null && row.nn_V <= 5) under5++;
+      }
+    }
+    gridSummary.textContent = `V universally learnable: ${under5}/${total} settings have NN ∇V ≤ 5%`;
+    gridSection.appendChild(gridSummary);
+
+    // === Section 3: Dimension Scaling Grid (NN ∇Φ) ===
+    const phiDivider = el('div');
+    Object.assign(phiDivider.style, { height: '1.5rem' });
+    gridSection.appendChild(phiDivider);
+
+    const phiTitle = el('h3', undefined, 'Dimension Scaling: NN ∇Φ (%)');
+    Object.assign(phiTitle.style, {
+      fontSize: '1rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      color: '#e2e8f0',
+    });
+    gridSection.appendChild(phiTitle);
+
+    const phiGrid = el('div', 'dim-grid');
+
+    // Header
+    phiGrid.appendChild(el('div', 'dim-grid-header', ''));
+    for (const d of dims) {
+      phiGrid.appendChild(el('div', 'dim-grid-header', `d=${d}`));
+    }
+
+    // Data rows
+    for (const m of models) {
+      const label = MODEL_LABELS[m] || m;
+      phiGrid.appendChild(el('div', 'dim-grid-model', label));
+      for (const d of dims) {
+        const row = rows.find((r: any) => r.model === m && r.d === d);
+        const val = row?.nn_Phi ?? null;
+        const cell = el('div', 'dim-grid-cell');
+        if (val != null) {
+          cell.textContent = val >= 100 ? val.toFixed(0) : val < 10 ? val.toFixed(1) : val.toFixed(0);
+          cell.style.background = getCellBg(val);
+          cell.style.color = val <= 5 ? '#22c55e' : val <= 20 ? '#f59e0b' : '#ef4444';
+          cell.title = `NN ∇Φ = ${val}%`;
+        } else {
+          cell.textContent = '—';
+          cell.style.color = '#64748b';
+        }
+        phiGrid.appendChild(cell);
+      }
+    }
+
+    gridSection.appendChild(phiGrid);
+
+    const phiSummary = el('div');
+    Object.assign(phiSummary.style, {
+      marginTop: '0.75rem',
+      padding: '0.5rem 0.75rem',
+      background: 'rgba(245, 158, 11, 0.08)',
+      borderRadius: '6px',
+      fontSize: '0.8rem',
+      color: '#f59e0b',
+      fontWeight: '600',
+    });
+    phiSummary.textContent = 'Φ is the bottleneck — model-dependent and dimension-sensitive';
+    gridSection.appendChild(phiSummary);
+
+    container!.appendChild(gridSection);
   }
 
-  loadAndRender();
+  function makeBar(value: number, maxVal: number, color: string, label: string): HTMLElement {
+    const bar = document.createElement('div');
+    bar.className = 'nn-bar-track';
+    const pct = Math.min(100, (value / maxVal) * 100);
+    bar.style.width = `${Math.max(pct, 3)}%`;
+    bar.style.background = color;
+    bar.textContent = `${label} ${value.toFixed(1)}%`;
+    bar.title = `${label}: ${value}%`;
+    return bar;
+  }
 }

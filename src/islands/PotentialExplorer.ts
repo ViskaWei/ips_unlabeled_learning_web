@@ -12,15 +12,31 @@ if (curveCanvas && simCanvas) {
   const curveCtx = curveCanvas.getContext('2d')!;
   const simCtx = simCanvas.getContext('2d')!;
 
-  let currentModel = 'model_a';
+  let currentModel = 'model_e';
   let system: ParticleSystem;
   let state: ReturnType<ParticleSystem['initialize']>;
+
+  function resizeCanvas(c: HTMLCanvasElement, context: CanvasRenderingContext2D) {
+    const rect = c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio;
+    c.width = rect.width * dpr;
+    c.height = rect.height * dpr;
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function resizeAll() {
+    resizeCanvas(curveCanvas, curveCtx);
+    resizeCanvas(simCanvas, simCtx);
+    drawCurves();
+  }
+
+  window.addEventListener('resize', resizeAll);
 
   function initModel(modelKey: string) {
     const config = MODELS[modelKey];
     if (!config) return;
     currentModel = modelKey;
-    system = new ParticleSystem(config.V, config.Phi, config.sigma, 0.005, 10, 2, 42);
+    system = new ParticleSystem(config.V, config.Phi, config.sigma, 0.005, 6, 2, 42);
     state = system.initialize(0.8);
   }
 
@@ -38,8 +54,9 @@ if (curveCanvas && simCanvas) {
     const config = MODELS[currentModel];
     if (!config) return;
 
-    const w = curveCanvas.width;
-    const h = curveCanvas.height;
+    const dpr = window.devicePixelRatio;
+    const w = curveCanvas.width / dpr;
+    const h = curveCanvas.height / dpr;
     curveCtx.clearRect(0, 0, w, h);
 
     const padL = 45, padR = 15, padT = 25, padB = 35;
@@ -120,20 +137,33 @@ if (curveCanvas && simCanvas) {
     ctx.textAlign = 'left';
     ctx.fillText(label, x0 + 5, y0 + 15);
 
-    // Axis labels
+    // X-axis labels
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.font = '9px var(--font-mono), monospace';
     ctx.textAlign = 'left';
     ctx.fillText(`${xMin}`, x0, y0 + plotH + 12);
     ctx.textAlign = 'right';
     ctx.fillText(`${xMax}`, x0 + plotW, y0 + plotH + 12);
+
+    // Y-axis tick labels (2-3 ticks)
+    ctx.textAlign = 'right';
+    const yTicks = [yMin, (yMin + yMax) / 2, yMax].filter(v => Number.isFinite(v));
+    for (const yTick of yTicks) {
+      const ty = y0 + plotH - ((yTick - yMin) / (yMax - yMin)) * plotH;
+      ctx.fillText(yTick % 1 === 0 ? `${yTick}` : yTick.toFixed(1), x0 - 4, ty + 3);
+      // Tick mark
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, ty); ctx.lineTo(x0 + 4, ty); ctx.stroke();
+    }
   }
 
   function drawSim() {
     if (!system || !state) return;
 
-    const w = simCanvas.width;
-    const h = simCanvas.height;
+    const dpr = window.devicePixelRatio;
+    const w = simCanvas.width / dpr;
+    const h = simCanvas.height / dpr;
     simCtx.clearRect(0, 0, w, h);
 
     // Step
@@ -145,8 +175,8 @@ if (curveCanvas && simCanvas) {
     const cy = h / 2;
 
     // Draw interaction lines
-    for (let i = 0; i < 10; i++) {
-      for (let j = i + 1; j < 10; j++) {
+    for (let i = 0; i < 6; i++) {
+      for (let j = i + 1; j < 6; j++) {
         const dx = pos[i * 2] - pos[j * 2];
         const dy = pos[i * 2 + 1] - pos[j * 2 + 1];
         const r = Math.sqrt(dx * dx + dy * dy);
@@ -166,7 +196,7 @@ if (curveCanvas && simCanvas) {
     }
 
     // Draw particles
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 6; i++) {
       const sx = cx + pos[i * 2] * scale;
       const sy = cy - pos[i * 2 + 1] * scale;
 
@@ -188,7 +218,7 @@ if (curveCanvas && simCanvas) {
     requestAnimationFrame(drawSim);
   }
 
-  initModel('model_a');
-  drawCurves();
+  initModel('model_e');
+  resizeAll();
   drawSim();
 }

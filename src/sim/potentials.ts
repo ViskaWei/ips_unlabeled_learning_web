@@ -273,6 +273,14 @@ export const MODELS: Record<string, ModelConfig> = {
     sigma: 0.1,
     description: 'Double-well confinement with Morse interaction',
   },
+  model_e: {
+    name: 'model_e',
+    label: 'E: Reference ★',
+    V: new QuadraticConfinement(0, 1.0),
+    Phi: new GaussianInteraction(1.0, 0.8),
+    sigma: 0.1,
+    description: 'Reference model — quadratic confinement with Gaussian interaction',
+  },
   model_aniso: {
     name: 'model_aniso',
     label: 'Model E (Anisotropic)',

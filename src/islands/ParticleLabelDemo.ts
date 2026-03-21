@@ -1,37 +1,32 @@
 /**
- * Label Toggle Demo — N=15 particles with toggleable labels.
- * Uses Model B (Double-Well + Inverse) for dynamic motion.
+ * Label Toggle Demo — N=4 particles with toggleable labels.
+ * Uses Reference model (Model E) for dynamic motion.
  *
  * Labeled mode:  continuous animation with colored trails → you can track each particle.
  * Unlabeled mode: periodic snapshots with large time gaps → impossible to match.
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
-import { DoubleWellPotential, InverseInteraction } from '../sim/potentials';
+import { MODELS } from '../sim/potentials';
 
 const canvas = document.getElementById('label-demo-canvas') as HTMLCanvasElement;
 if (canvas) {
   const ctx = canvas.getContext('2d')!;
-  const N = 15;
+  const N = 4;
   const d = 2;
 
-  const V = new DoubleWellPotential();
-  const Phi = new InverseInteraction(0.5);
-  const system = new ParticleSystem(V, Phi, 0.15, 0.02, N, d, 42);
-  const state = system.initialize(1.0);
+  const ref = MODELS.model_e;
+  const system = new ParticleSystem(ref.V, ref.Phi, 0.25, 0.02, N, d, 42);
+  const state = system.initialize(1.2);
 
   // Warmup
   for (let i = 0; i < 500; i++) system.step(state);
 
   // Trail history for labeled mode
-  const TRAIL_LEN = 60;
+  const TRAIL_LEN = 80;
   const trails: Float64Array[] = [];
 
-  // 15 distinct colors for labeled mode
-  const COLORS = [
-    '#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6',
-    '#ec4899', '#06b6d4', '#f97316', '#14b8a6', '#a855f7',
-    '#e11d48', '#84cc16', '#0ea5e9', '#d946ef', '#fb923c',
-  ];
+  // 4 distinct colors for labeled mode
+  const COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6'];
   const UNLABELED_COLOR = '#3b82f6';
 
   let labeled = true;
@@ -66,13 +61,14 @@ if (canvas) {
 
   function resize() {
     const rect = canvas.parentElement!.getBoundingClientRect();
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    const dpr = window.devicePixelRatio;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   function worldToScreen(x: number, y: number, w: number, h: number): [number, number] {
-    const scale = Math.min(w, h) / 5.5;
+    const scale = Math.min(w, h) / 3.0;
     return [w / 2 + x * scale, h / 2 - y * scale];
   }
 
@@ -88,7 +84,7 @@ if (canvas) {
 
     // Faint ring
     const [cx, cy] = worldToScreen(0, 0, w, h);
-    const ringR = Math.min(w, h) / 5.5;
+    const ringR = Math.min(w, h) / 3.0;
     ctx.beginPath();
     ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
@@ -105,7 +101,7 @@ if (canvas) {
           else ctx.lineTo(tx, ty);
         }
         ctx.strokeStyle = COLORS[i] + '55';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3.5;
         ctx.stroke();
       }
     }
@@ -129,8 +125,8 @@ if (canvas) {
       }
     }
 
-    // Particles with numbers
-    const radius = 13;
+    // Particles with numbers — large for N=4
+    const radius = 18;
     for (let i = 0; i < N; i++) {
       const [sx, sy] = worldToScreen(pos[i * 2], pos[i * 2 + 1], w, h);
       const color = COLORS[i];
@@ -146,7 +142,7 @@ if (canvas) {
       ctx.fill();
 
       ctx.fillStyle = 'white';
-      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.font = 'bold 14px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`${i + 1}`, sx, sy);
@@ -177,14 +173,14 @@ if (canvas) {
 
     // Faint ring
     const [cx, cy] = worldToScreen(0, 0, w, h);
-    const ringR = Math.min(w, h) / 5.5;
+    const ringR = Math.min(w, h) / 3.0;
     ctx.beginPath();
     ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    const radius = 10;
+    const radius = 16;
 
     // Draw previous snapshot as ghost circles (hollow, faded)
     if (prevPositions) {

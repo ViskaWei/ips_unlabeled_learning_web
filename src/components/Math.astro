@@ -1,0 +1,13 @@
+---
+import katex from 'katex';
+
+interface Props {
+  tex: string;
+  displayMode?: boolean;
+}
+
+const { tex, displayMode = true } = Astro.props;
+const html = katex.renderToString(tex, { displayMode, throwOnError: false });
+---
+
+<Fragment set:html={html} />
