@@ -1,0 +1,1 @@
+import"./Footer.astro_astro_type_script_index_0_lang.gOpWiJEa.js";const t=document.getElementById("code-lang-toggle");let e=localStorage.getItem("ips-lang")||"en";function n(){t&&(t.textContent=e.toUpperCase())}t?.addEventListener("click",()=>{e=e==="en"?"zh":"en",localStorage.setItem("ips-lang",e),n()});n();

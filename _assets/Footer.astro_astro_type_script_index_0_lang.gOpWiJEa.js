@@ -1,0 +1,1 @@
+document.getElementById("copy-bibtex")?.addEventListener("click",e=>{const t=e.currentTarget,n=t.dataset.bibtex||"";navigator.clipboard.writeText(n).then(()=>{t.textContent="Copied!",setTimeout(()=>{t.textContent="Copy BibTeX"},2e3)})});

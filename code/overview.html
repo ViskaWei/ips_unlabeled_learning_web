@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPS Computational Pipeline — Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0A0E17;
+    color: #E2E8F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .header {
+    width: 100%;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #E2E8F0;
+    flex: 1;
+  }
+  .header-btn {
+    padding: 5px 14px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    color: #94A3B8;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); color: #E2E8F0; }
+  .header-btn.active { background: rgba(99,102,241,0.15); border-color: rgba(129,140,248,0.5); color: #A5B4FC; }
+  .svg-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+  }
+  svg { cursor: default; }
+  .node-group { cursor: pointer; }
+  .node-group.expandable:hover { filter: brightness(1.08); }
+  .expand-badge { cursor: pointer; }
+  /* Legend overlay */
+  .legend-overlay {
+    position: fixed;
+    top: 60px;
+    right: 24px;
+    z-index: 100;
+    background: #1E293B;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    padding: 16px 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    min-width: 220px;
+    display: none;
+  }
+  .legend-overlay.show { display: block; }
+  .legend-overlay h3 { font-size: 13px; color: #E2E8F0; margin-bottom: 12px; }
+  .legend-section-title {
+    font-size: 10px; font-weight: 600; color: #64748B;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-top: 10px; margin-bottom: 6px;
+  }
+  .legend-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 0; font-size: 12px; color: #94A3B8;
+  }
+  .legend-swatch {
+    width: 22px; height: 14px; border-radius: 3px;
+    border: 1.5px solid; flex-shrink: 0;
+  }
+  .legend-line {
+    width: 22px; height: 0; border-top: 2px solid; flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>IPS Computational Pipeline</h1>
+  <button class="header-btn" onclick="expandAll()">Expand All</button>
+  <button class="header-btn" onclick="collapseAll()">Collapse All</button>
+  <button id="legendBtn" class="header-btn" onclick="toggleLegend()">Legend</button>
+</div>
+
+<div id="legendPanel" class="legend-overlay">
+  <h3>Legend</h3>
+  <div class="legend-section-title">Shapes</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#1E293B;border-color:#475569"></span>Data I/O (parallelogram)</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#172554;border-color:#2563EB"></span>Process (rectangle)</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#422006;border-color:#D97706"></span>Decision (diamond)</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#1E1B4B;border-color:#4F46E5"></span>Document (page)</div>
+  <div class="legend-section-title">Edges</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#94A3B8;border-width:3px"></span>Primary Flow</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#16A34A;border-width:2px"></span>Gate Pass</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#DC2626;border-width:2px;border-style:dashed"></span>Gate Fail</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#6B8DB2;border-width:1.5px"></span>Data Flow</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#7C3AED;border-width:1.5px;border-style:dotted"></span>Feedback</div>
+  <div class="legend-section-title">Accents</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#7C3AED;border-width:2.5px"></span>Expandable node</div>
+</div>
+
+<div class="svg-wrap" id="svgWrap"></div>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+
+/* ─── Dark-themed PAL palette ─── */
+const PAL = {
+  data:      { fill: '#1E293B', stroke: '#475569', font: '#CBD5E1' },
+  process:   { fill: '#172554', stroke: '#2563EB', font: '#BFDBFE' },
+  decision:  { fill: '#422006', stroke: '#D97706', font: '#FDE68A' },
+  document:  { fill: '#1E1B4B', stroke: '#4F46E5', font: '#C7D2FE' },
+  terminator:{ fill: '#2E1065', stroke: '#7C3AED', font: '#DDD6FE' },
+};
+
+const EDGE = {
+  primary:  { color: '#94A3B8', width: 3,   dash: null, opacity: 0.85, marker: 'arr-primary' },
+  pass:     { color: '#16A34A', width: 2,   dash: null, opacity: 0.80, marker: 'arr-pass' },
+  fail:     { color: '#DC2626', width: 2,   dash: '5,4', opacity: 0.70, marker: 'arr-fail' },
+  dataflow: { color: '#6B8DB2', width: 1.5, dash: null, opacity: 0.50, marker: 'arr-dataflow' },
+  feedback: { color: '#7C3AED', width: 1.5, dash: '2,3', opacity: 0.45, marker: 'arr-feedback' },
+};
+
+/* ─── Layout constants ─── */
+const NW = 240, NH = 64;
+const SPINE = 120, YTOP = 20, YGAP = 42;
+const DW = 110, DH = 80;
+const EW = 130, EH = 44;
+const EXGAP = 32, EXPAD = 40;
+const REWORK_DROP = 52;
+
+/* ─── Node definitions ─── */
+const nodes = [
+  { id:'potentials', label:'Define Potentials', sub:'V(x), \u03A6(r) for A/B/LJ/Morse', io:'model selection \u2192 potential functions', shape:'data', expand: false },
+  { id:'sde', label:'Generate SDE Trajectories', sub:'Euler-Maruyama simulation', io:'potentials + params \u2192 snapshot data', shape:'process', expand: true,
+    exp: { gate:'Data quality\ncheck?', rework:'Re-run with\nadjusted dt', out:'Snapshots', outSub:'(M,L,N,d) arrays' }},
+  { id:'load', label:'Load Unlabeled Snapshots', sub:'strip trajectory labels', io:'raw data \u2192 unlabeled (M\u00d7N\u00d7d)', shape:'data', expand: false },
+  { id:'method', label:'Choose Method', sub:'MLE vs Sinkhorn+MLE vs Self-test', io:'problem type \u2192 solver branch', shape:'decision', expand: false },
+  { id:'basis', label:'Build Basis Functions', sub:'RBF or Oracle polynomial', io:'method + K centers \u2192 \u03C8_k(r)', shape:'process', expand: true,
+    exp: { gate:'Basis coverage\nadequate?', rework:'Adjust K or\nr_max', out:'Basis Matrix', outSub:'\u03A8 \u2208 R^(n\u00d7K)' }},
+  { id:'energy', label:'Assemble Energy Balance', sub:'J_diss, J_diff, \u0394E terms', io:'basis + snapshots \u2192 A\u03B8=b system', shape:'process', expand: false },
+  { id:'lcurve', label:'Hansen L-curve Reg.', sub:'Tikhonov \u03BB at max curvature', io:'A\u03B8=b \u2192 optimal \u03BB', shape:'process', expand: true,
+    exp: { gate:'L-curve\nconverged?', rework:'Widen \u03BB\nsearch range', out:'\u03BB*', outSub:'regularization param' }},
+  { id:'solve', label:'Solve for Coefficients \u03B8', sub:'Tikhonov-regularized LS', io:'(A, b, \u03BB*) \u2192 \u03B8*', shape:'process', expand: false },
+  { id:'eval', label:'Evaluate Gradient Errors', sub:'relative L2 vs true \u2207V, \u2207\u03A6', io:'\u03B8* + true gradients \u2192 error %', shape:'process', expand: false },
+  { id:'figures', label:'Paper Figures & Tables', sub:'publication-ready outputs', io:'errors + params \u2192 PDF figures', shape:'document', expand: false },
+];
+
+/* ─── State ─── */
+const open = {};
+nodes.forEach(n => { if (n.expand) open[n.id] = false; });
+
+/* ─── SVG helpers ─── */
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  return e;
+}
+
+function addMarkers(defs) {
+  for (const [name, style] of Object.entries(EDGE)) {
+    const m = el('marker', { id: style.marker, viewBox:'0 0 10 10', refX:9, refY:5, markerWidth:6, markerHeight:6, orient:'auto-start-reverse' });
+    m.appendChild(el('path', { d:'M0,1.5 L10,5 L0,8.5Z', fill: style.color }));
+    defs.appendChild(m);
+  }
+}
+
+function addNodeText(g, cx, y, w, h, lines) {
+  const lineH = 13;
+  const totalH = lines.length * lineH;
+  const baseY = y + h/2 - totalH/2 + lineH/2;
+  lines.forEach((ln, i) => {
+    const t = el('text', {
+      x: cx, y: baseY + i * lineH,
+      'text-anchor':'middle', 'dominant-baseline':'central',
+      'font-family': FONT, 'font-size': ln.sz || 11,
+      'font-weight': ln.bold ? '600' : '400',
+      fill: ln.fill || '#CBD5E1',
+      'pointer-events':'none',
+    });
+    t.textContent = ln.text;
+    g.appendChild(t);
+  });
+}
+
+/* ─── Shape drawing ─── */
+function drawParallelogram(parent, x, y, w, h, pal, lines, opts) {
+  const g = el('g', { class: 'node-group' + (opts.expandable ? ' expandable' : ''), 'data-id': opts.id });
+  const sk = 16;
+  // shadow
+  g.appendChild(el('path', { d:`M${x+sk+1},${y+2} L${x+w+1},${y+2} L${x+w-sk+1},${y+h+2} L${x+1},${y+h+2} Z`, fill:'rgba(0,0,0,0.15)', 'stroke-width':0 }));
+  // main
+  g.appendChild(el('path', { d:`M${x+sk},${y} L${x+w},${y} L${x+w-sk},${y+h} L${x},${y+h} Z`, fill:pal.fill, stroke:pal.stroke, 'stroke-width':2 }));
+  addNodeText(g, x+w/2, y, w, h, lines);
+  parent.appendChild(g);
+  return g;
+}
+
+function drawProcess(parent, x, y, w, h, pal, lines, opts) {
+  const g = el('g', { class: 'node-group' + (opts.expandable ? ' expandable' : ''), 'data-id': opts.id });
+  g.appendChild(el('rect', { x:x+1, y:y+2, width:w, height:h, rx:8, fill:'rgba(0,0,0,0.15)', 'stroke-width':0 }));
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:8, fill:pal.fill, stroke:pal.stroke, 'stroke-width':2 }));
+  addNodeText(g, x+w/2, y, w, h, lines);
+  parent.appendChild(g);
+  return g;
+}
+
+function drawDecision(parent, cx, cy, w, h, pal, lines, opts) {
+  const g = el('g', { class: 'node-group', 'data-id': opts.id });
+  // shadow
+  g.appendChild(el('path', { d:`M${cx+1},${cy-h/2+2} L${cx+w/2+1},${cy+2} L${cx+1},${cy+h/2+2} L${cx-w/2+1},${cy+2} Z`, fill:'rgba(0,0,0,0.15)', 'stroke-width':0 }));
+  // main diamond
+  g.appendChild(el('path', { d:`M${cx},${cy-h/2} L${cx+w/2},${cy} L${cx},${cy+h/2} L${cx-w/2},${cy} Z`, fill:pal.fill, stroke:pal.stroke, 'stroke-width':2 }));
+  addNodeText(g, cx, cy - (lines.length * 13)/2 + 13/2, w, h, lines);
+  parent.appendChild(g);
+  return g;
+}
+
+function drawDocument(parent, x, y, w, h, pal, lines, opts) {
+  const g = el('g', { class: 'node-group', 'data-id': opts.id });
+  const wave = 6;
+  // shadow
+  g.appendChild(el('path', { d:`M${x+1},${y+2} L${x+w+1},${y+2} L${x+w+1},${y+h-wave+2} Q${x+w*0.75+1},${y+h+wave+2} ${x+w*0.5+1},${y+h-wave+2} Q${x+w*0.25+1},${y+h-wave*3+2} ${x+1},${y+h-wave+2} Z`, fill:'rgba(0,0,0,0.15)', 'stroke-width':0 }));
+  // main
+  g.appendChild(el('path', { d:`M${x},${y} L${x+w},${y} L${x+w},${y+h-wave} Q${x+w*0.75},${y+h+wave} ${x+w*0.5},${y+h-wave} Q${x+w*0.25},${y+h-wave*3} ${x},${y+h-wave} Z`, fill:pal.fill, stroke:pal.stroke, 'stroke-width':2 }));
+  addNodeText(g, x+w/2, y, w, h - wave, lines);
+  parent.appendChild(g);
+  return g;
+}
+
+function drawSmallDiamond(parent, cx, cy, w, h, pal, lines) {
+  const g = el('g');
+  g.appendChild(el('path', { d:`M${cx},${cy-h/2} L${cx+w/2},${cy} L${cx},${cy+h/2} L${cx-w/2},${cy} Z`, fill:pal.fill, stroke:pal.stroke, 'stroke-width':1.5 }));
+  const lineH = 11;
+  const totalH = lines.length * lineH;
+  const baseY = cy - totalH/2 + lineH/2;
+  lines.forEach((ln, i) => {
+    const t = el('text', { x:cx, y:baseY+i*lineH, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':FONT, 'font-size':ln.sz||10, 'font-weight':ln.bold?'600':'400', fill:ln.fill||'#FDE68A', 'pointer-events':'none' });
+    t.textContent = ln.text;
+    g.appendChild(t);
+  });
+  parent.appendChild(g);
+  return g;
+}
+
+function drawSmallDoc(parent, x, y, w, h, title, subtitle) {
+  const g = el('g');
+  const wave = 4;
+  g.appendChild(el('path', { d:`M${x},${y} L${x+w},${y} L${x+w},${y+h-wave} Q${x+w*0.75},${y+h+wave} ${x+w*0.5},${y+h-wave} Q${x+w*0.25},${y+h-wave*3} ${x},${y+h-wave} Z`, fill:'#1E1B4B', stroke:'#4F46E5', 'stroke-width':1.5 }));
+  const t1 = el('text', { x:x+w/2, y:y+(h-wave)/2-5, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':FONT, 'font-size':10, 'font-weight':'600', fill:'#C7D2FE', 'pointer-events':'none' });
+  t1.textContent = title;
+  g.appendChild(t1);
+  if (subtitle) {
+    const t2 = el('text', { x:x+w/2, y:y+(h-wave)/2+7, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':FONT, 'font-size':9, fill:'#818CF8', 'pointer-events':'none' });
+    t2.textContent = subtitle;
+    g.appendChild(t2);
+  }
+  parent.appendChild(g);
+  return g;
+}
+
+function drawRework(parent, x, y, w, h, label) {
+  const g = el('g');
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:6, fill:'#172554', stroke:'#DC2626', 'stroke-width':1.5, 'stroke-dasharray':'5,3' }));
+  const t = el('text', { x:x+w/2, y:y+h/2, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':FONT, 'font-size':10, fill:'#FCA5A5', 'pointer-events':'none' });
+  t.textContent = label;
+  g.appendChild(t);
+  parent.appendChild(g);
+  return g;
+}
+
+function finishNode(g, x, y, w, h, expandable, nodeId) {
+  if (expandable) {
+    // purple accent line at bottom
+    g.appendChild(el('line', { x1:x+12, y1:y+h, x2:x+w-12, y2:y+h, stroke:'#7C3AED', 'stroke-width':2.5, 'stroke-linecap':'round' }));
+    // expand badge
+    const badge = el('g', { class:'expand-badge', 'data-target':nodeId, style:'cursor:pointer' });
+    badge.appendChild(el('circle', { cx:x+w-2, cy:y+h/2, r:11, fill:'#7C3AED', 'fill-opacity':0.2, stroke:'#7C3AED', 'stroke-width':1, 'stroke-opacity':0.4 }));
+    const icon = el('text', { x:x+w-2, y:y+h/2, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':13, fill:'#A78BFA', 'pointer-events':'none' });
+    icon.textContent = open[nodeId] ? '\u25BE' : '\u25B8';
+    badge.appendChild(icon);
+    g.appendChild(badge);
+  }
+}
+
+/* ─── Edge drawing ─── */
+function edgeLine(parent, x1, y1, x2, y2, style, label) {
+  const s = EDGE[style];
+  const path = el('path', { d:`M${x1},${y1}L${x2},${y2}`, stroke:s.color, 'stroke-width':s.width, 'stroke-opacity':s.opacity, fill:'none', 'marker-end':`url(#${s.marker})` });
+  if (s.dash) path.setAttribute('stroke-dasharray', s.dash);
+  parent.appendChild(path);
+  if (label) {
+    const mx = (x1+x2)/2, my = (y1+y2)/2;
+    const lw = label.length * 6 + 12;
+    parent.appendChild(el('rect', { x:mx-lw/2, y:my-9, width:lw, height:18, rx:9, fill:'#1E293B', 'fill-opacity':0.92, 'stroke-width':0 }));
+    const t = el('text', { x:mx, y:my, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':FONT, 'font-size':9, fill:s.color, 'pointer-events':'none' });
+    t.textContent = label;
+    parent.appendChild(t);
+  }
+}
+
+function edgeCurve(parent, x1, y1, cpx, cpy, x2, y2, style, label, lx, ly) {
+  const s = EDGE[style];
+  const path = el('path', { d:`M${x1},${y1} C${cpx},${y1} ${cpx},${y2+16} ${x2},${y2}`, stroke:s.color, 'stroke-width':s.width, 'stroke-opacity':s.opacity, fill:'none', 'marker-end':`url(#${s.marker})` });
+  if (s.dash) path.setAttribute('stroke-dasharray', s.dash);
+  parent.appendChild(path);
+  if (label) {
+    const px = lx || (cpx - 4), py = ly || ((y1+y2)/2 + 2);
+    const lw = label.length * 6 + 12;
+    parent.appendChild(el('rect', { x:px-lw/2, y:py-9, width:lw, height:18, rx:9, fill:'#1E293B', 'fill-opacity':0.92, 'stroke-width':0 }));
+    const t = el('text', { x:px, y:py, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-family':FONT, 'font-size':9, fill:s.color, 'pointer-events':'none' });
+    t.textContent = label;
+    parent.appendChild(t);
+  }
+}
+
+/* ─── Render ─── */
+function render() {
+  const wrap = document.getElementById('svgWrap');
+  wrap.innerHTML = '';
+
+  // Compute positions
+  const pos = {};
+  let y = YTOP;
+  nodes.forEach(n => {
+    if (n.shape === 'decision') {
+      pos[n.id] = { x: SPINE, y, cx: SPINE + NW/2, cy: y + NH/2 };
+    } else {
+      pos[n.id] = { x: SPINE, y, cx: SPINE + NW/2, cy: y + NH/2 };
+    }
+    const extra = (n.expand && open[n.id]) ? (REWORK_DROP + EH + 8) : 0;
+    y += NH + YGAP + extra;
+  });
+
+  const anyOpen = Object.values(open).some(v => v);
+  const expRight = SPINE + NW + EXPAD + DW/2 + EXGAP + EW + EXGAP + EW + 20;
+  const svgW = anyOpen ? Math.max(expRight + 20, 860) : SPINE + NW + 60;
+  const svgH = y - YGAP + YTOP + 10;
+
+  const svg = el('svg', { width:'100%', height:svgH, viewBox:`0 0 ${svgW} ${svgH}`, preserveAspectRatio:'xMidYMid meet', xmlns:NS });
+
+  const defs = el('defs');
+  addMarkers(defs);
+  svg.appendChild(defs);
+
+  const edgeLayer = el('g', { id:'edges' });
+  const expLayer = el('g', { id:'expansions' });
+  const nodeLayer = el('g', { id:'nodes' });
+  svg.appendChild(edgeLayer);
+  svg.appendChild(expLayer);
+  svg.appendChild(nodeLayer);
+
+  // Draw spine edges
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const a = pos[nodes[i].id], b = pos[nodes[i+1].id];
+    edgeLine(edgeLayer, a.cx, a.y + NH, b.cx, b.y, 'primary');
+  }
+
+  // Draw nodes
+  nodes.forEach(n => {
+    const p = pos[n.id];
+    const lines = [
+      { text: n.label, sz: 12.5, bold: true, fill: PAL[n.shape].font },
+    ];
+    if (n.sub) lines.push({ text: n.sub, sz: 10, fill: '#94A3B8' });
+    if (n.io) lines.push({ text: n.io, sz: 9, fill: '#64748B' });
+
+    let g;
+    const opts = { expandable: n.expand, id: n.id };
+    if (n.shape === 'data') {
+      g = drawParallelogram(nodeLayer, p.x, p.y, NW, NH, PAL.data, lines, opts);
+    } else if (n.shape === 'process') {
+      g = drawProcess(nodeLayer, p.x, p.y, NW, NH, PAL.process, lines, opts);
+    } else if (n.shape === 'decision') {
+      g = el('g', { class:'node-group', 'data-id':n.id });
+      // Draw diamond on the spine at full NW width
+      const dw = 160, dh = NH + 10;
+      g.appendChild(el('path', { d:`M${p.cx},${p.cy-dh/2} L${p.cx+dw/2},${p.cy} L${p.cx},${p.cy+dh/2} L${p.cx-dw/2},${p.cy} Z`, fill:PAL.decision.fill, stroke:PAL.decision.stroke, 'stroke-width':2 }));
+      // shadow
+      addNodeText(g, p.cx, p.cy - (lines.length*13)/2 + 13/2, dw, dh, lines);
+      nodeLayer.appendChild(g);
+    } else if (n.shape === 'document') {
+      g = drawDocument(nodeLayer, p.x, p.y, NW, NH, PAL.document, lines, opts);
+    }
+
+    if (g) finishNode(g, p.x, p.y, NW, NH, n.expand, n.id);
+
+    // Draw gate expansion if open
+    if (n.expand && open[n.id] && n.exp) {
+      const px = p.x, py = p.y;
+      const dcx = px + NW + EXPAD + DW/2;
+      const dcy = py + NH/2;
+
+      // Dataflow edge: spine node right → diamond left
+      edgeLine(expLayer, px + NW, py + NH/2, dcx - DW/2, dcy, 'dataflow');
+
+      // Diamond
+      const dLines = n.exp.gate.split('\n').map(l => ({ text:l, sz:10, bold:true }));
+      drawSmallDiamond(expLayer, dcx, dcy, DW, DH, PAL.decision, dLines);
+
+      // Output doc: right of diamond
+      const outX = dcx + DW/2 + EXGAP;
+      const outY = dcy - EH/2;
+      drawSmallDoc(expLayer, outX, outY, EW, EH, n.exp.out, n.exp.outSub);
+      edgeLine(expLayer, dcx + DW/2, dcy, outX, outY + EH/2, 'pass', 'pass');
+
+      // Rework node: below diamond
+      const rwX = dcx - EW/2;
+      const rwY = dcy + DH/2 + REWORK_DROP - DH/2;
+      const rwW = EW, rwH = EH - 4;
+      drawRework(expLayer, rwX, rwY, rwW, rwH, n.exp.rework);
+      edgeLine(expLayer, dcx, dcy + DH/2, rwX + rwW/2, rwY, 'fail', 'fail');
+
+      // Feedback curve: rework → spine node
+      const startX = rwX;
+      const startY = rwY + rwH/2;
+      const endX = px + NW/2 + 30;
+      const endY = py + NH;
+      const cpX = rwX - 16;
+      edgeCurve(expLayer, startX, startY, cpX, startY, endX, endY, 'feedback', 'retry');
+    }
+  });
+
+  // Click handlers
+  svg.querySelectorAll('.node-group.expandable').forEach(g => {
+    g.addEventListener('click', () => toggle(g.getAttribute('data-id')));
+  });
+  svg.querySelectorAll('.expand-badge').forEach(b => {
+    b.addEventListener('click', e => { e.stopPropagation(); toggle(b.getAttribute('data-target')); });
+  });
+
+  wrap.appendChild(svg);
+}
+
+function toggle(id) { open[id] = !open[id]; render(); }
+function expandAll() { nodes.forEach(n => { if (n.expand) open[n.id] = true; }); render(); }
+function collapseAll() { nodes.forEach(n => { if (n.expand) open[n.id] = false; }); render(); }
+function toggleLegend() {
+  document.getElementById('legendPanel').classList.toggle('show');
+  document.getElementById('legendBtn').classList.toggle('active');
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,19 +1,27 @@
 {
-  "caption": "Effect of observation interval dt on gradient errors (%) for all four models at d=2",
-  "params": { "delta_t_fine": 1e-4, "M": 2000, "N": 10 },
-  "columns": ["model", "dt_obs", "oracle_mle_V", "oracle_mle_Phi", "oracle_selftest_V", "oracle_selftest_Phi", "nn_selftest_V", "nn_selftest_Phi"],
+  "caption": "Effect of observation interval dt on gradient errors (%) at d=2. Data from paper Table 2 (Reference) and Table 4 (Boundary tests).",
+  "params": { "delta_t_fine": 1e-4, "M": 2000, "N": 10, "sigma": 1, "T": 1 },
+  "columns": ["model", "dt_obs", "oracle_mle_V", "oracle_mle_Phi", "sinkhorn_V", "sinkhorn_Phi", "oracle_selftest_V", "oracle_selftest_Phi", "nn_selftest_V", "nn_selftest_Phi"],
   "data": [
-    { "model": "A", "dt_obs": 0.001, "oracle_mle_V": 6.08, "oracle_mle_Phi": 12.5, "oracle_selftest_V": 0.78, "oracle_selftest_Phi": 1.72, "nn_selftest_V": 0.45, "nn_selftest_Phi": 3.81 },
-    { "model": "A", "dt_obs": 0.01,  "oracle_mle_V": 20.3, "oracle_mle_Phi": 52.9, "oracle_selftest_V": 0.82, "oracle_selftest_Phi": 2.69, "nn_selftest_V": 1.95, "nn_selftest_Phi": 4.03 },
-    { "model": "A", "dt_obs": 0.1,   "oracle_mle_V": 0.49, "oracle_mle_Phi": 92.2, "oracle_selftest_V": 8.03, "oracle_selftest_Phi": 2.84, "nn_selftest_V": 5.69, "nn_selftest_Phi": 8.86 },
-    { "model": "B", "dt_obs": 0.001, "oracle_mle_V": 0.08, "oracle_mle_Phi": 3.88, "oracle_selftest_V": 2.69, "oracle_selftest_Phi": 70.2, "nn_selftest_V": 4.36, "nn_selftest_Phi": 14.3 },
-    { "model": "B", "dt_obs": 0.01,  "oracle_mle_V": 3.91, "oracle_mle_Phi": 32.0, "oracle_selftest_V": 3.53, "oracle_selftest_Phi": 79.4, "nn_selftest_V": 18.5, "nn_selftest_Phi": 24.6 },
-    { "model": "B", "dt_obs": 0.1,   "oracle_mle_V": 21.7, "oracle_mle_Phi": 60.8, "oracle_selftest_V": 2.99, "oracle_selftest_Phi": 100.2, "nn_selftest_V": 28.8, "nn_selftest_Phi": 35.3 },
-    { "model": "C", "dt_obs": 0.001, "oracle_mle_V": 25.6, "oracle_mle_Phi": 39.9, "oracle_selftest_V": 9.42, "oracle_selftest_Phi": 10.4, "nn_selftest_V": 0.77, "nn_selftest_Phi": 14.1 },
-    { "model": "C", "dt_obs": 0.01,  "oracle_mle_V": 5.08, "oracle_mle_Phi": 78.0, "oracle_selftest_V": 7.33, "oracle_selftest_Phi": 8.52, "nn_selftest_V": 4.06, "nn_selftest_Phi": 10.0 },
-    { "model": "C", "dt_obs": 0.1,   "oracle_mle_V": 43.7, "oracle_mle_Phi": 95.9, "oracle_selftest_V": 11.3, "oracle_selftest_Phi": 11.7, "nn_selftest_V": 1.08, "nn_selftest_Phi": 21.8 },
-    { "model": "D", "dt_obs": 0.001, "oracle_mle_V": 2.56, "oracle_mle_Phi": 6.18, "oracle_selftest_V": 8.58, "oracle_selftest_Phi": 8.50, "nn_selftest_V": 1.94, "nn_selftest_Phi": 4.57 },
-    { "model": "D", "dt_obs": 0.01,  "oracle_mle_V": 11.8, "oracle_mle_Phi": 31.2, "oracle_selftest_V": 7.14, "oracle_selftest_Phi": 7.25, "nn_selftest_V": 3.89, "nn_selftest_Phi": 2.68 },
-    { "model": "D", "dt_obs": 0.1,   "oracle_mle_V": 29.0, "oracle_mle_Phi": 77.4, "oracle_selftest_V": 7.65, "oracle_selftest_Phi": 4.03, "nn_selftest_V": 7.91, "nn_selftest_Phi": 5.49 }
+    { "model": "E", "dt_obs": 0.0001, "oracle_mle_V": 0.80, "oracle_mle_Phi": 0.35, "sinkhorn_V": 1.34, "sinkhorn_Phi": 0.82, "oracle_selftest_V": 1.35, "oracle_selftest_Phi": 1.24, "nn_selftest_V": null, "nn_selftest_Phi": null },
+    { "model": "E", "dt_obs": 0.001,  "oracle_mle_V": 1.41, "oracle_mle_Phi": 5.18, "sinkhorn_V": 3.13, "sinkhorn_Phi": 7.17, "oracle_selftest_V": 0.67, "oracle_selftest_Phi": 0.74, "nn_selftest_V": 0.89, "nn_selftest_Phi": 1.80 },
+    { "model": "E", "dt_obs": 0.01,   "oracle_mle_V": 10.44, "oracle_mle_Phi": 37.49, "sinkhorn_V": 21.64, "sinkhorn_Phi": 47.38, "oracle_selftest_V": 0.80, "oracle_selftest_Phi": 1.10, "nn_selftest_V": 1.25, "nn_selftest_Phi": 2.47 },
+    { "model": "E", "dt_obs": 0.1,    "oracle_mle_V": 11.30, "oracle_mle_Phi": 89.38, "sinkhorn_V": 45.37, "sinkhorn_Phi": 95.78, "oracle_selftest_V": 6.84, "oracle_selftest_Phi": 6.93, "nn_selftest_V": 3.15, "nn_selftest_Phi": 5.80 },
+
+    { "model": "A", "dt_obs": 0.001, "oracle_mle_V": 6.70, "oracle_mle_Phi": 12.98, "sinkhorn_V": 6.30, "sinkhorn_Phi": 14.42, "oracle_selftest_V": 1.07, "oracle_selftest_Phi": 2.01, "nn_selftest_V": 0.91, "nn_selftest_Phi": 1.74 },
+    { "model": "A", "dt_obs": 0.01,  "oracle_mle_V": 21.05, "oracle_mle_Phi": 52.63, "sinkhorn_V": 18.23, "sinkhorn_Phi": 59.31, "oracle_selftest_V": 0.85, "oracle_selftest_Phi": 2.55, "nn_selftest_V": 1.25, "nn_selftest_Phi": 2.47 },
+    { "model": "A", "dt_obs": 0.1,   "oracle_mle_V": 3.57, "oracle_mle_Phi": 92.15, "sinkhorn_V": 31.32, "sinkhorn_Phi": 95.89, "oracle_selftest_V": 9.07, "oracle_selftest_Phi": 10.01, "nn_selftest_V": 3.15, "nn_selftest_Phi": 5.80 },
+
+    { "model": "B", "dt_obs": 0.001, "oracle_mle_V": 1.15, "oracle_mle_Phi": 11.97, "sinkhorn_V": 13.58, "sinkhorn_Phi": 271, "oracle_selftest_V": 1.46, "oracle_selftest_Phi": 31.02, "nn_selftest_V": 4.36, "nn_selftest_Phi": 14.3 },
+    { "model": "B", "dt_obs": 0.01,  "oracle_mle_V": 2.67, "oracle_mle_Phi": 15.85, "sinkhorn_V": 34.74, "sinkhorn_Phi": 719, "oracle_selftest_V": 1.58, "oracle_selftest_Phi": 40.26, "nn_selftest_V": 6.11, "nn_selftest_Phi": 36.6 },
+    { "model": "B", "dt_obs": 0.1,   "oracle_mle_V": 21.58, "oracle_mle_Phi": 24.75, "sinkhorn_V": 59.21, "sinkhorn_Phi": 1258, "oracle_selftest_V": 6.19, "oracle_selftest_Phi": 185, "nn_selftest_V": 10.8, "nn_selftest_Phi": 125 },
+
+    { "model": "C", "dt_obs": 0.001, "oracle_mle_V": 25.46, "oracle_mle_Phi": 55.12, "sinkhorn_V": 25.46, "sinkhorn_Phi": 55.12, "oracle_selftest_V": 8.88, "oracle_selftest_Phi": 13.89, "nn_selftest_V": 0.77, "nn_selftest_Phi": 14.1 },
+    { "model": "C", "dt_obs": 0.01,  "oracle_mle_V": 4.53, "oracle_mle_Phi": 99.40, "sinkhorn_V": 4.53, "sinkhorn_Phi": 99.40, "oracle_selftest_V": 13.34, "oracle_selftest_Phi": 21.75, "nn_selftest_V": 1.62, "nn_selftest_Phi": 51.8 },
+    { "model": "C", "dt_obs": 0.1,   "oracle_mle_V": 47.51, "oracle_mle_Phi": 100, "sinkhorn_V": 49.72, "sinkhorn_Phi": 101, "oracle_selftest_V": 15.36, "oracle_selftest_Phi": 39.68, "nn_selftest_V": 1.60, "nn_selftest_Phi": 4.80 },
+
+    { "model": "D", "dt_obs": 0.001, "oracle_mle_V": 2.77, "oracle_mle_Phi": 5.61, "sinkhorn_V": 4.82, "sinkhorn_Phi": 8.87, "oracle_selftest_V": 1.72, "oracle_selftest_Phi": 1.69, "nn_selftest_V": 1.94, "nn_selftest_Phi": 4.57 },
+    { "model": "D", "dt_obs": 0.01,  "oracle_mle_V": 13.06, "oracle_mle_Phi": 31.30, "sinkhorn_V": 4.13, "sinkhorn_Phi": 8.00, "oracle_selftest_V": 2.01, "oracle_selftest_Phi": 3.86, "nn_selftest_V": 3.38, "nn_selftest_Phi": 3.60 },
+    { "model": "D", "dt_obs": 0.1,   "oracle_mle_V": 32.19, "oracle_mle_Phi": 78.79, "sinkhorn_V": 33.88, "sinkhorn_Phi": 38.51, "oracle_selftest_V": 8.05, "oracle_selftest_Phi": 33.42, "nn_selftest_V": 5.91, "nn_selftest_Phi": 6.78 }
   ]
 }

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPS Experiment Protocol — Full Fidelity</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0A0E17;
+    color: #E2E8F0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .header {
+    width: 100%;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header h1 { font-size: 15px; font-weight: 600; color: #E2E8F0; flex: 1; }
+  .header-btn {
+    padding: 5px 14px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    color: #94A3B8;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .header-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); color: #E2E8F0; }
+  .header-btn.active { background: rgba(99,102,241,0.15); border-color: rgba(129,140,248,0.5); color: #A5B4FC; }
+  .svg-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+  }
+  /* Legend */
+  .legend-overlay {
+    position: fixed; top: 60px; right: 24px; z-index: 100;
+    background: #1E293B; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    padding: 16px 20px; max-height: 80vh; overflow-y: auto;
+    min-width: 240px; display: none;
+  }
+  .legend-overlay.show { display: block; }
+  .legend-overlay h3 { font-size: 13px; color: #E2E8F0; margin-bottom: 12px; }
+  .legend-section-title { font-size: 10px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 10px; margin-bottom: 6px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12px; color: #94A3B8; }
+  .legend-swatch { width: 22px; height: 14px; border-radius: 3px; border: 1.5px solid; flex-shrink: 0; }
+  .legend-line { width: 22px; height: 0; border-top: 2px solid; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>IPS Experiment Protocol</h1>
+  <button id="legendBtn" class="header-btn" onclick="toggleLegend()">Legend</button>
+</div>
+
+<div id="legendPanel" class="legend-overlay">
+  <h3>Legend</h3>
+  <div class="legend-section-title">Stage Colors</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#0A2E1A;border-color:#16A34A"></span>Preparation</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#0C1A3D;border-color:#2563EB"></span>Configuration</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#2A1506;border-color:#EA580C"></span>Execution</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#1A0A2E;border-color:#7C3AED"></span>Comparison</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#2A0A14;border-color:#E11D48"></span>Collection</div>
+  <div class="legend-section-title">Node Types</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#0A2E1A;border-color:#16A34A;border-radius:8px"></span>Stage Header</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#1E293B;border-color:#475569"></span>Step</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#332B00;border-color:#CA8A04;border-style:dashed"></span>Parameter</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#1E293B;border-color:#64748B;border-radius:7px"></span>Code Ref</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#422006;border-color:#D97706;border-radius:0;transform:rotate(45deg);width:12px;height:12px"></span>Decision</div>
+  <div class="legend-row"><span class="legend-swatch" style="background:#1E1B4B;border-color:#4F46E5"></span>Output</div>
+  <div class="legend-section-title">Edge Types</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#94A3B8;border-width:2.5px"></span>Primary Flow</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#7C3AED;border-width:2px"></span>Branch</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#7C3AED;border-width:1.5px;border-style:dotted"></span>Loop Back</div>
+  <div class="legend-row"><span class="legend-line" style="border-color:#94A3B8;border-width:1px;border-style:dashed"></span>Annotation</div>
+</div>
+
+<div class="svg-wrap" id="svgWrap"></div>
+
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+const MONO = '"SF Mono","Fira Code","Cascadia Code",Consolas,monospace';
+
+/* ─── Dark-adapted stage palette ─── */
+const STAGE_PAL = {
+  preparation:   { fill:'#0A2E1A', stroke:'#16A34A', badge:'#22C55E', font:'#86EFAC' },
+  configuration: { fill:'#0C1A3D', stroke:'#2563EB', badge:'#3B82F6', font:'#93C5FD' },
+  execution:     { fill:'#2A1506', stroke:'#EA580C', badge:'#F97316', font:'#FDBA74' },
+  comparison:    { fill:'#1A0A2E', stroke:'#7C3AED', badge:'#8B5CF6', font:'#C4B5FD' },
+  collection:    { fill:'#2A0A14', stroke:'#E11D48', badge:'#F43F5E', font:'#FDA4AF' },
+};
+
+/* Layout constants */
+const MX = 40, MY = 30;
+const SW = 800, SH_HEAD = 48, SPAD = 20;
+const STEP_W = 155, STEP_H = 52, STEP_GAP = 20;
+const PARAM_W = 170, PARAM_H = 26, PARAM_GAP = 6;
+const CREF_H = 22, CREF_GAP = 8;
+const LOOP_PAD = 14, LOOP_HEAD = 26, LOOP_GAP = 10;
+const BRANCH_GAP_BASE = 18;
+const BRANCH_GAP_WITH_CREFS = CREF_GAP + CREF_H + 12; // 8+22+12=42
+const DISPATCH_W = 100, DISPATCH_H = 60;
+const TERM_W = 120, TERM_H = 38;
+const DIAMOND_W = 90, DIAMOND_H = 60;
+
+/* ─── SVG helpers ─── */
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+  return e;
+}
+function txt(parent, x, y, str, opts={}) {
+  const t = el('text', { x, y, 'text-anchor':opts.anchor||'middle', 'dominant-baseline':'central', 'font-family':opts.font||FONT, 'font-size':opts.sz||11, 'font-weight':opts.bold?'600':'400', fill:opts.fill||'#CBD5E1', 'pointer-events':'none' });
+  t.textContent = str;
+  parent.appendChild(t);
+  return t;
+}
+
+function addMarkers(defs) {
+  const markers = { 'arr-primary':'#94A3B8', 'arr-branch':'#7C3AED', 'arr-loop':'#7C3AED', 'arr-data':'#6B8DB2' };
+  for (const [id, color] of Object.entries(markers)) {
+    const m = el('marker', { id, viewBox:'0 0 10 10', refX:9, refY:5, markerWidth:6, markerHeight:6, orient:'auto-start-reverse' });
+    m.appendChild(el('path', { d:'M0,1.5 L10,5 L0,8.5Z', fill:color }));
+    defs.appendChild(m);
+  }
+}
+
+/* ─── Drawing functions ─── */
+function drawTerminator(N, cx, cy, w, h, label) {
+  const g = el('g');
+  g.appendChild(el('rect', { x:cx-w/2, y:cy-h/2, width:w, height:h, rx:h/2, fill:'#2E1065', stroke:'#7C3AED', 'stroke-width':2 }));
+  txt(g, cx, cy, label, { sz:11, bold:true, fill:'#DDD6FE' });
+  N.appendChild(g);
+}
+
+function drawStageHeader(N, x, y, w, h, pal, label) {
+  const g = el('g');
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:12, fill:pal.fill, stroke:pal.stroke, 'stroke-width':2.5 }));
+  txt(g, x+16, y+h/2, label, { anchor:'start', sz:13, bold:true, fill:pal.font });
+  N.appendChild(g);
+  return g;
+}
+
+function drawStep(N, x, y, w, h, label, subtitle) {
+  const g = el('g');
+  g.appendChild(el('rect', { x:x+1, y:y+2, width:w, height:h, rx:6, fill:'rgba(0,0,0,0.15)', 'stroke-width':0 }));
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:6, fill:'#1E293B', stroke:'#475569', 'stroke-width':1.5 }));
+  txt(g, x+w/2, subtitle ? y+h/2-8 : y+h/2, label, { sz:11, bold:true, fill:'#E2E8F0' });
+  if (subtitle) txt(g, x+w/2, y+h/2+8, subtitle, { sz:9, fill:'#64748B' });
+  N.appendChild(g);
+  return g;
+}
+
+function drawParam(N, x, y, w, h, display) {
+  const g = el('g');
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:10, fill:'#332B00', stroke:'#CA8A04', 'stroke-width':1.5, 'stroke-dasharray':'4,2' }));
+  txt(g, x+w/2, y+h/2, display, { sz:9.5, font:MONO, fill:'#FDE68A' });
+  N.appendChild(g);
+  return g;
+}
+
+function drawCodeRef(N, x, y, w, h, ref) {
+  const g = el('g');
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:h/2, fill:'#1E293B', stroke:'#475569', 'stroke-width':1 }));
+  txt(g, x+w/2, y+h/2, ref, { sz:9, font:MONO, fill:'#818CF8' });
+  N.appendChild(g);
+  return g;
+}
+
+function drawLoopContainer(N, x, y, w, h, header, count, depth, pal) {
+  const g = el('g');
+  const opacity = 1 - depth * 0.15;
+  g.appendChild(el('rect', { x, y, width:w, height:h, rx:8, fill:pal.fill, 'fill-opacity':0.4*opacity, stroke:pal.stroke, 'stroke-width':2, 'stroke-dasharray':'8,4', 'stroke-opacity':opacity }));
+  // header bar
+  g.appendChild(el('rect', { x:x+1, y:y+1, width:w-2, height:LOOP_HEAD, rx:7, fill:pal.fill, 'fill-opacity':0.8, 'stroke-width':0 }));
+  txt(g, x+12, y+LOOP_HEAD/2, header, { anchor:'start', sz:10.5, bold:true, fill:pal.font });
+  if (count) {
+    const bw = 48, bh = 20, bx = x+w-bw-10, by = y+(LOOP_HEAD-bh)/2;
+    g.appendChild(el('rect', { x:bx, y:by, width:bw, height:bh, rx:bh/2, fill:pal.badge, 'fill-opacity':0.2, stroke:pal.badge, 'stroke-width':1 }));
+    txt(g, bx+bw/2, by+bh/2, '\u00d7'+count, { sz:9.5, bold:true, fill:pal.badge });
+  }
+  N.appendChild(g);
+  return g;
+}
+
+function drawDispatch(N, cx, cy, w, h, label) {
+  const g = el('g');
+  const hw=w/2, hh=h/2, inset=w*0.25;
+  const pts = [`${cx-hw+inset},${cy-hh}`,`${cx+hw-inset},${cy-hh}`,`${cx+hw},${cy}`,`${cx+hw-inset},${cy+hh}`,`${cx-hw+inset},${cy+hh}`,`${cx-hw},${cy}`].join(' ');
+  g.appendChild(el('polygon', { points:pts, fill:'#2A0A20', stroke:'#DB2777', 'stroke-width':2 }));
+  txt(g, cx, cy, label, { sz:10.5, bold:true, fill:'#F9A8D4' });
+  N.appendChild(g);
+  return g;
+}
+
+function drawOutputDoc(N, x, y, w, h, label) {
+  const g = el('g');
+  const wave = 5;
+  g.appendChild(el('path', { d:`M${x},${y} L${x+w},${y} L${x+w},${y+h-wave} Q${x+w*0.75},${y+h+wave} ${x+w*0.5},${y+h-wave} Q${x+w*0.25},${y+h-wave*3} ${x},${y+h-wave} Z`, fill:'#1E1B4B', stroke:'#4F46E5', 'stroke-width':1.5 }));
+  txt(g, x+w/2, y+(h-wave)/2, label, { sz:10, fill:'#C7D2FE' });
+  N.appendChild(g);
+  return g;
+}
+
+function drawDiamond(N, cx, cy, w, h, label) {
+  const g = el('g');
+  g.appendChild(el('path', { d:`M${cx},${cy-h/2} L${cx+w/2},${cy} L${cx},${cy+h/2} L${cx-w/2},${cy} Z`, fill:'#422006', stroke:'#D97706', 'stroke-width':2 }));
+  txt(g, cx, cy, label, { sz:10, bold:true, fill:'#FDE68A' });
+  N.appendChild(g);
+}
+
+/* Edge drawing */
+function drawEdge(E, x1, y1, x2, y2, type, label) {
+  const styles = {
+    primary:   { color:'#94A3B8', width:2.5, dash:null, marker:'arr-primary' },
+    connector: { color:'#94A3B8', width:2.5, dash:null, marker:null },
+    branch:    { color:'#7C3AED', width:2,   dash:null, marker:'arr-branch' },
+    loop_back: { color:'#7C3AED', width:1.5, dash:'3,3', marker:'arr-loop' },
+    data:      { color:'#6B8DB2', width:1,   dash:null, marker:'arr-data' },
+    annotation:{ color:'#475569', width:1,   dash:'4,3', marker:null },
+    pass:      { color:'#16A34A', width:2,   dash:null, marker:'arr-primary' },
+    fail:      { color:'#DC2626', width:2,   dash:'5,4', marker:'arr-primary' },
+  };
+  const s = styles[type] || styles.primary;
+  const line = el('path', { d:`M${x1},${y1}L${x2},${y2}`, stroke:s.color, 'stroke-width':s.width, fill:'none' });
+  if (s.dash) line.setAttribute('stroke-dasharray', s.dash);
+  if (s.marker) line.setAttribute('marker-end', `url(#${s.marker})`);
+  E.appendChild(line);
+  if (label) {
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    const lw = label.length*6+12;
+    E.appendChild(el('rect', { x:mx-lw/2, y:my-9, width:lw, height:18, rx:9, fill:'#0A0E17', 'fill-opacity':0.92, 'stroke-width':0 }));
+    txt(E, mx, my, label, { sz:9, fill:s.color });
+  }
+}
+
+/* ─── Main render ─── */
+function render() {
+  const wrap = document.getElementById('svgWrap');
+  wrap.innerHTML = '';
+
+  const svgW = MX*2 + SW + PARAM_W + 60;
+  let Y = MY;
+
+  // We'll build content then set svgH
+  const svg = el('svg', { xmlns:NS, width:'100%' });
+  const defs = el('defs');
+  addMarkers(defs);
+  svg.appendChild(defs);
+  const E = el('g', {id:'edges'});
+  const N = el('g', {id:'nodes'});
+  svg.appendChild(E);
+  svg.appendChild(N);
+
+  const PX = MX + SW + 20; // parameter column X
+
+  // ─── START ───
+  drawTerminator(N, MX+SW/2, Y+TERM_H/2, TERM_W, TERM_H, 'START');
+  Y += TERM_H + 20;
+  const startBottomY = Y;
+
+  // ════════════════════════════════════════════
+  // STAGE 1: PREPARATION
+  // ════════════════════════════════════════════
+  const s1Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.preparation, '1. Preparation — Model & Potential Selection');
+  Y += SH_HEAD + SPAD;
+
+  // Steps
+  const s1steps = [
+    { label:'Select Model', sub:'A / B / LJ / Morse' },
+    { label:'Define V(x)', sub:'confinement potential' },
+    { label:'Define \u03A6(r)', sub:'interaction potential' },
+    { label:'Set Dimension d', sub:'\u2208 {2, 5, 10, 20}' },
+  ];
+  const s1x0 = MX + SPAD;
+  s1steps.forEach((s, i) => {
+    const sx = s1x0 + i * (STEP_W + STEP_GAP);
+    drawStep(N, sx, Y, STEP_W, STEP_H, s.label, s.sub);
+    if (i < s1steps.length - 1) {
+      drawEdge(E, sx+STEP_W, Y+STEP_H/2, sx+STEP_W+STEP_GAP, Y+STEP_H/2, 'primary');
+    }
+  });
+
+  // Code refs below steps
+  const crY = Y + STEP_H + CREF_GAP;
+  drawCodeRef(N, s1x0, crY, 180, CREF_H, 'core/true_potentials.py');
+  // annotation line
+  drawEdge(E, s1x0+STEP_W/2, Y+STEP_H, s1x0+90, crY, 'annotation');
+
+  Y = crY + CREF_H + SPAD;
+
+  // Parameters
+  drawParam(N, PX, s1Y+SH_HEAD+5, PARAM_W, PARAM_H, 'V_A(x) = |x|^4/4');
+  drawParam(N, PX, s1Y+SH_HEAD+5+PARAM_H+PARAM_GAP, PARAM_W, PARAM_H, '\u03A6_A(r) = tanh((\u03B5-r)/\u03B5)');
+  drawParam(N, PX, s1Y+SH_HEAD+5+2*(PARAM_H+PARAM_GAP), PARAM_W, PARAM_H, '\u03B5 = 0.05 (sharp cutoff)');
+  // annotation lines
+  drawEdge(E, MX+SW, s1Y+SH_HEAD+20, PX, s1Y+SH_HEAD+5+PARAM_H/2, 'annotation');
+
+  // Stage 1 bottom border
+  const s1Bottom = Y;
+  Y += 20;
+
+  // Primary flow connector
+  drawEdge(E, MX+SW/2, s1Bottom, MX+SW/2, Y, 'primary');
+
+  // ════════════════════════════════════════════
+  // STAGE 2: DATA GENERATION
+  // ════════════════════════════════════════════
+  const s2Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.preparation, '2. Data Generation — SDE Simulation');
+  Y += SH_HEAD + SPAD;
+
+  // Loop container
+  const loopY = Y;
+  const loopH = STEP_H + CREF_GAP + CREF_H + LOOP_HEAD + LOOP_PAD*2 + 10;
+  drawLoopContainer(N, MX+SPAD, Y, SW-2*SPAD, loopH, 'for m = 1 to M snapshots', 2000, 0, STAGE_PAL.preparation);
+  Y += LOOP_HEAD + LOOP_PAD;
+
+  // Steps inside loop
+  const s2steps = [
+    { label:'Init Positions', sub:'x\u2080 ~ \u03C0_eq (if known)' },
+    { label:'Euler-Maruyama', sub:'L=100 steps, dt=0.01' },
+    { label:'Record Snapshot', sub:'x_{m,l} \u2208 R^(N\u00d7d)' },
+  ];
+  const s2x0 = MX + SPAD + LOOP_PAD + LOOP_GAP;
+  s2steps.forEach((s, i) => {
+    const sx = s2x0 + i * (STEP_W + STEP_GAP);
+    drawStep(N, sx, Y, STEP_W, STEP_H, s.label, s.sub);
+    if (i < s2steps.length - 1) drawEdge(E, sx+STEP_W, Y+STEP_H/2, sx+STEP_W+STEP_GAP, Y+STEP_H/2, 'primary');
+  });
+
+  const cr2Y = Y + STEP_H + CREF_GAP;
+  drawCodeRef(N, s2x0, cr2Y, 230, CREF_H, 'core/sde_simulator.py');
+  drawCodeRef(N, s2x0+240, cr2Y, 250, CREF_H, 'scripts/generate_data_elephant6.py');
+  drawEdge(E, s2x0+STEP_W/2, Y+STEP_H, s2x0+115, cr2Y, 'annotation');
+
+  Y = loopY + loopH + SPAD;
+
+  // Parameters for stage 2
+  drawParam(N, PX, s2Y+SH_HEAD+5, PARAM_W, PARAM_H, 'M = 2000 snapshots');
+  drawParam(N, PX, s2Y+SH_HEAD+5+PARAM_H+PARAM_GAP, PARAM_W, PARAM_H, 'L = 100 time steps');
+  drawParam(N, PX, s2Y+SH_HEAD+5+2*(PARAM_H+PARAM_GAP), PARAM_W, PARAM_H, 'N = 10 particles');
+  drawParam(N, PX, s2Y+SH_HEAD+5+3*(PARAM_H+PARAM_GAP), PARAM_W, PARAM_H, 'dt = 0.01, \u03C3 = 0.7');
+  drawEdge(E, MX+SW, s2Y+SH_HEAD+30, PX, s2Y+SH_HEAD+5+PARAM_H/2, 'annotation');
+
+  const s2Bottom = Y;
+  Y += 20;
+  drawEdge(E, MX+SW/2, s2Bottom, MX+SW/2, Y, 'primary');
+
+  // ════════════════════════════════════════════
+  // STAGE 3: CONFIGURATION
+  // ════════════════════════════════════════════
+  const s3Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.configuration, '3. Configuration — Basis Function Setup');
+  Y += SH_HEAD + SPAD;
+
+  // Decision diamond — centered
+  const dcx = MX + SW/2;
+  const dcy = Y + DIAMOND_H/2;
+  drawDiamond(N, dcx, dcy, DIAMOND_W+20, DIAMOND_H, 'Oracle or RBF?');
+  Y += DIAMOND_H + 16;
+
+  // Two branches — SYMMETRIC around diamond center
+  const brW3 = STEP_W + 10;  // 165
+  const brGap3 = 50;  // gap between the two branches
+  const branchLX = dcx - brGap3/2 - brW3;  // symmetric left
+  const branchRX = dcx + brGap3/2;          // symmetric right
+  drawStep(N, branchLX, Y, brW3, STEP_H, 'Oracle Basis', 'true polynomial terms');
+  drawStep(N, branchRX, Y, brW3, STEP_H, 'RBF Basis', 'Gaussian \u03C8_k(r)');
+
+  // Edges from diamond to branches (target branch centers)
+  drawEdge(E, dcx-DIAMOND_W/2-5, dcy, branchLX+brW3/2, Y, 'branch', 'Oracle');
+  drawEdge(E, dcx+DIAMOND_W/2+5, dcy, branchRX+brW3/2, Y, 'branch', 'RBF');
+
+  const cr3Y = Y + STEP_H + CREF_GAP;
+  drawCodeRef(N, branchLX+(brW3-160)/2, cr3Y, 160, CREF_H, 'lib/basis.py');
+  drawCodeRef(N, branchRX+(brW3-160)/2, cr3Y, 160, CREF_H, 'lib/basis.py');
+  drawEdge(E, branchLX+brW3/2, Y+STEP_H, branchLX+brW3/2, cr3Y, 'annotation');
+  drawEdge(E, branchRX+brW3/2, Y+STEP_H, branchRX+brW3/2, cr3Y, 'annotation');
+
+  Y = cr3Y + CREF_H + 10;
+
+  // Merge step — centered
+  const mergeY = Y;
+  drawStep(N, MX+SW/2-STEP_W/2, Y, STEP_W+20, STEP_H, 'Build \u03A8 Matrix', '\u03A8 \u2208 R^(n\u00d7K)');
+  drawEdge(E, branchLX+brW3/2, cr3Y+CREF_H, MX+SW/2, Y, 'primary');
+  drawEdge(E, branchRX+brW3/2, cr3Y+CREF_H, MX+SW/2, Y, 'primary');
+
+  Y += STEP_H + SPAD;
+
+  // Parameters for stage 3
+  drawParam(N, PX, s3Y+SH_HEAD+5, PARAM_W, PARAM_H, 'K_V = 20 centers');
+  drawParam(N, PX, s3Y+SH_HEAD+5+PARAM_H+PARAM_GAP, PARAM_W, PARAM_H, 'K_\u03A6 = 20 centers');
+  drawParam(N, PX, s3Y+SH_HEAD+5+2*(PARAM_H+PARAM_GAP), PARAM_W, PARAM_H, 'r_max auto-scaled');
+  drawEdge(E, MX+SW, s3Y+SH_HEAD+30, PX, s3Y+SH_HEAD+5+PARAM_H/2, 'annotation');
+
+  const s3Bottom = Y;
+  Y += 20;
+  drawEdge(E, MX+SW/2, s3Bottom, MX+SW/2, Y, 'primary');
+
+  // ════════════════════════════════════════════
+  // STAGE 4: EXECUTION — Solver Branches
+  // ════════════════════════════════════════════
+  const s4Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.execution, '4. Execution — Three Solver Methods');
+  Y += SH_HEAD + SPAD;
+
+  // Three parallel branches — define data first
+  const brW = 180;
+  const branches = [
+    { label:'MLE (Labeled)', steps:['Velocity Regression','Normal Equations'], refs:['lib/solvers.py:solve_mle()'], color:'#F97316' },
+    { label:'Sinkhorn + MLE', steps:['OT Matching','Imputed Labels','Velocity Regression'], refs:['lib/sinkhorn.py','lib/solvers.py'], color:'#8B5CF6' },
+    { label:'Self-test (Unlabeled)', steps:['Energy Balance','J_diss, J_diff, \u0394E','A\u03B8 = b System'], refs:['lib/solvers.py:solve_selftest()'], color:'#F43F5E' },
+  ];
+
+  // Branch row height: step + code ref + clearance (NO overlap possible)
+  const branchRowH = STEP_H + CREF_GAP + CREF_H + 16;  // 52+8+22+16 = 98px
+
+  // Branches start HERE (below header), flow top-to-bottom
+  const branchStartY = Y;
+  const dispCX = MX + SPAD + DISPATCH_W/2 + 10;
+  const brStepX = MX + SPAD + DISPATCH_W + 40;
+
+  // Draw branches first (top-to-bottom, never above header)
+  branches.forEach((br, bi) => {
+    const by = branchStartY + bi * branchRowH;
+    // Branch label step
+    drawStep(N, brStepX, by, brW, STEP_H, br.label, br.steps[0]);
+
+    // Additional steps in this branch
+    let lastX = brStepX + brW;
+    for (let si = 1; si < br.steps.length; si++) {
+      const sx = lastX + 12;
+      const sw = 140;
+      drawStep(N, sx, by, sw, STEP_H, br.steps[si], '');
+      drawEdge(E, lastX, by+STEP_H/2, sx, by+STEP_H/2, 'primary');
+      lastX = sx + sw;
+    }
+
+    // Code refs below this branch's steps
+    br.refs.forEach((ref, ri) => {
+      const crx = brStepX + ri * 185;
+      drawCodeRef(N, crx, by+STEP_H+CREF_GAP, 175, CREF_H, ref);
+      drawEdge(E, crx+87, by+STEP_H, crx+87, by+STEP_H+CREF_GAP, 'annotation');
+    });
+  });
+
+  // Dispatch hexagon — vertically centered on the branch region
+  const totalBranchRegionH = (branches.length - 1) * branchRowH + STEP_H;
+  const dispCY = branchStartY + totalBranchRegionH / 2;
+  drawDispatch(N, dispCX, dispCY, DISPATCH_W, DISPATCH_H, 'Choose\nSolver');
+
+  // Edges from dispatch to each branch
+  branches.forEach((br, bi) => {
+    const by = branchStartY + bi * branchRowH;
+    drawEdge(E, dispCX+DISPATCH_W/2, dispCY, brStepX, by+STEP_H/2, 'branch');
+  });
+
+  Y = branchStartY + branches.length * branchRowH + SPAD;
+
+  // Merge point — Coefficient Vector node
+  const mergeExY = Y;
+  const coeffNodeW = STEP_W + 20;
+  const coeffNodeX = MX + SW/2 - coeffNodeW/2;
+  drawStep(N, coeffNodeX, Y, coeffNodeW, STEP_H, 'Coefficient Vector', '\u03B8 = [\u03B8_V ; \u03B8_\u03A6]');
+
+  // Orthogonal routing: right-side collector bus → right-middle of coefficient node
+  const coeffRightX = coeffNodeX + coeffNodeW;       // right edge of node
+  const coeffCY     = mergeExY + STEP_H / 2;         // vertical center of node
+
+  // Find rightmost branch extent to place the collector line
+  let maxBranchRightX = 0;
+  branches.forEach((br) => {
+    const endX = brStepX + brW + (br.steps.length - 1) * (140 + 12);
+    if (endX > maxBranchRightX) maxBranchRightX = endX;
+  });
+  const collectorX = maxBranchRightX + 30;  // 30px right of furthest node
+
+  // 1. Horizontal stubs: each branch end → collector X (no arrow)
+  branches.forEach((br, bi) => {
+    const by = branchStartY + bi * branchRowH;
+    const lastStepEndX = brStepX + brW + (br.steps.length - 1) * (140 + 12);
+    const byCY = by + STEP_H / 2;
+    drawEdge(E, lastStepEndX, byCY, collectorX, byCY, 'connector');
+    // Junction dot at collector
+    E.appendChild(el('circle', { cx: collectorX, cy: byCY, r: 3.5, fill: '#94A3B8' }));
+  });
+
+  // 2. Vertical collector line: top branch → coefficient node Y-center (no arrow)
+  const topBrCY = branchStartY + STEP_H / 2;
+  drawEdge(E, collectorX, topBrCY, collectorX, coeffCY, 'connector');
+
+  // 3. Final horizontal: collector → right edge of coefficient node (WITH arrow)
+  drawEdge(E, collectorX, coeffCY, coeffRightX, coeffCY, 'primary');
+
+  Y += STEP_H + SPAD;
+  const s4Bottom = Y;
+  Y += 20;
+  drawEdge(E, MX+SW/2, s4Bottom, MX+SW/2, Y, 'primary');
+
+  // ════════════════════════════════════════════
+  // STAGE 5: REGULARIZATION
+  // ════════════════════════════════════════════
+  const s5Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.configuration, '5. Regularization — Hansen L-curve');
+  Y += SH_HEAD + SPAD;
+
+  const s5steps = [
+    { label:'Compute SVD', sub:'of matrix A' },
+    { label:'Sweep \u03BB Range', sub:'log-spaced grid' },
+    { label:'L-curve Curvature', sub:'max \u03BA in log-log' },
+    { label:'Select \u03BB*', sub:'optimal regularization' },
+  ];
+  const s5x0 = MX + SPAD;
+  s5steps.forEach((s, i) => {
+    const sx = s5x0 + i * (STEP_W + STEP_GAP);
+    drawStep(N, sx, Y, STEP_W, STEP_H, s.label, s.sub);
+    if (i < s5steps.length - 1) drawEdge(E, sx+STEP_W, Y+STEP_H/2, sx+STEP_W+STEP_GAP, Y+STEP_H/2, 'primary');
+  });
+
+  const cr5Y = Y + STEP_H + CREF_GAP;
+  drawCodeRef(N, s5x0+STEP_W+STEP_GAP, cr5Y, 250, CREF_H, 'lib/solvers.py:_hansen_lcurve_lambda()');
+  drawEdge(E, s5x0+STEP_W+STEP_GAP+STEP_W/2, Y+STEP_H, s5x0+STEP_W+STEP_GAP+125, cr5Y, 'annotation');
+
+  Y = cr5Y + CREF_H + SPAD;
+
+  // Parameters
+  drawParam(N, PX, s5Y+SH_HEAD+5, PARAM_W, PARAM_H, 'Tikhonov: (A^TA+\u03BBI)\u03B8=A^Tb');
+  drawParam(N, PX, s5Y+SH_HEAD+5+PARAM_H+PARAM_GAP, PARAM_W, PARAM_H, '\u03BB \u2208 [10^-12, 10^2]');
+  drawEdge(E, MX+SW, s5Y+SH_HEAD+30, PX, s5Y+SH_HEAD+5+PARAM_H/2, 'annotation');
+
+  const s5Bottom = Y;
+  Y += 20;
+  drawEdge(E, MX+SW/2, s5Bottom, MX+SW/2, Y, 'primary');
+
+  // ════════════════════════════════════════════
+  // STAGE 6: EVALUATION
+  // ════════════════════════════════════════════
+  const s6Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.collection, '6. Evaluation — Gradient Error Metrics');
+  Y += SH_HEAD + SPAD;
+
+  const s6steps = [
+    { label:'Reconstruct \u2207V', sub:'\u03A8_V \u00b7 \u03B8_V' },
+    { label:'Reconstruct \u2207\u03A6', sub:'\u03A8_\u03A6 \u00b7 \u03B8_\u03A6' },
+    { label:'Compute Rel. L2', sub:'||\u2207\u0302 - \u2207||/||\u2207||' },
+    { label:'Save Results', sub:'JSON output' },
+  ];
+  const s6x0 = MX + SPAD;
+  s6steps.forEach((s, i) => {
+    const sx = s6x0 + i * (STEP_W + STEP_GAP);
+    drawStep(N, sx, Y, STEP_W, STEP_H, s.label, s.sub);
+    if (i < s6steps.length - 1) drawEdge(E, sx+STEP_W, Y+STEP_H/2, sx+STEP_W+STEP_GAP, Y+STEP_H/2, 'primary');
+  });
+
+  const cr6Y = Y + STEP_H + CREF_GAP;
+  drawCodeRef(N, s6x0, cr6Y, 190, CREF_H, 'scripts/error_metrics.py');
+  drawCodeRef(N, s6x0+200, cr6Y, 180, CREF_H, 'lib/eval_utils.py');
+  drawEdge(E, s6x0+STEP_W/2, Y+STEP_H, s6x0+95, cr6Y, 'annotation');
+
+  Y = cr6Y + CREF_H + SPAD;
+  const s6Bottom = Y;
+  Y += 20;
+  drawEdge(E, MX+SW/2, s6Bottom, MX+SW/2, Y, 'primary');
+
+  // ════════════════════════════════════════════
+  // STAGE 7: COLLECTION
+  // ════════════════════════════════════════════
+  const s7Y = Y;
+  drawStageHeader(N, MX, Y, SW, SH_HEAD, STAGE_PAL.collection, '7. Collection — Paper Outputs');
+  Y += SH_HEAD + SPAD;
+
+  const s7steps = [
+    { label:'Aggregate Tables', sub:'across models & dims' },
+    { label:'Generate Figures', sub:'matplotlib plots' },
+  ];
+  const s7x0 = MX + SPAD;
+  s7steps.forEach((s, i) => {
+    const sx = s7x0 + i * (STEP_W + STEP_GAP);
+    drawStep(N, sx, Y, STEP_W, STEP_H, s.label, s.sub);
+    if (i < s7steps.length - 1) drawEdge(E, sx+STEP_W, Y+STEP_H/2, sx+STEP_W+STEP_GAP, Y+STEP_H/2, 'primary');
+  });
+
+  // Output documents
+  const outY = Y + STEP_H + 16;
+  drawOutputDoc(N, s7x0, outY, 160, 44, 'Table: Error Summary');
+  drawOutputDoc(N, s7x0+180, outY, 160, 44, 'Figure: \u2207V Comparison');
+  drawOutputDoc(N, s7x0+360, outY, 160, 44, 'Figure: \u2207\u03A6 Comparison');
+
+  // Edges to outputs
+  drawEdge(E, s7x0+STEP_W/2, Y+STEP_H, s7x0+80, outY, 'data');
+  drawEdge(E, s7x0+STEP_W+STEP_GAP+STEP_W/2, Y+STEP_H, s7x0+260, outY, 'data');
+
+  const cr7Y = outY + 44 + CREF_GAP;
+  drawCodeRef(N, s7x0, cr7Y, 280, CREF_H, 'scripts/generate_all_paper_figures.py');
+  drawCodeRef(N, s7x0+290, cr7Y, 230, CREF_H, 'scripts/extract_paper_tables.py');
+  drawEdge(E, s7x0+STEP_W/2, outY+44, s7x0+140, cr7Y, 'annotation');
+
+  Y = cr7Y + CREF_H + SPAD + 20;
+
+  // ─── END ───
+  drawTerminator(N, MX+SW/2, Y+TERM_H/2, TERM_W, TERM_H, 'END');
+  Y += TERM_H + MY;
+
+  // Primary flow from start
+  drawEdge(E, MX+SW/2, MY+TERM_H, MX+SW/2, s1Y, 'primary');
+
+  // Set final SVG dimensions
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${Y}`);
+  svg.setAttribute('height', Y);
+
+  wrap.appendChild(svg);
+
+}
+
+function toggleLegend() {
+  document.getElementById('legendPanel').classList.toggle('show');
+  document.getElementById('legendBtn').classList.toggle('active');
+}
+
+render();
+</script>
+</body>
+</html>
