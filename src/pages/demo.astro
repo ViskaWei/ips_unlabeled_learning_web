@@ -1,0 +1,384 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Try It — IPS Unlabeled Learning">
+  <Nav />
+
+  <div style="height: 56px;"></div>
+
+  <!-- ═══ Demo Hero ═══ -->
+  <section class="demo-hero">
+    <div class="demo-hero-inner">
+      <p class="section-label"
+        data-i18n-en="Interactive Demo"
+        data-i18n-zh="交互式演示">Interactive Demo</p>
+      <h1 data-i18n-en="Try It Yourself"
+          data-i18n-zh="亲自试试">Try It Yourself</h1>
+      <p style="max-width: 600px; margin: 0 auto; color: var(--text-secondary);"
+        data-i18n-en="See how our self-test method learns particle interactions from unlabeled data. All simulations run in your browser — no server needed."
+        data-i18n-zh="看看我们的自测方法如何从无标签数据学习粒子交互。所有模拟在浏览器中运行——无需服务器。">
+        See how our self-test method learns particle interactions from unlabeled data. All simulations run in your browser — no server needed.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ Section 1: Particle Trajectories ═══ -->
+  <section id="trajectories" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Demo 1"
+      data-i18n-zh="演示 1">Demo 1</p>
+    <h2 data-i18n-en="Particle Evolution"
+        data-i18n-zh="粒子演化">Particle Evolution</h2>
+    <p data-i18n-en="Watch 10 particles evolve under confinement V and interaction &Phi;. Each colored trail traces one particle's path. The interplay of attraction, repulsion, and noise creates rich dynamics."
+       data-i18n-zh="观察 10 个粒子在束缚势 V 和交互势 &Phi; 下的演化。每条彩色轨迹追踪一个粒子的路径。吸引、排斥和噪声的相互作用产生丰富的动力学。">
+      Watch 10 particles evolve under confinement V and interaction &Phi;. Each colored trail traces one particle's path. The interplay of attraction, repulsion, and noise creates rich dynamics.
+    </p>
+
+    <div class="demo-container">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 16/9; min-height: 400px;">
+        <canvas id="traj-viewer-canvas"></canvas>
+      </div>
+      <div class="demo-controls">
+        <div class="toggle-group">
+          <button id="traj-play-btn" class="toggle-btn active">Pause</button>
+          <button id="traj-trail-toggle" class="toggle-btn">Hide Trails</button>
+        </div>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-traj-speed="1">1x</button>
+          <button class="toggle-btn" data-traj-speed="2">2x</button>
+          <button class="toggle-btn" data-traj-speed="4">4x</button>
+        </div>
+      </div>
+      <div class="demo-controls" style="margin-top: 0.5rem;">
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-traj-model="model_e">E: Reference</button>
+          <button class="toggle-btn" data-traj-model="model_a">A: Smoothness</button>
+          <button class="toggle-btn" data-traj-model="model_b">B: Conditioning</button>
+          <button class="toggle-btn" data-traj-model="model_lj">C: LJ</button>
+          <button class="toggle-btn" data-traj-model="model_morse">D: Morse</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1.5rem;">
+      <p style="margin: 0;"
+        data-i18n-en="This is the data we observe: snapshots of particle positions. But in real experiments, we don't know which particle is which across snapshots — the labels are lost."
+        data-i18n-zh="这就是我们观测到的数据：粒子位置的快照。但在真实实验中，我们不知道不同快照中哪个粒子是哪个——标签丢失了。">
+        This is the data we observe: snapshots of particle positions. But in real experiments, we don't know which particle is which across snapshots — the labels are lost.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 2: Estimator vs True ═══ -->
+  <section id="estimation" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Demo 2"
+      data-i18n-zh="演示 2">Demo 2</p>
+    <h2 data-i18n-en="Estimated vs True Potentials"
+        data-i18n-zh="估计势函数 vs 真实势函数">Estimated vs True Potentials</h2>
+    <p data-i18n-en="Our self-test method recovers the gradient of both potentials. Solid line = true gradient; dashed = estimated. The error percentages are from our actual experiments (Table 3 in the paper)."
+       data-i18n-zh="我们的自测方法恢复了两个势函数的梯度。实线 = 真实梯度；虚线 = 估计值。误差百分比来自我们的实际实验（论文表 3）。">
+      Our self-test method recovers the gradient of both potentials. Solid line = true gradient; dashed = estimated. The error percentages are from our actual experiments (Table 3 in the paper).
+    </p>
+
+    <div class="demo-container">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 2/1; min-height: 320px;">
+        <canvas id="potential-compare-canvas"></canvas>
+      </div>
+      <div class="demo-controls">
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-compare-method="selftest"
+            data-i18n-en="Self-Test (Basis)" data-i18n-zh="自测（基函数）">Self-Test (Basis)</button>
+          <button class="toggle-btn" data-compare-method="nn"
+            data-i18n-en="Self-Test (NN)" data-i18n-zh="自测（NN）">Self-Test (NN)</button>
+        </div>
+      </div>
+      <div class="demo-controls" style="margin-top: 0.5rem;">
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-compare-model="model_e">E: Reference</button>
+          <button class="toggle-btn" data-compare-model="model_a">A</button>
+          <button class="toggle-btn" data-compare-model="model_b">B</button>
+          <button class="toggle-btn" data-compare-model="model_lj">C: LJ</button>
+          <button class="toggle-btn" data-compare-model="model_morse">D: Morse</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1.5rem;">
+      <p style="margin: 0;"
+        data-i18n-en="Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned Gram matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers."
+        data-i18n-zh="试试切换到模型 B（条件测试）——注意 &Phi; 估计因病态 Gram 矩阵（&kappa; = 146K）而退化。这是基函数方法最困难的情况；NN 部分恢复。">
+        Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned Gram matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 3: Predicted vs True Trajectories ═══ -->
+  <section id="prediction" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Demo 3"
+      data-i18n-zh="演示 3">Demo 3</p>
+    <h2 data-i18n-en="Predicted vs True Trajectories"
+        data-i18n-zh="预测轨迹 vs 真实轨迹">Predicted vs True Trajectories</h2>
+    <p data-i18n-en="The ultimate test: use the learned potentials to forward-simulate trajectories. Left: true dynamics. Right: predicted dynamics using estimated V&#x0302; and &Phi;&#x0302;. Both start from identical initial conditions with the same noise — any divergence is purely from estimation error."
+       data-i18n-zh="终极测试：用学到的势函数前向模拟轨迹。左：真实动力学。右：用估计的 V&#x0302; 和 &Phi;&#x0302; 预测的动力学。两者从相同初始条件和噪声出发——任何偏差都纯粹来自估计误差。">
+      The ultimate test: use the learned potentials to forward-simulate trajectories. Left: true dynamics. Right: predicted dynamics using estimated V&#x0302; and &Phi;&#x0302;. Both start from identical initial conditions with the same noise — any divergence is purely from estimation error.
+    </p>
+
+    <div class="demo-container">
+      <div class="traj-compare-grid">
+        <div class="demo-canvas-wrap" style="aspect-ratio: 1/1; min-height: 350px;">
+          <canvas id="traj-true-canvas"></canvas>
+        </div>
+        <div class="demo-canvas-wrap" style="aspect-ratio: 1/1; min-height: 350px;">
+          <canvas id="traj-pred-canvas"></canvas>
+        </div>
+      </div>
+      <div class="demo-controls">
+        <div class="toggle-group">
+          <button id="compare-play-btn" class="toggle-btn active">Pause</button>
+          <button id="compare-overlay-btn" class="toggle-btn"
+            data-i18n-en="Overlay" data-i18n-zh="叠加">Overlay</button>
+          <button id="compare-reset-btn" class="toggle-btn"
+            data-i18n-en="Reset" data-i18n-zh="重置">Reset</button>
+        </div>
+      </div>
+      <div class="demo-controls" style="margin-top: 0.5rem;">
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-compare-traj-model="model_e">E: Reference</button>
+          <button class="toggle-btn" data-compare-traj-model="model_a">A</button>
+          <button class="toggle-btn" data-compare-traj-model="model_b">B</button>
+          <button class="toggle-btn" data-compare-traj-model="model_lj">C: LJ</button>
+          <button class="toggle-btn" data-compare-traj-model="model_morse">D: Morse</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1.5rem;">
+      <p style="margin: 0;"
+        data-i18n-en="For the Reference model (E), predicted trajectories stay close to truth. Switch to Model B or C to see how estimation errors compound — small gradient errors can cause significant trajectory divergence over time."
+        data-i18n-zh="对于参考模型（E），预测轨迹与真值保持接近。切换到模型 B 或 C 查看估计误差如何累积——小的梯度误差随时间推移可能导致显著的轨迹偏差。">
+        For the Reference model (E), predicted trajectories stay close to truth. Switch to Model B or C to see how estimation errors compound — small gradient errors can cause significant trajectory divergence over time.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 4: Quick Reference ═══ -->
+  <section id="quickref" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="For Developers"
+      data-i18n-zh="开发者指南">For Developers</p>
+    <h2 data-i18n-en="Use This Code"
+        data-i18n-zh="使用代码">Use This Code</h2>
+    <p data-i18n-en="Get started in 5 minutes. The codebase supports both basis regression (fast, exact) and neural network learning (flexible, no prior knowledge needed)."
+       data-i18n-zh="5 分钟上手。代码支持基函数回归（快速、精确）和神经网络学习（灵活、无需先验知识）。">
+      Get started in 5 minutes. The codebase supports both basis regression (fast, exact) and neural network learning (flexible, no prior knowledge needed).
+    </p>
+
+    <div class="code-cards">
+      <!-- Step 1: Install -->
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-step">1</span>
+          <span data-i18n-en="Install" data-i18n-zh="安装">Install</span>
+        </div>
+        <pre class="code-block"><code>git clone https://github.com/ViskaWei/lips_unlabeled_data
+cd lips_unlabeled_data
+pip install -e .</code></pre>
+      </div>
+
+      <!-- Step 2: Generate Data -->
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-step">2</span>
+          <span data-i18n-en="Generate Data" data-i18n-zh="生成数据">Generate Data</span>
+        </div>
+        <pre class="code-block"><code>from core.potentials import HarmonicPotential, GaussianInteraction
+from core.sde_simulator import SDESimulator
+
+V = HarmonicPotential(k=2.0)
+Phi = GaussianInteraction(A=1.0, sigma=0.8)
+sim = SDESimulator(V=V, Phi=Phi, sigma=1.0, dt=0.001)
+data, t_obs = sim.simulate(N=10, d=2, T=1.0, L=100, M=2000)</code></pre>
+      </div>
+
+      <!-- Step 3: Learn -->
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-step">3</span>
+          <span data-i18n-en="Learn (No Labels Needed!)" data-i18n-zh="学习（无需标签！）">Learn (No Labels Needed!)</span>
+        </div>
+        <pre class="code-block"><code>from lib.basis import get_basis
+from lib.solvers import solve_selftest
+
+build_V, build_Phi, K_V, K_Phi, _ = get_basis('oracle', 'model_e')
+alpha, beta, info = solve_selftest(
+    data, t_obs, sigma=1.0,
+    build_V_fn=build_V, build_Phi_fn=build_Phi,
+    K_V=K_V, K_Phi=K_Phi, reg='auto'
+)</code></pre>
+      </div>
+
+      <!-- Step 4: Evaluate -->
+      <div class="code-card">
+        <div class="code-card-header">
+          <span class="code-step">4</span>
+          <span data-i18n-en="Evaluate" data-i18n-zh="评估">Evaluate</span>
+        </div>
+        <pre class="code-block"><code>from lib.eval import evaluate_kde
+
+errors = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
+                      build_V_fn=build_V, build_Phi_fn=build_Phi)
+print("V error: %.1f%%" % errors['V_error_pct'])
+print("Phi error: %.1f%%" % errors['Phi_error_pct'])
+# Expected: V ~1%, Phi ~1.5% for Reference model</code></pre>
+      </div>
+    </div>
+
+    <!-- Key Points -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
+      <div class="info-card">
+        <h4 style="color: var(--accent-green); margin-bottom: 0.5rem;"
+          data-i18n-en="For AI Agents" data-i18n-zh="给 AI Agent">For AI Agents</h4>
+        <p style="font-size: 0.85rem;"
+          data-i18n-en="The repo includes a comprehensive CLAUDE.md with code architecture, module dependencies, formula verification rules, and common pitfalls. AI agents can read it to understand the full API surface."
+          data-i18n-zh="仓库包含完整的 CLAUDE.md，涵盖代码架构、模块依赖、公式验证规则和常见陷阱。AI agent 可以读取它来理解完整的 API 接口。">
+          The repo includes a comprehensive CLAUDE.md with code architecture, module dependencies, formula verification rules, and common pitfalls. AI agents can read it to understand the full API surface.
+        </p>
+      </div>
+      <div class="info-card">
+        <h4 style="color: var(--accent-amber); margin-bottom: 0.5rem;"
+          data-i18n-en="Key Gotchas" data-i18n-zh="注意事项">Key Gotchas</h4>
+        <ul style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 1.2rem;">
+          <li data-i18n-en="Self-test loss converges to negative (not zero)" data-i18n-zh="自测损失收敛到负值（不是零）">Self-test loss converges to negative (not zero)</li>
+          <li data-i18n-en="L-curve regularization fails at dt_obs=0.1" data-i18n-zh="L-curve 正则化在 dt_obs=0.1 时失效">L-curve regularization fails at dt_obs=0.1</li>
+          <li data-i18n-en="NN activation must be Softplus for C&sup2; Laplacians" data-i18n-zh="NN 激活函数必须是 Softplus（C&sup2; 拉普拉斯量）">NN activation must be Softplus for C&sup2; Laplacians</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+      <a href="https://github.com/ViskaWei/lips_unlabeled_data" class="btn btn-outline" style="font-size: 1rem; padding: 0.75rem 2rem;">
+        View on GitHub &rarr;
+      </a>
+    </div>
+  </section>
+
+  <Footer />
+</BaseLayout>
+
+<!-- Island Scripts -->
+<script src="../islands/TrajectoryViewer.ts"></script>
+<script src="../islands/PotentialComparison.ts"></script>
+<script src="../islands/TrajectoryComparison.ts"></script>
+
+<style>
+  .demo-hero {
+    padding: 4rem 1.5rem 2rem;
+    text-align: center;
+    background: var(--gradient-hero);
+  }
+  .demo-hero-inner {
+    max-width: var(--content-width);
+    margin: 0 auto;
+  }
+  .demo-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .traj-compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .traj-compare-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Code cards */
+  .code-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .code-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .code-card {
+    background: var(--bg-code);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .code-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .code-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--accent-cyan);
+    color: var(--bg-primary);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .code-block {
+    padding: 1rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Info cards */
+  .info-card {
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+  }
+
+  .info-card ul {
+    list-style: disc;
+    margin: 0;
+  }
+
+  .info-card li {
+    margin-bottom: 0.3rem;
+  }
+</style>

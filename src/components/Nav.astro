@@ -18,7 +18,9 @@ const base = import.meta.env.BASE_URL;
         <a href={`#${s.id}`} class="nav-link">{s.label}</a>
       ))}
       <span class="nav-separator"></span>
+      <a href={`${base}/demo/`} class="nav-link nav-link-page">Demo</a>
       <a href={`${base}/code/overview/`} class="nav-link nav-link-page">Code</a>
+      <a href={`${base}/code/api/`} class="nav-link nav-link-page">API</a>
     </div>
     <div class="nav-actions">
       <button id="lang-toggle" class="toggle-btn active" title="Toggle language">EN</button>
@@ -31,7 +33,9 @@ const base = import.meta.env.BASE_URL;
     {sections.map((s) => (
       <a href={`#${s.id}`} class="nav-mobile-link">{s.label}</a>
     ))}
+    <a href={`${base}/demo/`} class="nav-mobile-link nav-link-page">Demo</a>
     <a href={`${base}/code/overview/`} class="nav-mobile-link nav-link-page">Code</a>
+    <a href={`${base}/code/api/`} class="nav-mobile-link nav-link-page">API</a>
   </div>
 </nav>
 

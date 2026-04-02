@@ -1,0 +1,578 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import Math from '../../components/Math.astro';
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="API Guide — IPS Unlabeled Learning">
+  <Nav />
+
+  <div style="height: 56px;"></div>
+
+  <div class="api-page">
+    <!-- Sidebar Navigation -->
+    <aside class="api-sidebar">
+      <h3>API Guide</h3>
+      <nav>
+        <a href="#quickstart" class="api-nav-link active">Quick Start</a>
+        <a href="#pipelines" class="api-nav-link">Pipelines</a>
+        <a href="#potentials" class="api-nav-link">Potentials</a>
+        <a href="#solvers" class="api-nav-link">Solvers</a>
+        <a href="#evaluation" class="api-nav-link">Evaluation</a>
+        <a href="#nn" class="api-nav-link">Neural Networks</a>
+        <a href="#constraints" class="api-nav-link">Constraints</a>
+        <a href="#ai-agents" class="api-nav-link">For AI Agents</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="api-content">
+
+      <h1>Developer & AI API Guide</h1>
+      <p class="api-subtitle">Everything you need to use the IPS Unlabeled Learning codebase — whether you're a human developer or an AI agent.</p>
+
+      <!-- Quick Start -->
+      <section id="quickstart">
+        <h2>Quick Start</h2>
+        <p>From zero to results in 4 steps. The self-test method needs <strong>no trajectory labels</strong> — just unlabeled snapshots.</p>
+
+        <div class="api-code-block">
+          <div class="api-code-header">Install & Import</div>
+          <pre><code>git clone https://github.com/ViskaWei/lips_unlabeled_data
+cd lips_unlabeled_data && pip install -e .
+
+from core.potentials import HarmonicPotential, GaussianInteraction
+from core.sde_simulator import SDESimulator
+from lib.basis import get_basis
+from lib.solvers import solve_selftest
+from lib.eval import evaluate_kde</code></pre>
+        </div>
+
+        <div class="api-code-block">
+          <div class="api-code-header">Generate → Learn → Evaluate</div>
+          <pre><code># 1. Simulate particle data
+V = HarmonicPotential(k=2.0)
+Phi = GaussianInteraction(A=1.0, sigma=0.8)
+sim = SDESimulator(V=V, Phi=Phi, sigma=1.0, dt=0.001)
+data, t_obs = sim.simulate(N=10, d=2, T=1.0, L=100, M=2000)
+
+# 2. Learn from unlabeled data (no labels needed!)
+build_V, build_Phi, K_V, K_Phi, _ = get_basis('oracle', 'model_e')
+alpha, beta, info = solve_selftest(
+    data, t_obs, sigma=1.0,
+    build_V_fn=build_V, build_Phi_fn=build_Phi,
+    K_V=K_V, K_Phi=K_Phi, reg='auto'
+)
+
+# 3. Evaluate
+errors = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
+                      build_V_fn=build_V, build_Phi_fn=build_Phi)
+print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']))</code></pre>
+        </div>
+      </section>
+
+      <!-- Pipelines -->
+      <section id="pipelines">
+        <h2>Two Pipelines</h2>
+
+        <div class="pipeline-cards">
+          <div class="pipeline-card" style="border-left-color: var(--accent-green);">
+            <h3 style="color: var(--accent-green);">Basis Regression</h3>
+            <p>Expand V, &Phi; in known basis functions. Linear least-squares — <strong>exact, fast</strong>.</p>
+            <pre><code>load_data → get_basis → solve_selftest → evaluate_kde</code></pre>
+            <div class="pipeline-meta">
+              <span>Modules: lib.config, lib.basis, lib.solvers, lib.eval</span>
+              <span>Time: ~seconds</span>
+            </div>
+          </div>
+
+          <div class="pipeline-card" style="border-left-color: var(--accent-purple);">
+            <h3 style="color: var(--accent-purple);">Neural Network</h3>
+            <p>MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no prior knowledge</strong>.</p>
+            <pre><code>load_data → create_networks → train_loop(selftest_loss) → evaluate</code></pre>
+            <div class="pipeline-meta">
+              <span>Modules: core.nn_models, core.selftest_loss</span>
+              <span>Time: ~hours (GPU)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Potentials -->
+      <section id="potentials">
+        <h2>Available Potentials</h2>
+        <p>All potentials implement <code>evaluate(x)</code> and <code>gradient(x)</code>.</p>
+
+        <div class="api-table-wrap">
+          <table class="api-table">
+            <thead>
+              <tr><th>Class</th><th>Formula</th><th>Model</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>HarmonicPotential(k)</code></td><td>V(x) = k|x|&sup2;/2</td><td>C, E</td></tr>
+              <tr><td><code>QuadraticConfinement(&alpha;1, &alpha;2)</code></td><td>V = &alpha;1|x|/2 + &alpha;2|x|&sup2;</td><td>A</td></tr>
+              <tr><td><code>DoubleWellPotential()</code></td><td>V = (|x|&sup2;-1)&sup2;/4</td><td>B, D</td></tr>
+              <tr><td><code>GaussianInteraction(A, &sigma;)</code></td><td>&Phi;(r) = A exp(-r&sup2;/2&sigma;&sup2;)</td><td>E</td></tr>
+              <tr><td><code>PiecewiseInteraction(&beta;1, &beta;2)</code></td><td>Smoothed indicator &Phi;</td><td>A</td></tr>
+              <tr><td><code>InverseInteraction(&gamma;)</code></td><td>&Phi;(r) = &gamma;/(r+1)</td><td>B</td></tr>
+              <tr><td><code>LennardJonesPotential(&epsilon;, &sigma;)</code></td><td>4&epsilon;[(&sigma;/r)&sup1;&sup2; - (&sigma;/r)&sup6;]</td><td>C</td></tr>
+              <tr><td><code>MorsePotential(D, a, r0)</code></td><td>D(1-e<sup>-a(r-r0)</sup>)&sup2;</td><td>D</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Solvers -->
+      <section id="solvers">
+        <h2>Solver API</h2>
+
+        <div class="api-func">
+          <h3><code>solve_selftest(data, t_obs, sigma, build_V_fn, build_Phi_fn, K_V, K_Phi, reg='auto')</code></h3>
+          <p>Trajectory-free learning via energy balance. <strong>No labels needed.</strong></p>
+          <div class="api-params">
+            <div class="api-param"><code>data</code>: ndarray (M, L, N, d) — unlabeled snapshot ensemble</div>
+            <div class="api-param"><code>t_obs</code>: ndarray (L,) — observation times</div>
+            <div class="api-param"><code>sigma</code>: float — diffusion coefficient</div>
+            <div class="api-param"><code>reg</code>: 'auto' | float — Tikhonov regularization (auto = Hansen L-curve)</div>
+            <div class="api-param"><strong>Returns</strong>: alpha (K_V,), beta (K_Phi,), info dict</div>
+          </div>
+        </div>
+
+        <div class="api-func">
+          <h3><code>solve_mle(data_labeled, t_obs, ...)</code></h3>
+          <p>Maximum likelihood estimation. <strong>Requires labeled trajectory pairs.</strong></p>
+        </div>
+
+        <div class="api-func">
+          <h3><code>solve_sinkhorn(data_unlabeled, t_obs, ..., eps_factor=0.01)</code></h3>
+          <p>Optimal transport label imputation + MLE. Unlabeled input, but degrades at large &Delta;t.</p>
+        </div>
+      </section>
+
+      <!-- Evaluation -->
+      <section id="evaluation">
+        <h2>Evaluation</h2>
+        <div class="api-func">
+          <h3><code>evaluate_kde(model_name, d, alpha, beta, build_V_fn, build_Phi_fn)</code></h3>
+          <p>Compute L&sup2;(&rho;)-weighted errors against true gradients on a 2000-point grid.</p>
+          <div class="api-params">
+            <div class="api-param"><strong>Returns</strong>: dict with <code>V_error_pct</code>, <code>Phi_error_pct</code></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Neural Networks -->
+      <section id="nn">
+        <h2>Neural Network Training</h2>
+
+        <div class="api-code-block">
+          <div class="api-code-header">Complete NN Pipeline</div>
+          <pre><code>import torch
+from core.nn_models import RadialNet, RadialInteractionNet
+from core.selftest_loss import compute_selftest_loss_batch
+
+# Create networks
+V_net = RadialNet(hidden_dims=(64, 64, 64), activation='softplus').cuda()
+Phi_net = RadialInteractionNet(d=2, hidden_dims=(64, 64, 64)).cuda()
+
+# Train
+optimizer = torch.optim.Adam(
+    list(V_net.parameters()) + list(Phi_net.parameters()), lr=1e-3
+)
+
+for epoch in range(200):
+    # Sample batch
+    idx = np.random.choice(M, 32)
+    X_curr = torch.tensor(data[idx, :-1], device='cuda', dtype=torch.float32)
+    X_next = torch.tensor(data[idx, 1:], device='cuda', dtype=torch.float32)
+
+    loss = compute_selftest_loss_batch(V_net, Phi_net, X_curr, X_next, dt, sigma)
+    optimizer.zero_grad()
+    loss.mean().backward()
+    optimizer.step()</code></pre>
+        </div>
+      </section>
+
+      <!-- Constraints -->
+      <section id="constraints">
+        <h2>Constraints & Gotchas</h2>
+
+        <div class="constraint-list">
+          <div class="constraint critical">
+            <span class="constraint-tag">CRITICAL</span>
+            <p>Self-test loss converges to a <strong>negative</strong> value, not zero. L(V*, &Phi;*) = -&frac12; E[J_diss &middot; &Delta;t] &lt; 0.</p>
+          </div>
+          <div class="constraint critical">
+            <span class="constraint-tag">CRITICAL</span>
+            <p>L-curve regularization <strong>fails at dt_obs=0.1</strong> (Bakushinskii phenomenon). Use fixed reg=1e-6 instead.</p>
+          </div>
+          <div class="constraint warning">
+            <span class="constraint-tag">WARNING</span>
+            <p>NN activation must be <code>Softplus</code> (not Tanh/ReLU) — C&sup2; smoothness required for AD-based Laplacians.</p>
+          </div>
+          <div class="constraint warning">
+            <span class="constraint-tag">WARNING</span>
+            <p>KDE evaluation only works for <strong>radial models</strong> (model_a/b/lj/morse/e). Non-radial models (aniso/dipole) use grid evaluation.</p>
+          </div>
+          <div class="constraint info">
+            <span class="constraint-tag">INFO</span>
+            <p>Mean-field energy 1/(2N&sup2;) has N(N-1) terms → gradients are O(1), not O(1/N&sup2;). This is normalization, not signal suppression.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Agents -->
+      <section id="ai-agents">
+        <h2>For AI Agents</h2>
+        <p>This codebase is designed to be agent-friendly. Here's how to consume it:</p>
+
+        <div class="api-code-block">
+          <div class="api-code-header">Agent Workflow</div>
+          <pre><code># Step 1: Read CLAUDE.md at repo root for full architecture guide
+# Step 2: Choose pipeline (basis or NN)
+# Step 3: Follow the function chain:
+
+# Basis pipeline:
+#   lib.config.load_experiment_data() → data, t_obs
+#   lib.basis.get_basis() → build_V, build_Phi, K_V, K_Phi
+#   lib.solvers.solve_selftest() → alpha, beta
+#   lib.eval.evaluate_kde() → errors dict
+
+# NN pipeline:
+#   core.nn_models.RadialNet() → V network
+#   core.nn_models.RadialInteractionNet() → Phi network
+#   core.selftest_loss.compute_selftest_loss_batch() → loss
+#   Train loop → evaluate
+
+# Step 4: Validate with pytest tests/ -v
+# Step 5: V_error_pct &lt; 5% for model_e at d=2 is a sanity check</code></pre>
+        </div>
+
+        <div class="api-table-wrap">
+          <table class="api-table">
+            <thead>
+              <tr><th>Module</th><th>Key Functions</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>config/model.py</code></td><td>Config</td><td>Central configuration</td></tr>
+              <tr><td><code>core/potentials.py</code></td><td>Potential classes</td><td>15+ potential functions</td></tr>
+              <tr><td><code>core/sde_simulator.py</code></td><td>SDESimulator</td><td>Euler-Maruyama integrator</td></tr>
+              <tr><td><code>core/nn_models.py</code></td><td>RadialNet, SymmetricMLP</td><td>NN architectures</td></tr>
+              <tr><td><code>core/selftest_loss.py</code></td><td>compute_selftest_loss_batch</td><td>Algorithm 1</td></tr>
+              <tr><td><code>lib/basis.py</code></td><td>get_basis</td><td>Oracle/RBF basis interface</td></tr>
+              <tr><td><code>lib/solvers.py</code></td><td>solve_selftest, solve_mle</td><td>Learning algorithms</td></tr>
+              <tr><td><code>lib/eval.py</code></td><td>evaluate_kde</td><td>L&sup2;(&rho;) error metrics</td></tr>
+              <tr><td><code>lib/config.py</code></td><td>load_experiment_data</td><td>Data loading + paths</td></tr>
+              <tr><td><code>lib/plot.py</code></td><td>apply_style, savefig</td><td>Publication figures</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .api-page {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .api-page {
+      grid-template-columns: 1fr;
+    }
+    .api-sidebar {
+      display: none;
+    }
+  }
+
+  .api-sidebar {
+    position: sticky;
+    top: 72px;
+    height: fit-content;
+    padding: 1rem 0;
+  }
+
+  .api-sidebar h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-cyan);
+    margin-bottom: 1rem;
+  }
+
+  .api-nav-link {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-left: 2px solid transparent;
+    transition: all var(--transition-fast);
+  }
+
+  .api-nav-link:hover, .api-nav-link.active {
+    color: var(--text-primary);
+    border-left-color: var(--accent-cyan);
+    background: rgba(34, 211, 238, 0.05);
+  }
+
+  .api-content {
+    min-width: 0;
+  }
+
+  .api-content h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .api-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .api-content section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 80px;
+  }
+
+  .api-content h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .api-code-block {
+    background: var(--bg-code);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+
+  .api-code-header {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .api-code-block pre {
+    padding: 1rem;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Pipelines */
+  .pipeline-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .pipeline-cards { grid-template-columns: 1fr; }
+  }
+
+  .pipeline-card {
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 3px solid;
+    border-radius: 10px;
+  }
+
+  .pipeline-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+
+  .pipeline-card pre {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0.75rem 0;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .pipeline-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* API Table */
+  .api-table-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+
+  .api-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .api-table th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .api-table td {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+  }
+
+  .api-table code {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-cyan);
+    background: rgba(34, 211, 238, 0.08);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  /* API Function */
+  .api-func {
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    margin: 1rem 0;
+  }
+
+  .api-func h3 {
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+    color: var(--accent-cyan);
+    margin-bottom: 0.5rem;
+    word-break: break-all;
+  }
+
+  .api-params {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .api-param {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 0.2rem 0;
+  }
+
+  .api-param code {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+  }
+
+  /* Constraints */
+  .constraint-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .constraint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border-left: 3px solid;
+  }
+
+  .constraint.critical {
+    background: rgba(239, 68, 68, 0.05);
+    border-left-color: var(--accent-red);
+  }
+
+  .constraint.warning {
+    background: rgba(245, 158, 11, 0.05);
+    border-left-color: var(--accent-amber);
+  }
+
+  .constraint.info {
+    background: rgba(59, 130, 246, 0.05);
+    border-left-color: var(--accent-blue);
+  }
+
+  .constraint-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .critical .constraint-tag {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+  }
+
+  .warning .constraint-tag {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-amber);
+  }
+
+  .info .constraint-tag {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+  }
+
+  .constraint p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+</style>
+
+<script>
+  // Sidebar active state tracking
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.api-nav-link').forEach((link) => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+          });
+        }
+      });
+    },
+    { rootMargin: '-20% 0px -70% 0px' },
+  );
+  document.querySelectorAll('.api-content section[id]').forEach((sec) => observer.observe(sec));
+</script>
