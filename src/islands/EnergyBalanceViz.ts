@@ -96,6 +96,49 @@ if (canvas && vSlider && phiSlider) {
     return sum / N;
   }
 
+  function computeDiffusion(positions: Float64Array, vScale: number, phiScale: number): number {
+    const h = 1e-4;
+    const tmpX = new Float64Array(d);
+    const tmpXp = new Float64Array(d);
+    const tmpXm = new Float64Array(d);
+
+    // (1/N) Σ_i ΔV(x_i) — numerical Laplacian via central differences
+    let lapVsum = 0;
+    for (let i = 0; i < N; i++) {
+      for (let k = 0; k < d; k++) tmpX[k] = positions[i * d + k];
+      const vCenter = trueV.evaluate(tmpX);
+      let lapV_i = 0;
+      for (let k = 0; k < d; k++) {
+        tmpXp.set(tmpX); tmpXp[k] += h;
+        tmpXm.set(tmpX); tmpXm[k] -= h;
+        lapV_i += (trueV.evaluate(tmpXp) + trueV.evaluate(tmpXm) - 2 * vCenter) / (h * h);
+      }
+      lapVsum += lapV_i;
+    }
+
+    // (1/N²) Σ_{i≠j} ΔΦ(r_ij) — radial Laplacian: Φ''(r) + (d-1)/r·Φ'(r)
+    let lapPhiSum = 0;
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        if (i === j) continue;
+        let rSq = 0;
+        for (let k = 0; k < d; k++) {
+          const dif = positions[i * d + k] - positions[j * d + k];
+          rSq += dif * dif;
+        }
+        const r = Math.max(Math.sqrt(rSq), 1e-10);
+        const dPhiDr = truePhi.gradient(r) as number;
+        const rp = r + h;
+        const rm = Math.max(r - h, 1e-10);
+        const d2PhiDr2 = ((truePhi.gradient(rp) as number) - (truePhi.gradient(rm) as number)) / (rp - rm);
+        const lapPhi = d2PhiDr2 + (d - 1) / r * dPhiDr;
+        lapPhiSum += lapPhi;
+      }
+    }
+
+    return vScale * lapVsum / N + phiScale * lapPhiSum / (N * N);
+  }
+
   function resize() {
     const rect = canvas.parentElement!.getBoundingClientRect();
     const dpr = window.devicePixelRatio;
@@ -123,11 +166,13 @@ if (canvas && vSlider && phiSlider) {
     const E_curr = computeEnergy(state.positions, vScale, phiScale);
     const dE = E_curr - E_prev;
     const J_diss = computeDissipation(prevPositions, vScale, phiScale) * dt;
+    const J_diff_dt = computeDiffusion(prevPositions, vScale, phiScale) * dt;
 
-    // Smoothed values
+    // Smoothed values — L = (1/2)·J_diss·Δt − (σ²/2)·J_diff·Δt + δE
     dissipation = smoothing * dissipation + (1 - smoothing) * (0.5 * J_diss);
+    diffusion = smoothing * diffusion + (1 - smoothing) * (sigma * sigma / 2 * J_diff_dt);
     energyChange = smoothing * energyChange + (1 - smoothing) * dE;
-    const selfTestLoss = dissipation + energyChange; // simplified (ignoring diffusion for visual)
+    const selfTestLoss = dissipation - diffusion + energyChange;
     residual = smoothing * residual + (1 - smoothing) * selfTestLoss;
 
     residualHistory.push(residual);
@@ -151,23 +196,44 @@ if (canvas && vSlider && phiSlider) {
     ctx.lineWidth = 1;
     ctx.stroke();
 
+    // Particle color encodes how far guessed potentials are from truth
+    const vErr = Math.abs(vScale - 1);
+    const phiErr = Math.abs(phiScale - 1);
+    const totalErr = Math.min(1, (vErr + phiErr) / 2);
+    // Green (correct) → Red (wrong), with size pulsing
+    const pR = Math.round(34 + 205 * totalErr);
+    const pG = Math.round(197 - 150 * totalErr);
+    const pB = Math.round(94 - 26 * totalErr);
+    const particleColor = `rgb(${pR}, ${pG}, ${pB})`;
+    const particleRadius = 12 + totalErr * 6; // grow when wrong
+    const glowRadius = 20 + totalErr * 10;
+
     for (let i = 0; i < N; i++) {
       const sx = cx + state.positions[i * 2] * simScale;
       const sy = cy - state.positions[i * 2 + 1] * simScale;
 
       // Glow
       ctx.beginPath();
-      ctx.arc(sx, sy, 20, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
+      ctx.arc(sx, sy, glowRadius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${pR}, ${pG}, ${pB}, 0.12)`;
       ctx.fill();
 
       // Particle
       ctx.beginPath();
-      ctx.arc(sx, sy, 12, 0, Math.PI * 2);
-      ctx.fillStyle = '#3b82f6';
-      ctx.globalAlpha = 0.7;
+      ctx.arc(sx, sy, particleRadius, 0, Math.PI * 2);
+      ctx.fillStyle = particleColor;
+      ctx.globalAlpha = 0.8;
       ctx.fill();
       ctx.globalAlpha = 1;
+
+      // Ring when wrong
+      if (totalErr > 0.1) {
+        ctx.beginPath();
+        ctx.arc(sx, sy, particleRadius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(239, 68, 68, ${totalErr * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
     }
 
     // Right: Energy ledger
@@ -181,9 +247,9 @@ if (canvas && vSlider && phiSlider) {
     ctx.textAlign = 'left';
     ctx.fillText('Energy Ledger', ledgerX, ledgerY);
 
-    // Dissipation bar (red - spending)
-    const maxBar = ledgerW * 0.7;
-    const dissBar = Math.min(Math.abs(dissipation) * 2000, maxBar);
+    // Dissipation bar (red - spending) — amplified for visual clarity
+    const maxBar = ledgerW * 0.8;
+    const dissBar = Math.min(Math.abs(dissipation) * 5000, maxBar);
     const row1Y = ledgerY + 25;
 
     ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
@@ -198,42 +264,56 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillText(dissipation.toFixed(5), ledgerX + ledgerW - 4, row1Y + 15);
     ctx.textAlign = 'left';
 
-    // Energy change bar (blue - balance)
-    const row2Y = row1Y + barH + 8;
-    const eBar = Math.min(Math.abs(energyChange) * 2000, maxBar);
+    // Diffusion bar (cyan - income)
+    const row2Y = row1Y + barH + 6;
+    const diffBar = Math.min(Math.abs(diffusion) * 5000, maxBar);
 
-    ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
     ctx.fillRect(ledgerX, row2Y, ledgerW, barH);
-    ctx.fillStyle = energyChange < 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(59, 130, 246, 0.6)';
-    ctx.fillRect(ledgerX, row2Y, eBar, barH);
-    ctx.fillStyle = '#3b82f6';
-    ctx.fillText('Energy change (balance)', ledgerX + 5, row2Y + 15);
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
+    ctx.fillRect(ledgerX, row2Y, diffBar, barH);
+    ctx.fillStyle = '#06b6d4';
+    ctx.fillText('Diffusion (income)', ledgerX + 5, row2Y + 15);
     ctx.textAlign = 'right';
-    ctx.fillText(energyChange.toFixed(5), ledgerX + ledgerW - 4, row2Y + 15);
+    ctx.fillText(diffusion.toFixed(5), ledgerX + ledgerW - 4, row2Y + 15);
+    ctx.textAlign = 'left';
+
+    // Energy change bar (amber - balance)
+    const row3Y = row2Y + barH + 6;
+    const eBar = Math.min(Math.abs(energyChange) * 5000, maxBar);
+
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+    ctx.fillRect(ledgerX, row3Y, ledgerW, barH);
+    ctx.fillStyle = energyChange < 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(245, 158, 11, 0.6)';
+    ctx.fillRect(ledgerX, row3Y, eBar, barH);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText('Energy change (balance)', ledgerX + 5, row3Y + 15);
+    ctx.textAlign = 'right';
+    ctx.fillText(energyChange.toFixed(5), ledgerX + ledgerW - 4, row3Y + 15);
     ctx.textAlign = 'left';
 
     // Residual (self-test loss)
-    const row3Y = row2Y + barH + 15;
+    const row4Y = row3Y + barH + 12;
     const resColor = Math.abs(residual) < 0.001 ? '#22c55e' : '#ef4444';
     ctx.fillStyle = resColor;
     ctx.font = 'bold 13px Inter, sans-serif';
-    ctx.fillText(`Self-test loss: ${residual.toFixed(5)}`, ledgerX, row3Y + 5);
+    ctx.fillText(`Self-test loss: ${residual.toFixed(5)}`, ledgerX, row4Y + 5);
 
     // Scale labels
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.font = '11px Inter, sans-serif';
-    ctx.fillText(`V scale: ${vScale.toFixed(1)}×  |  Φ scale: ${phiScale.toFixed(1)}×`, ledgerX, row3Y + 25);
+    ctx.fillText(`V scale: ${vScale.toFixed(1)}×  |  Φ scale: ${phiScale.toFixed(1)}×`, ledgerX, row4Y + 25);
 
     const atTruth = Math.abs(vScale - 1) < 0.05 && Math.abs(phiScale - 1) < 0.05;
     ctx.fillStyle = atTruth ? '#22c55e' : '#f59e0b';
     ctx.fillText(
       atTruth ? '✓ True potentials — loss is negative' : '✗ Wrong potentials — residual grows',
       ledgerX,
-      row3Y + 45,
+      row4Y + 45,
     );
 
     // Mini chart of residual history
-    const chartY = row3Y + 65;
+    const chartY = row4Y + 65;
     const chartH = h - chartY - 20;
     if (chartH > 40 && residualHistory.length > 2) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';

@@ -88,15 +88,15 @@ if (container) {
       // Model label
       barRow.appendChild(el('div', 'nn-bar-label', label));
 
-      // ∇V group
+      // ∇V group — Basis lighter, NN solid
       const vGroup = el('div', 'nn-bar-group');
-      vGroup.appendChild(makeBar(row.oracle_selftest_V, maxV, '#4ade80', 'Basis'));
+      vGroup.appendChild(makeBar(row.oracle_selftest_V, maxV, 'rgba(74, 222, 128, 0.45)', 'Basis'));
       vGroup.appendChild(makeBar(row.nn_V, maxV, '#22c55e', 'NN'));
       barRow.appendChild(vGroup);
 
-      // ∇Φ group
+      // ∇Φ group — Basis lighter, NN solid
       const phiGroup = el('div', 'nn-bar-group');
-      phiGroup.appendChild(makeBar(row.oracle_selftest_Phi, maxPhi, '#a78bfa', 'Basis'));
+      phiGroup.appendChild(makeBar(row.oracle_selftest_Phi, maxPhi, 'rgba(167, 139, 250, 0.45)', 'Basis'));
       phiGroup.appendChild(makeBar(row.nn_Phi, maxPhi, '#8b5cf6', 'NN'));
       barRow.appendChild(phiGroup);
 
@@ -268,13 +268,49 @@ if (container) {
   }
 
   function makeBar(value: number, maxVal: number, color: string, label: string): HTMLElement {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.gap = '6px';
+    row.style.height = '20px';
+    row.title = `${label}: ${value}%`;
+
+    // Label (fixed width)
+    const lbl = document.createElement('span');
+    lbl.textContent = label;
+    Object.assign(lbl.style, {
+      fontSize: '0.7rem',
+      color: 'rgba(255,255,255,0.5)',
+      minWidth: '32px',
+      textAlign: 'right',
+    });
+    row.appendChild(lbl);
+
+    // Bar
     const bar = document.createElement('div');
-    bar.className = 'nn-bar-track';
     const pct = Math.min(100, (value / maxVal) * 100);
-    bar.style.width = `${Math.max(pct, 3)}%`;
-    bar.style.background = color;
-    bar.textContent = `${label} ${value.toFixed(1)}%`;
-    bar.title = `${label}: ${value}%`;
-    return bar;
+    Object.assign(bar.style, {
+      width: `${Math.max(pct, 5)}%`,
+      height: '16px',
+      borderRadius: '3px',
+      background: color,
+      flexShrink: '0',
+      transition: 'width 0.4s ease',
+    });
+    row.appendChild(bar);
+
+    // Value
+    const val = document.createElement('span');
+    val.textContent = `${value.toFixed(1)}%`;
+    Object.assign(val.style, {
+      fontSize: '0.7rem',
+      fontFamily: 'var(--font-mono)',
+      color: value <= 5 ? '#22c55e' : value <= 20 ? '#f59e0b' : '#ef4444',
+      fontWeight: '600',
+      whiteSpace: 'nowrap',
+    });
+    row.appendChild(val);
+
+    return row;
   }
 }

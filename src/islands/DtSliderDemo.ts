@@ -12,16 +12,16 @@ const dtValueLabel = document.getElementById('dt-value');
 if (vizContainer && slider) {
   const dtLabels = ['0.0001', '0.001', '0.01', '0.1'];
 
-  // Reference model (Model E) data from paper Table 1
+  // Reference model (Model E) data from paper Table 2
   const refData: Record<string, (number | null)[]> = {
-    oracle_mle_V:       [0.80, 1.53, 10.44, 11.30],
+    oracle_mle_V:       [0.80, 1.41, 10.44, 11.30],
     oracle_mle_Phi:     [0.35, 5.18, 37.49, 89.38],
-    sinkhorn_V:         [1.09, 3.13, 21.64, 45.37],
-    sinkhorn_Phi:       [0.16, 7.17, 47.38, 95.78],
-    oracle_selftest_V:  [1.35, 0.90, 0.80, 6.84],
-    oracle_selftest_Phi:[1.24, 0.75, 1.10, 6.93],
-    nn_selftest_V:      [null, 2.1, 1.44, 3.05],
-    nn_selftest_Phi:    [null, 5.1, 2.23, 5.48],
+    sinkhorn_V:         [1.34, 3.13, 21.64, 45.37],
+    sinkhorn_Phi:       [0.82, 7.17, 47.38, 95.78],
+    oracle_selftest_V:  [1.35, 0.67, 0.80, 6.84],
+    oracle_selftest_Phi:[1.24, 0.74, 1.10, 6.93],
+    nn_selftest_V:      [null, 0.89, 1.25, 3.15],
+    nn_selftest_Phi:    [null, 1.80, 2.47, 5.80],
   };
 
   const canvas = document.createElement('canvas');
