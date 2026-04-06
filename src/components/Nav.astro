@@ -12,10 +12,11 @@ const base = import.meta.env.BASE_URL;
 
 <nav class="nav">
   <div class="nav-inner">
-    <a href="#hero" class="nav-brand">IPS</a>
+    <a href="https://viskawei.github.io/" class="nav-home">&larr;</a>
+    <a href={`${base}/`} class="nav-brand">IPS</a>
     <div class="nav-links">
       {sections.map((s) => (
-        <a href={`#${s.id}`} class="nav-link">{s.label}</a>
+        <a href={`${base}/#${s.id}`} class="nav-link">{s.label}</a>
       ))}
       <span class="nav-separator"></span>
       <a href={`${base}/demo/`} class="nav-link nav-link-page">Demo</a>
@@ -31,7 +32,7 @@ const base = import.meta.env.BASE_URL;
   </div>
   <div id="nav-mobile" class="nav-mobile">
     {sections.map((s) => (
-      <a href={`#${s.id}`} class="nav-mobile-link">{s.label}</a>
+      <a href={`${base}/#${s.id}`} class="nav-mobile-link">{s.label}</a>
     ))}
     <a href={`${base}/demo/`} class="nav-mobile-link nav-link-page">Demo</a>
     <a href={`${base}/code/overview/`} class="nav-mobile-link nav-link-page">Code</a>
@@ -60,6 +61,19 @@ const base = import.meta.env.BASE_URL;
     display: flex;
     align-items: center;
     gap: 1.5rem;
+  }
+
+  .nav-home {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+  }
+  .nav-home:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .nav-brand {

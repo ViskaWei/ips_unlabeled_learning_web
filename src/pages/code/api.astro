@@ -23,15 +23,14 @@ const base = import.meta.env.BASE_URL;
         <a href="#evaluation" class="api-nav-link">Evaluation</a>
         <a href="#nn" class="api-nav-link">Neural Networks</a>
         <a href="#constraints" class="api-nav-link">Constraints</a>
-        <a href="#ai-agents" class="api-nav-link">For AI Agents</a>
       </nav>
     </aside>
 
     <!-- Main Content -->
     <main class="api-content">
 
-      <h1>Developer & AI API Guide</h1>
-      <p class="api-subtitle">Everything you need to use the IPS Unlabeled Learning codebase — whether you're a human developer or an AI agent.</p>
+      <h1>Developer API Guide</h1>
+      <p class="api-subtitle">Everything you need to use the IPS Unlabeled Learning codebase.</p>
 
       <!-- Quick Start -->
       <section id="quickstart">
@@ -220,54 +219,6 @@ for epoch in range(200):
             <span class="constraint-tag">INFO</span>
             <p>Mean-field energy 1/(2N&sup2;) has N(N-1) terms → gradients are O(1), not O(1/N&sup2;). This is normalization, not signal suppression.</p>
           </div>
-        </div>
-      </section>
-
-      <!-- AI Agents -->
-      <section id="ai-agents">
-        <h2>For AI Agents</h2>
-        <p>This codebase is designed to be agent-friendly. Here's how to consume it:</p>
-
-        <div class="api-code-block">
-          <div class="api-code-header">Agent Workflow</div>
-          <pre><code># Step 1: Read CLAUDE.md at repo root for full architecture guide
-# Step 2: Choose pipeline (basis or NN)
-# Step 3: Follow the function chain:
-
-# Basis pipeline:
-#   lib.config.load_experiment_data() → data, t_obs
-#   lib.basis.get_basis() → build_V, build_Phi, K_V, K_Phi
-#   lib.solvers.solve_selftest() → alpha, beta
-#   lib.eval.evaluate_kde() → errors dict
-
-# NN pipeline:
-#   core.nn_models.RadialNet() → V network
-#   core.nn_models.RadialInteractionNet() → Phi network
-#   core.selftest_loss.compute_selftest_loss_batch() → loss
-#   Train loop → evaluate
-
-# Step 4: Validate with pytest tests/ -v
-# Step 5: V_error_pct &lt; 5% for model_e at d=2 is a sanity check</code></pre>
-        </div>
-
-        <div class="api-table-wrap">
-          <table class="api-table">
-            <thead>
-              <tr><th>Module</th><th>Key Functions</th><th>Purpose</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>config/model.py</code></td><td>Config</td><td>Central configuration</td></tr>
-              <tr><td><code>core/potentials.py</code></td><td>Potential classes</td><td>15+ potential functions</td></tr>
-              <tr><td><code>core/sde_simulator.py</code></td><td>SDESimulator</td><td>Euler-Maruyama integrator</td></tr>
-              <tr><td><code>core/nn_models.py</code></td><td>RadialNet, SymmetricMLP</td><td>NN architectures</td></tr>
-              <tr><td><code>core/selftest_loss.py</code></td><td>compute_selftest_loss_batch</td><td>Algorithm 1</td></tr>
-              <tr><td><code>lib/basis.py</code></td><td>get_basis</td><td>Oracle/RBF basis interface</td></tr>
-              <tr><td><code>lib/solvers.py</code></td><td>solve_selftest, solve_mle</td><td>Learning algorithms</td></tr>
-              <tr><td><code>lib/eval.py</code></td><td>evaluate_kde</td><td>L&sup2;(&rho;) error metrics</td></tr>
-              <tr><td><code>lib/config.py</code></td><td>load_experiment_data</td><td>Data loading + paths</td></tr>
-              <tr><td><code>lib/plot.py</code></td><td>apply_style, savefig</td><td>Publication figures</td></tr>
-            </tbody>
-          </table>
         </div>
       </section>
 

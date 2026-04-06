@@ -470,13 +470,13 @@ import Math from '../components/Math.astro';
       <div class="stress-card" style="border-left-color: #22c55e;">
         <p class="sc-title" style="color: #22c55e;">A: Smoothness Test</p>
         <div class="math-block" style="margin: 0.35rem 0; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
-          <Math tex={String.raw`V = -\tfrac{1}{2}|x|+|x|^2, \quad \Phi = -3\cdot\mathbf{1}_{[0.5,1]}+2\cdot\mathbf{1}_{[1,2]}`} />
+          <Math tex={String.raw`V = -\tfrac{1}{2}|x|+2|x|^2, \quad \Phi = -3\cdot\mathbf{1}_{[0.5,1]}+2\cdot\mathbf{1}_{[1,2]}`} />
         </div>
         <p class="sc-hypothesis"
           data-i18n-en="Piecewise constant &Phi; &rarr; violates C&#8308; smoothness"
           data-i18n-zh="分段常数 &Phi; &rarr; 违反 C&#8308; 光滑性">Piecewise constant &Phi; &rarr; violates C&#8308; smoothness</p>
-        <p class="sc-result">&nabla;V: Basis 1.07% &middot; NN 0.91%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 2.01% &middot; NN 1.74%</p>
+        <p class="sc-result">&nabla;V: Basis 1.07% &middot; NN 1.76%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 2.01% &middot; NN 3.32%</p>
         <p class="sc-verdict" style="color: #22c55e;"
           data-i18n-en="&check; Both handle non-smoothness well"
           data-i18n-zh="&check; 两种方法均良好应对非光滑">&check; Both handle non-smoothness well</p>
@@ -491,8 +491,8 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="Slow 1/r decay &rarr; &kappa;(A) = 146K, ill-conditioned"
           data-i18n-zh="慢 1/r 衰减 &rarr; &kappa;(A) = 146K，病态">Slow 1/r decay &rarr; &kappa;(A) = 146K, ill-conditioned</p>
-        <p class="sc-result">&nabla;V: Basis 1.46% &middot; NN 4.36%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 31.0% &middot; NN 14.3%</p>
+        <p class="sc-result">&nabla;V: Basis 1.46% &middot; NN 3.83%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 31.0% &middot; NN 26.7%</p>
         <p class="sc-verdict" style="color: #f59e0b;"
           data-i18n-en="&triangle; Ill-conditioning: NN wins &nabla;&Phi;, basis wins &nabla;V"
           data-i18n-zh="&triangle; 病态性：NN 赢 &nabla;&Phi;，基函数赢 &nabla;V">&triangle; Ill-conditioning: NN wins &nabla;&Phi;, basis wins &nabla;V</p>
@@ -507,11 +507,11 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="r⁻¹² blowup near origin → gradient explosion"
           data-i18n-zh="r⁻¹² 在原点附近爆炸 → 梯度爆炸">r<sup>&minus;12</sup> blowup near origin &rarr; gradient explosion</p>
-        <p class="sc-result">&nabla;V: Basis 8.88% &middot; NN 0.77%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 13.9% &middot; NN 14.1%</p>
+        <p class="sc-result">&nabla;V: Basis 8.88% &middot; NN 1.91%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 13.9% &middot; NN 40.4%</p>
         <p class="sc-verdict" style="color: #8b5cf6;"
-          data-i18n-en="&#9733; NN outperforms basis on singular &Phi;"
-          data-i18n-zh="&#9733; NN 在奇异 &Phi; 上超越基函数">&#9733; NN outperforms basis on singular &Phi;</p>
+          data-i18n-en="&#9733; NN wins &nabla;V by 4&times;; singular &nabla;&Phi; hard for both"
+          data-i18n-zh="&#9733; NN 在 &nabla;V 赢 4 倍；奇异 &nabla;&Phi; 对两者都困难">&#9733; NN wins &nabla;V by 4&times;; singular &nabla;&Phi; hard for both</p>
       </div>
 
       <!-- D: Smooth Control (Morse) -->
@@ -523,8 +523,8 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="All C&#8308; assumptions satisfied &rarr; baseline"
           data-i18n-zh="所有 C&#8308; 假设满足 &rarr; 基准">All C&#8308; assumptions satisfied &rarr; baseline</p>
-        <p class="sc-result">&nabla;V: Basis 1.72% &middot; NN 1.94%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 1.69% &middot; NN 4.57%</p>
+        <p class="sc-result">&nabla;V: Basis 1.72% &middot; NN 2.34%</p>
+        <p class="sc-result">&nabla;&Phi;: Basis 1.69% &middot; NN 3.43%</p>
         <p class="sc-verdict" style="color: #22d3ee;"
           data-i18n-en="&check; Both excellent on smooth potentials"
           data-i18n-zh="&check; 两者在光滑势上均表现优异">&check; Both excellent on smooth potentials</p>
