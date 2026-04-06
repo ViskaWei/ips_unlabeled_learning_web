@@ -421,7 +421,7 @@ import Math from '../components/Math.astro';
       <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
         data-i18n-en="Figure 1: Algorithm Workflow"
         data-i18n-zh="图 1：算法工作流">Figure 1: Algorithm Workflow</h4>
-      <img src="/figures/algorithm_combined_flowchart.png" alt="Algorithm workflow: LSE (left) and NN (right)" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <img src={`${import.meta.env.BASE_URL}/figures/algorithm_combined_flowchart.png`} alt="Algorithm workflow: LSE (left) and NN (right)" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
       <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
         data-i18n-en="Left: Least squares regression with basis functions. Right: Neural network regression via gradient descent. Both share the same self-test loss."
         data-i18n-zh="左：基函数最小二乘回归。右：神经网络梯度下降回归。两者共享同一个自测损失。">
@@ -677,7 +677,7 @@ import Math from '../components/Math.astro';
       <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
         data-i18n-en="Figure 2: M-scaling — Riemann vs Trapezoidal"
         data-i18n-zh="图 2：M-标度 — 黎曼和 vs 梯形法则">Figure 2: M-scaling — Riemann vs Trapezoidal</h4>
-      <img src="/figures/m_scaling_zerogap_multi_dt.png" alt="M-scaling convergence rates" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_zerogap_multi_dt.png`} alt="M-scaling convergence rates" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
       <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
         data-i18n-en="Riemann sum saturates at O(Δt) floor (left pair); trapezoidal rule achieves O((Δt)²) floor (right pair). 10 trials per point."
         data-i18n-zh="黎曼和在 O(Δt) 下界处饱和（左图对）；梯形法则达到 O((Δt)²) 下界（右图对）。每点 10 次试验。">
@@ -689,7 +689,7 @@ import Math from '../components/Math.astro';
       <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
         data-i18n-en="Figure 3: Discrete-Model Bias"
         data-i18n-zh="图 3：离散模型偏差">Figure 3: Discrete-Model Bias</h4>
-      <img src="/figures/m_scaling_discrete_bias.png" alt="Discrete model bias" style="width: 70%; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_discrete_bias.png`} alt="Discrete model bias" style="width: 70%; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
       <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
         data-i18n-en="When δt = Δt (zero gap), the O(Δt) bias is intrinsic and cannot be removed by refining quadrature."
         data-i18n-zh="当 δt = Δt（零间隙）时，O(Δt) 偏差是内在的，不能通过细化积分消除。">
@@ -701,7 +701,7 @@ import Math from '../components/Math.astro';
       <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
         data-i18n-en="Figure 4: Condition Number Scaling with N"
         data-i18n-zh="图 4：条件数随 N 的标度">Figure 4: Condition Number Scaling with N</h4>
-      <img src="/figures/condition_numbers_1x3.png" alt="Condition number scaling" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <img src={`${import.meta.env.BASE_URL}/figures/condition_numbers_1x3.png`} alt="Condition number scaling" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
       <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
         data-i18n-en="Left: κ* = O(N) at d=10. Center: κ_VV is N-independent. Right: κ_ΦΦ = O(N) driven by distance concentration."
         data-i18n-zh="左：κ* = O(N)（d=10）。中：κ_VV 与 N 无关。右：κ_ΦΦ = O(N)，由距离集中驱动。">
@@ -744,7 +744,7 @@ import Math from '../components/Math.astro';
         <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
           data-i18n-en="Figure 5: Non-Radial Potential Recovery (d=2)"
           data-i18n-zh="图 5：非径向势恢复（d=2）">Figure 5: Non-Radial Potential Recovery (d=2)</h4>
-        <img src="/figures/nn_model_aniso.png" alt="Anisotropic potential recovery" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <img src={`${import.meta.env.BASE_URL}/figures/nn_model_aniso.png`} alt="Anisotropic potential recovery" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
           data-i18n-en="NN recovers anisotropic V(x) with a=(1,4) and Gaussian Φ(z) with s=(0.5,1.5). Relative errors: ∇V 3.6%, ∇Φ 12.3%."
           data-i18n-zh="NN 恢复各向异性 V(x)（a=(1,4)）和高斯 Φ(z)（s=(0.5,1.5)）。相对误差：∇V 3.6%，∇Φ 12.3%。">
@@ -756,7 +756,7 @@ import Math from '../components/Math.astro';
         <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
           data-i18n-en="Figure 6: Boundary Recovery — Four Stress Tests"
           data-i18n-zh="图 6：边界恢复 — 四个压力测试">Figure 6: Boundary Recovery — Four Stress Tests</h4>
-        <img src="/figures/boundary_recovery.png" alt="Boundary recovery for four stress test models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <img src={`${import.meta.env.BASE_URL}/figures/boundary_recovery.png`} alt="Boundary recovery for four stress test models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
           data-i18n-en="Typical Φ'(r) estimators for four boundary models (d=2, M=2000, σ=1, δt=10⁻⁴, Δt=10⁻²). Gray shading: exploration measure ρ_Φ."
           data-i18n-zh="四个边界模型的典型 Φ'(r) 估计器（d=2, M=2000, σ=1, δt=10⁻⁴, Δt=10⁻²）。灰色阴影：探索测度 ρ_Φ。">
@@ -768,7 +768,7 @@ import Math from '../components/Math.astro';
         <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
           data-i18n-en="Figure 7: All Methods Comparison"
           data-i18n-zh="图 7：所有方法对比">Figure 7: All Methods Comparison</h4>
-        <img src="/figures/all_methods_combined.png" alt="All methods comparison for four models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <img src={`${import.meta.env.BASE_URL}/figures/all_methods_combined.png`} alt="All methods comparison for four models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
           data-i18n-en="Typical V' and Φ' estimators from all methods for four stress-test radial models (d=2). RBF basis produces oscillatory estimators, confirming the importance of basis specification."
           data-i18n-zh="四个压力测试径向模型的所有方法典型 V' 和 Φ' 估计器（d=2）。RBF 基函数产生振荡估计器，确认了基函数选择的重要性。">
