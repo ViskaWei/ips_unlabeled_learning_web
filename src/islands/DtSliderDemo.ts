@@ -1,7 +1,7 @@
 /**
  * Delta-t Slider Demo — dot-on-gradient gauge showing error severity.
  * Left (green) = low error = good. Right (red) = high error = bad.
- * Uses Reference model (Model E) data from paper Table 1.
+ * Uses Reference model (Model E) data from paper Table 2.
  * NN Self-Test (our method) is green.
  */
 
@@ -20,8 +20,8 @@ if (vizContainer && slider) {
     sinkhorn_Phi:       [0.82, 7.17, 47.38, 95.78],
     oracle_selftest_V:  [1.35, 0.67, 0.80, 6.84],
     oracle_selftest_Phi:[1.24, 0.74, 1.10, 6.93],
-    nn_selftest_V:      [null, 0.89, 1.25, 3.15],
-    nn_selftest_Phi:    [null, 1.80, 2.47, 5.80],
+    nn_selftest_V:      [null, 0.91, 1.25, 3.15],
+    nn_selftest_Phi:    [null, 1.74, 2.47, 5.80],
   };
 
   const canvas = document.createElement('canvas');
@@ -34,9 +34,9 @@ if (vizContainer && slider) {
   let animatedValues: Record<string, number> = {};
 
   const methods = [
-    { key: 'nn',       name: 'Self-Test (NN) ★',    dot: '#22c55e', ring: '#16a34a', label: '#22c55e' },
-    { key: 'oracle',   name: 'Self-Test (Basis) ★',  dot: '#4ade80', ring: '#16a34a', label: '#4ade80' },
-    { key: 'sinkhorn', name: 'Sinkhorn',            dot: '#a78bfa', ring: '#7c3aed', label: '#a78bfa' },
+    { key: 'nn',       name: 'Self-Test NN ★',      dot: '#22c55e', ring: '#16a34a', label: '#22c55e' },
+    { key: 'oracle',   name: 'Self-Test LSE ★',     dot: '#4ade80', ring: '#16a34a', label: '#4ade80' },
+    { key: 'sinkhorn', name: 'Sinkhorn MLE',        dot: '#a78bfa', ring: '#7c3aed', label: '#a78bfa' },
     { key: 'mle',      name: 'Labeled MLE',         dot: '#94a3b8', ring: '#64748b', label: '#94a3b8' },
   ];
 

@@ -55,7 +55,7 @@ if (container) {
     // === Section 1: NN vs Basis Bar Chart (d=2 only) ===
     const d2Rows = rows.filter((r: any) => r.d === 2);
     const barSection = el('div');
-    const barTitle = el('h3', undefined, 'Self-Test: Basis vs NN (d=2)');
+    const barTitle = el('h3', undefined, 'Self-Test: LSE vs NN (d=2)');
     Object.assign(barTitle.style, {
       fontSize: '1rem',
       fontWeight: '600',
@@ -90,13 +90,13 @@ if (container) {
 
       // ∇V group — Basis lighter, NN solid
       const vGroup = el('div', 'nn-bar-group');
-      vGroup.appendChild(makeBar(row.oracle_selftest_V, maxV, 'rgba(74, 222, 128, 0.45)', 'Basis'));
+      vGroup.appendChild(makeBar(row.oracle_selftest_V, maxV, 'rgba(74, 222, 128, 0.45)', 'LSE'));
       vGroup.appendChild(makeBar(row.nn_V, maxV, '#22c55e', 'NN'));
       barRow.appendChild(vGroup);
 
       // ∇Φ group — Basis lighter, NN solid
       const phiGroup = el('div', 'nn-bar-group');
-      phiGroup.appendChild(makeBar(row.oracle_selftest_Phi, maxPhi, 'rgba(167, 139, 250, 0.45)', 'Basis'));
+      phiGroup.appendChild(makeBar(row.oracle_selftest_Phi, maxPhi, 'rgba(167, 139, 250, 0.45)', 'LSE'));
       phiGroup.appendChild(makeBar(row.nn_Phi, maxPhi, '#8b5cf6', 'NN'));
       barRow.appendChild(phiGroup);
 
