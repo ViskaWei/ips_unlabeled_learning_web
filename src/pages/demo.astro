@@ -82,7 +82,7 @@ import Footer from '../components/Footer.astro';
     <h2 data-i18n-en="Estimated vs True Potentials"
         data-i18n-zh="估计势函数 vs 真实势函数">Estimated vs True Potentials</h2>
     <p data-i18n-en="Our self-test method recovers the gradient of both potentials. Solid line = true gradient; dashed = estimated. The error percentages are from our actual experiments (Tables 2 &amp; 4 in the paper)."
-       data-i18n-zh="我们的自测方法恢复了两个势函数的梯度。实线 = 真实梯度；虚线 = 估计值。误差百分比来自我们的实际实验（论文表 3）。">
+       data-i18n-zh="我们的自测方法恢复了两个势函数的梯度。实线 = 真实梯度；虚线 = 估计值。误差百分比来自我们的实际实验（论文表 2 和表 4）。">
       Our self-test method recovers the gradient of both potentials. Solid line = true gradient; dashed = estimated. The error percentages are from our actual experiments (Tables 2 &amp; 4 in the paper).
     </p>
 
@@ -111,9 +111,9 @@ import Footer from '../components/Footer.astro';
 
     <div class="callout callout-insight" style="margin-top: 1.5rem;">
       <p style="margin: 0;"
-        data-i18n-en="Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned Gram matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers."
-        data-i18n-zh="试试切换到模型 B（条件测试）——注意 &Phi; 估计因病态 Gram 矩阵（&kappa; = 146K）而退化。这是基函数方法最困难的情况；NN 部分恢复。">
-        Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned Gram matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers.
+        data-i18n-en="Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned normal matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers."
+        data-i18n-zh="试试切换到模型 B（条件数测试）——注意 &Phi; 估计因病态法方程矩阵（&kappa; = 146K）而退化。这是基函数方法最困难的情况；NN 部分恢复。">
+        Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned normal matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers.
       </p>
     </div>
   </section>
@@ -202,12 +202,12 @@ pip install -e .</code></pre>
           <span class="code-step">2</span>
           <span data-i18n-en="Generate Data" data-i18n-zh="生成数据">Generate Data</span>
         </div>
-        <pre class="code-block"><code>from core.potentials import HarmonicPotential, GaussianInteraction
+        <pre class="code-block"><code>from core.potentials import QuadraticConfinement, GaussianBumpInteraction
 from core.sde_simulator import SDESimulator
 
-V = HarmonicPotential(k=2.0)
-Phi = GaussianInteraction(A=1.0, sigma=0.8)
-sim = SDESimulator(V=V, Phi=Phi, sigma=1.0, dt=0.001)
+V = QuadraticConfinement(alpha1=-1.0, alpha2=2.0)
+Phi = GaussianBumpInteraction(beta=[-3, 2], c=[0.75, 1.5], sigma=[0.125, 0.25])
+sim = SDESimulator(V=V, Phi=Phi, sigma=1.0, dt=0.0001)  # δt = 10⁻⁴
 data, t_obs = sim.simulate(N=10, d=2, T=1.0, L=100, M=2000)</code></pre>
       </div>
 
@@ -236,11 +236,11 @@ alpha, beta, info = solve_selftest(
         </div>
         <pre class="code-block"><code>from lib.eval import evaluate_kde
 
-errors = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
-                      build_V_fn=build_V, build_Phi_fn=build_Phi)
-print("V error: %.1f%%" % errors['V_error_pct'])
-print("Phi error: %.1f%%" % errors['Phi_error_pct'])
-# Expected: V ~1%, Phi ~1.5% for Reference model</code></pre>
+v_err, phi_err = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
+                              build_V_fn=build_V, build_Phi_fn=build_Phi)
+print("V error: %.2f%%" % (v_err * 100))
+print("Phi error: %.2f%%" % (phi_err * 100))
+# Expected: V ~0.67%, Phi ~0.74% for Reference model at Δt=10⁻³</code></pre>
       </div>
     </div>
 
