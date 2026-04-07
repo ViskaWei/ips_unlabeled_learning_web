@@ -26,8 +26,8 @@ const benefits = [
       '无需恢复隐藏的配对。两张快照已足够；无需重建谁去了哪里。',
     ),
     callback: t(
-      'Recall: Sinkhorn MLE must reconstruct a trajectory first (via optimal transport). Self-test skips this entirely.',
-      '回想：Sinkhorn MLE 必须先重建轨迹（通过最优传输）。自测完全跳过这一步。',
+      'Recall: Sinkhorn Maximum Likelihood (Sinkhorn MLE) must reconstruct a trajectory first (via optimal transport). Self-test skips this entirely.',
+      '回想：Sinkhorn 最大似然（Sinkhorn MLE）必须先重建轨迹（通过最优传输）。自测完全跳过这一步。',
     ),
     color: '#f59e0b',
     delay: 100,
@@ -61,8 +61,8 @@ const benefits = [
   {
     title: t('Quadratic geometry', '二次几何'),
     detail: t(
-      'The loss is quadratic in (V,Φ). Under linear parameterization: convex least squares, SPD matrix A, condition number κ = O(N).',
-      '损失关于 (V,Φ) 是二次的。在线性参数化下：凸最小二乘、SPD 矩阵 A、条件数 κ = O(N)。',
+      'The loss is quadratic in (V,Φ). Under linear parameterization: convex least squares — the matrix A is symmetric and well-structured, condition number κ = O(N).',
+      '损失关于 (V,Φ) 是二次的。在线性参数化下：凸最小二乘——矩阵 A 是对称且结构良好的，条件数 κ = O(N)。',
     ),
     callback: t(
       'Compare: energy-balance approach gives a quartic loss (degree 4). Wasserstein gives a non-convex objective. Self-test: convex, direct solver applicable.',

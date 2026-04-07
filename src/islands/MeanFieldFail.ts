@@ -70,9 +70,12 @@ if (canvas) {
     const pts = sampleGaussian2D(N);
 
     // LEFT: empirical measure (delta spikes as dots with spike lines)
+    const dotRadius = N > 100 ? 2 : N > 60 ? 3 : 5;
     pts.forEach(([x, y]) => {
       const sx = cx1 + x * scale;
-      const sy = cy - y * scale;
+      const rawSy = cy - y * scale;
+      const spikeCap = Math.max(8, H * 0.05);
+      const sy = Math.max(spikeCap, rawSy);
       // Spike line
       ctx.beginPath();
       ctx.moveTo(sx, H * 0.85);
@@ -82,10 +85,27 @@ if (canvas) {
       ctx.stroke();
       // Dot
       ctx.beginPath();
-      ctx.arc(sx, sy, N > 50 ? 3 : 6, 0, Math.PI * 2);
+      ctx.arc(sx, sy, dotRadius, 0, Math.PI * 2);
       ctx.fillStyle = '#4f9cf9';
       ctx.fill();
     });
+
+    // "Our setting: N=10" fixed annotation when slider > 10
+    if (N > 10) {
+      const n10x = cx1;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.6)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(n10x, 28);
+      ctx.lineTo(n10x, H * 0.85);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(t('Our setting: N=10', '我们的设置：N=10'), n10x, H * 0.85 + 12);
+    }
 
     // RIGHT: smooth density (Gaussian bell curve, 2D projection as 1D cross-section)
     ctx.beginPath();

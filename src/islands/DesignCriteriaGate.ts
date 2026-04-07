@@ -42,16 +42,16 @@ const gates = [
   },
   {
     id: 'gate-3',
-    title: t('Criterion 3: Induces SPD Geometry', '标准 3：诱导 SPD 几何'),
+    title: t('Criterion 3: Guarantees a Unique Solution', '标准 3：保证唯一解'),
     desc: t(
-      'The bilinear form B(φ,ψ) induced by the test family must be symmetric and nonneg-definite. This gives the loss matrix A the structure of an SPD matrix — guaranteeing a unique minimizer and enabling condition number analysis.',
-      '测试族诱导的双线性型 B(φ,ψ) 必须是对称且非负定的。这赋予损失矩阵 A 以 SPD 结构——保证唯一极小值并使条件数分析成为可能。',
+      'The bilinear form B(φ,ψ) must be symmetric and non-negative — like a bowl shape. This gives the loss matrix A a well-structured form — guaranteeing a unique minimizer and enabling condition number analysis.',
+      '测试族诱导的双线性型 B(φ,ψ) 必须是对称且非负定——像碗的形状。这赋予损失矩阵 A 一个结构良好的形式——保证唯一极小值并使条件数分析成为可能。',
     ),
     violation: t(
       'Example violation: an asymmetric test family where B(φ,ψ) ≠ B(ψ,φ). The matrix A is no longer symmetric — no guarantee that the minimum is unique, and standard convergence theory fails.',
       '违例示例：一个不对称测试族，使 B(φ,ψ) ≠ B(ψ,φ)。矩阵 A 不再对称——无法保证极小值唯一，标准收敛理论失效。',
     ),
-    checkText: t('✓ SPD geometry → unique minimizer → condition number κ = O(N) → convergence theorem', '✓ SPD 几何 → 唯一极小值 → 条件数 κ = O(N) → 收敛定理'),
+    checkText: t('✓ Well-structured (symmetric, non-negative) matrix → unique minimizer → condition number κ = O(N) → convergence', '✓ 结构良好（对称、非负）矩阵 → 唯一极小值 → 条件数 κ = O(N) → 收敛'),
     color: '#22c55e',
   },
 ];

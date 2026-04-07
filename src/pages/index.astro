@@ -246,8 +246,8 @@ import Math from '../components/Math.astro';
   <section id="mean-field-fail" class="section section-wide">
     <p class="section-label" data-i18n-en="And Approach 3 Also Fails" data-i18n-zh="方法3也不行">And Approach 3 Also Fails</p>
     <h2 data-i18n-en="Mean-Field: Elegant Theory, Wrong Regime" data-i18n-zh="均场：优雅的理论，错误的范围">Mean-Field: Elegant Theory, Wrong Regime</h2>
-    <p data-i18n-en="For N→∞, the empirical measure converges to a smooth density satisfying a PDE — enabling clean inference. BUT: we care about finite N. At N=10, the empirical measure is 10 discrete delta spikes. Mean-field theory breaks down exactly here." data-i18n-zh="当 N→∞ 时，经验测度收敛到满足 PDE 的光滑密度——支持干净的推断。但：我们关心有限 N。在 N=10 时，经验测度是 10 个离散 delta 尖峰。均场理论在此处正好失效。">
-      For N&rarr;&infin;, the empirical measure converges to a smooth density satisfying a PDE — enabling clean inference. BUT: we care about finite N. At N=10, the empirical measure is 10 discrete delta spikes. Mean-field theory breaks down exactly here.
+    <p data-i18n-en="For N→∞, the empirical measure converges to a smooth density satisfying a partial differential equation (PDE) — enabling clean inference. BUT: we care about finite N. At N=10, the empirical measure is 10 discrete delta spikes. Mean-field theory breaks down exactly here." data-i18n-zh="当 N→∞ 时，经验测度收敛到满足偏微分方程（PDE）的光滑密度——支持干净的推断。但：我们关心有限 N。在 N=10 时，经验测度是 10 个离散 delta 尖峰。均场理论在此处正好失效。">
+      For N&rarr;&infin;, the empirical measure converges to a smooth density satisfying a partial differential equation (PDE) — enabling clean inference. BUT: we care about finite N. At N=10, the empirical measure is 10 discrete delta spikes. Mean-field theory breaks down exactly here.
     </p>
     <div class="demo-container">
       <div class="demo-label" data-i18n-en="Drag N — observe when empirical measure becomes smooth enough for mean-field" data-i18n-zh="拖动 N——观察经验测度何时足够光滑以使用均场">Drag N — observe when empirical measure becomes smooth enough for mean-field</div>
@@ -296,7 +296,7 @@ import Math from '../components/Math.astro';
     <h2 data-i18n-en="The Observable Forces the Formulation" data-i18n-zh="可观测量迫使我们进入这个公式">The Observable Forces the Formulation</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0;">
       <div style="padding:1.25rem;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:12px;">
-        <h4 style="color:#ef4444;margin:0 0 0.5rem;" data-i18n-en="Pointwise PDE: Impossible" data-i18n-zh="逐点 PDE：不可能">Pointwise PDE: Impossible</h4>
+        <h4 style="color:#ef4444;margin:0 0 0.5rem;" data-i18n-en="Pointwise Equation: Impossible" data-i18n-zh="逐点方程：不可能">Pointwise Equation: Impossible</h4>
         <p style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin:0;" data-i18n-en="μₙ is a sum of delta spikes. Try ∂μₙ/∂x at a particle location: it's ∞. Pointwise derivatives don't exist for delta masses. We CANNOT write ∂ₜμₙ = ... in the classical sense." data-i18n-zh="μₙ 是 delta 尖峰的和。在粒子位置求 ∂μₙ/∂x：结果是 ∞。逐点导数对 delta 质量不存在。我们无法以经典意义写出 ∂ₜμₙ = ...">
           &mu;<sub>n</sub> is a sum of delta spikes. Try &part;&mu;<sub>n</sub>/&part;x at a particle location: it's &infin;. Pointwise derivatives don't exist for delta masses. We CANNOT write &part;<sub>t</sub>&mu;<sub>n</sub> = ... in the classical sense.
         </p>
@@ -324,8 +324,8 @@ import Math from '../components/Math.astro';
     <div id="self-test-reveal" style="display:none;margin-top:2rem;">
       <div class="callout callout-success" style="border-color:var(--accent-green);">
         <h3 style="margin:0 0 0.75rem;" data-i18n-en="The Self-Test Family: ψ = V + Φ*μ" data-i18n-zh="自测函数族：ψ = V + Φ*μ">The Self-Test Family: &psi; = V + &Phi;*&mu;</h3>
-        <p style="margin:0;" data-i18n-en="Use the candidate potential ITSELF as the test function. This family satisfies all three criteria automatically: it's computable from μₙ, it's linear in (V,Φ), and it induces an SPD bilinear form. The self-test family is not a trick — it is the natural answer to the test-function design problem." data-i18n-zh="用候选势函数本身作为测试函数。这个族自动满足所有三条标准：可从 μₙ 计算、对 (V,Φ) 线性、诱导 SPD 双线性型。自测函数族不是技巧——它是测试函数设计问题的自然答案。">
-          Use the candidate potential ITSELF as the test function. This family satisfies all three criteria automatically: it's computable from &mu;<sub>n</sub>, it's linear in (V,&Phi;), and it induces an SPD bilinear form. The self-test family is not a trick — it is the natural answer to the test-function design problem.
+        <p style="margin:0;" data-i18n-en="Use the candidate potential ITSELF as the test function. This family satisfies all three criteria automatically: it's computable from μₙ, it's linear in (V,Φ), and it induces a well-structured (symmetric, non-negative) bilinear form. The self-test family is not a trick — it is the natural answer to the test-function design problem." data-i18n-zh="用候选势函数本身作为测试函数。这个族自动满足所有三条标准：可从 μₙ 计算、对 (V,Φ) 线性、诱导一个结构良好（对称、非负）双线性型。自测函数族不是技巧——它是测试函数设计问题的自然答案。">
+          Use the candidate potential ITSELF as the test function. This family satisfies all three criteria automatically: it's computable from &mu;<sub>n</sub>, it's linear in (V,&Phi;), and it induces a well-structured (symmetric, non-negative) bilinear form. The self-test family is not a trick — it is the natural answer to the test-function design problem.
         </p>
       </div>
     </div>
@@ -1240,9 +1240,9 @@ import Math from '../components/Math.astro';
     <details>
       <summary data-i18n-en="Neural Network Architecture"
                data-i18n-zh="神经网络架构">Neural Network Architecture</summary>
-      <p data-i18n-en="Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions. The activation function must be C&sup2;-smooth (e.g. Softplus or Tanh) — ReLU is not allowed because the self-test loss requires computing Laplacians via automatic differentiation, which needs second derivatives to exist. The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters."
+      <p data-i18n-en="Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions. The activation function must be C&sup2;-smooth (for example, Softplus or Tanh) — ReLU is not allowed because the self-test loss requires computing Laplacians via automatic differentiation, which needs second derivatives to exist. The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters."
          data-i18n-zh="V 和 &Phi; 均由 3 层 MLP 参数化，隐藏维度 [64, 64, 64]。激活函数必须是 C&sup2; 连续的（如 Softplus 或 Tanh）——不能用 ReLU，因为自测损失需要通过自动微分计算拉普拉斯量，要求二阶导数存在。对称性 &Phi;(x) = &Phi;(-x) 通过架构强制实现。总参数：约 17,000。">
-        Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions. The activation function must be C&sup2;-smooth (e.g. Softplus or Tanh) — ReLU is not allowed because the self-test loss requires computing Laplacians via automatic differentiation, which needs second derivatives to exist. The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters.
+        Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions. The activation function must be C&sup2;-smooth (for example, Softplus or Tanh) — ReLU is not allowed because the self-test loss requires computing Laplacians via automatic differentiation, which needs second derivatives to exist. The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters.
       </p>
     </details>
   </section>
