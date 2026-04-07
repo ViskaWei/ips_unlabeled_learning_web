@@ -245,9 +245,9 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.font = 'bold 13px Inter, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Energy Ledger', ledgerX, ledgerY);
+    ctx.fillText('Energy Components', ledgerX, ledgerY);
 
-    // Dissipation bar (red - spending) — amplified for visual clarity
+    // Dissipation bar (red) — amplified for visual clarity
     const maxBar = ledgerW * 0.8;
     const dissBar = Math.min(Math.abs(dissipation) * 5000, maxBar);
     const row1Y = ledgerY + 25;
@@ -258,13 +258,13 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillRect(ledgerX, row1Y, dissBar, barH);
     ctx.fillStyle = '#ef4444';
     ctx.font = '11px Inter, sans-serif';
-    ctx.fillText('Dissipation (spending)', ledgerX + 5, row1Y + 15);
+    ctx.fillText('Dissipation', ledgerX + 5, row1Y + 15);
     // Value label at bar end
     ctx.textAlign = 'right';
     ctx.fillText(dissipation.toFixed(5), ledgerX + ledgerW - 4, row1Y + 15);
     ctx.textAlign = 'left';
 
-    // Diffusion bar (cyan - income)
+    // Diffusion bar (cyan)
     const row2Y = row1Y + barH + 6;
     const diffBar = Math.min(Math.abs(diffusion) * 5000, maxBar);
 
@@ -273,12 +273,12 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
     ctx.fillRect(ledgerX, row2Y, diffBar, barH);
     ctx.fillStyle = '#06b6d4';
-    ctx.fillText('Diffusion (income)', ledgerX + 5, row2Y + 15);
+    ctx.fillText('Diffusion', ledgerX + 5, row2Y + 15);
     ctx.textAlign = 'right';
     ctx.fillText(diffusion.toFixed(5), ledgerX + ledgerW - 4, row2Y + 15);
     ctx.textAlign = 'left';
 
-    // Energy change bar (amber - balance)
+    // Energy change bar (amber)
     const row3Y = row2Y + barH + 6;
     const eBar = Math.min(Math.abs(energyChange) * 5000, maxBar);
 
@@ -287,7 +287,7 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = energyChange < 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(245, 158, 11, 0.6)';
     ctx.fillRect(ledgerX, row3Y, eBar, barH);
     ctx.fillStyle = '#f59e0b';
-    ctx.fillText('Energy change (balance)', ledgerX + 5, row3Y + 15);
+    ctx.fillText('Energy change', ledgerX + 5, row3Y + 15);
     ctx.textAlign = 'right';
     ctx.fillText(energyChange.toFixed(5), ledgerX + ledgerW - 4, row3Y + 15);
     ctx.textAlign = 'left';

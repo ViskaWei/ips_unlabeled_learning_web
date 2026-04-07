@@ -252,7 +252,7 @@ print("Phi error: %.2f%%" % (phi_err * 100))
         <ul style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 1.2rem;">
           <li data-i18n-en="Self-test loss converges to negative (not zero)" data-i18n-zh="自测损失收敛到负值（不是零）">Self-test loss converges to negative (not zero)</li>
           <li data-i18n-en="L-curve regularization fails at dt_obs=0.1" data-i18n-zh="L-curve 正则化在 dt_obs=0.1 时失效">L-curve regularization fails at dt_obs=0.1</li>
-          <li data-i18n-en="NN activation must be Softplus for C&sup2; Laplacians" data-i18n-zh="NN 激活函数必须是 Softplus（C&sup2; 拉普拉斯量）">NN activation must be Softplus for C&sup2; Laplacians</li>
+          <li data-i18n-en="NN activation must be C&sup2;-smooth (Softplus or Tanh, not ReLU) for AD-based Laplacians" data-i18n-zh="NN 激活函数必须 C&sup2; 连续（Softplus 或 Tanh，不能用 ReLU）以计算拉普拉斯量">NN activation must be C&sup2;-smooth (Softplus or Tanh, not ReLU) for AD-based Laplacians</li>
         </ul>
       </div>
     </div>

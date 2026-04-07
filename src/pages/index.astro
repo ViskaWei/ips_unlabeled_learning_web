@@ -215,66 +215,71 @@ import Math from '../components/Math.astro';
 
   <div class="section-divider"></div>
 
-  <!-- ═══ Section 4: Our Insight ═══ -->
+  <!-- ═══ Section 4: Our Approach — The Weak Form PDE ═══ -->
   <section id="insight" class="section section-wide">
     <p class="section-label"
-      data-i18n-en="Our Insight"
-      data-i18n-zh="核心洞察">Our Insight</p>
-    <h2 data-i18n-en="The Self-Test Loss"
-        data-i18n-zh="自测损失函数">The Self-Test Loss</h2>
+      data-i18n-en="Our Approach"
+      data-i18n-zh="我们的方法">Our Approach</p>
+    <h2 data-i18n-en="From Particles to Distributions: The Weak Form PDE"
+        data-i18n-zh="从粒子到分布：弱形式 PDE">From Particles to Distributions: The Weak Form PDE</h2>
 
+    <!-- Step 1: The key realization -->
     <div class="callout callout-insight" style="margin-bottom: 2rem; border-left: 3px solid var(--accent-cyan);">
       <p style="margin: 0; font-size: 0.95rem;"
-        data-i18n-en="Key shift: stop trying to recover individual trajectories. The empirical distribution &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) is directly observable from unlabeled snapshots — no labels needed. And &mu;&#8346; satisfies a PDE that is linear in V and &Phi;. This transforms a combinatorial matching problem into a functional optimization."
-        data-i18n-zh="关键转变：停止尝试恢复个体轨迹。经验分布 &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) 可以从无标签快照直接观测——不需要标签。而且 &mu;&#8346; 满足一个关于 V 和 &Phi; 线性的 PDE。这将组合匹配问题转化为泛函优化。">
-        Key shift: stop trying to recover individual trajectories. The empirical distribution &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) is directly observable from unlabeled snapshots — no labels needed. And &mu;&#8346; satisfies a PDE that is linear in V and &Phi;. This transforms a combinatorial matching problem into a functional optimization.
+        data-i18n-en="Key realization: we don't need to track individual particles. The empirical distribution &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) is directly observable from unlabeled snapshots — no labels needed. Better yet, &mu;&#8346; satisfies a PDE that is linear in V and &Phi;. This transforms the N! combinatorial matching problem into a functional optimization."
+        data-i18n-zh="关键洞察：我们不需要追踪单个粒子。经验分布 &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) 可以从无标签快照直接观测——不需要标签。更好的是，&mu;&#8346; 满足一个关于 V 和 &Phi; 线性的 PDE。这将 N! 组合匹配问题转化为泛函优化。">
+        Key realization: we don't need to track individual particles. The empirical distribution &mu;&#8346; = (1/N)&sum;&delta;(X&#7522;) is directly observable from unlabeled snapshots — no labels needed. Better yet, &mu;&#8346; satisfies a PDE that is linear in V and &Phi;. This transforms the N! combinatorial matching problem into a functional optimization.
       </p>
     </div>
 
-    <p data-i18n-en="Think of the particle system as a bank account. Energy has three flows: dissipation (spending), diffusion (income), and net energy change (balance). For the correct potentials, the books must balance — this is the self-test."
-       data-i18n-zh="把粒子系统想象成一个银行账户。能量有三种流动：耗散（支出）、扩散（收入）和净能量变化（余额）。对于正确的势函数，账本必须平衡——这就是自测。">
-      Think of the particle system as a bank account. Energy has three flows: dissipation (spending), diffusion (income), and net energy change (balance). For the correct potentials, the books must balance — this is the self-test.
+    <!-- Step 2: Why the Weak Form? -->
+    <h3 data-i18n-en="Why the Weak Form?"
+        data-i18n-zh="为什么用弱形式？">Why the Weak Form?</h3>
+    <p data-i18n-en="The particle distribution &mu;&#8346; evolves according to a Fokker-Planck-type PDE. But &mu;&#8346; is a sum of delta functions — we can't take its derivatives directly. The weak form solves this: multiply the PDE by a smooth test function &psi; and integrate. Now everything becomes empirical averages over particle positions — directly computable from snapshots, with no derivatives of &mu;&#8346; needed."
+       data-i18n-zh="粒子分布 &mu;&#8346; 按 Fokker-Planck 型 PDE 演化。但 &mu;&#8346; 是 delta 函数之和——无法直接求导。弱形式解决了这个问题：将 PDE 乘以光滑测试函数 &psi; 并积分。现在一切都变成了粒子位置的经验平均——直接从快照计算，无需对 &mu;&#8346; 求导。">
+      The particle distribution &mu;&#8346; evolves according to a Fokker-Planck-type PDE. But &mu;&#8346; is a sum of delta functions — we can't take its derivatives directly. The weak form solves this: multiply the PDE by a smooth test function &psi; and integrate. Now everything becomes empirical averages over particle positions — directly computable from snapshots, with no derivatives of &mu;&#8346; needed.
     </p>
 
-    <!-- Energy Balance Demo -->
-    <div class="demo-container">
-      <div class="demo-canvas-wrap" style="aspect-ratio: 16/9; min-height: 380px;">
-        <canvas id="energy-canvas"></canvas>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+      <div style="text-align: center; padding: 1rem; background: rgba(239, 68, 68, 0.06); border-radius: 10px; border-top: 3px solid #ef4444;">
+        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #ef4444; margin-bottom: 0.5rem;"
+          data-i18n-en="Strong Form"
+          data-i18n-zh="强形式">Strong Form</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"
+          data-i18n-en="Requires &nabla;&mu; — impossible for delta functions"
+          data-i18n-zh="需要 &nabla;&mu; — 对 delta 函数不可能">Requires &nabla;&mu; — impossible for delta functions</p>
       </div>
-      <div class="demo-controls" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
-        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-          <label style="flex: 1; min-width: 200px;">
-            <span style="font-size: 0.8rem; color: var(--text-muted);"
-              data-i18n-en="V scale (confinement strength)"
-              data-i18n-zh="V缩放（束缚强度）">V scale (confinement strength)</span>
-            <input type="range" id="v-scale" min="0" max="3" step="0.1" value="1"
-              style="width: 100%; accent-color: var(--accent-blue);" />
-          </label>
-          <label style="flex: 1; min-width: 200px;">
-            <span style="font-size: 0.8rem; color: var(--text-muted);"
-              data-i18n-en="&Phi; scale (interaction strength)"
-              data-i18n-zh="&Phi;缩放（交互强度）">&Phi; scale (interaction strength)</span>
-            <input type="range" id="phi-scale" min="0" max="3" step="0.1" value="1"
-              style="width: 100%; accent-color: var(--accent-purple);" />
-          </label>
-        </div>
+      <div style="text-align: center; padding: 1rem; background: rgba(34, 197, 94, 0.06); border-radius: 10px; border-top: 3px solid #22c55e;">
+        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #22c55e; margin-bottom: 0.5rem;"
+          data-i18n-en="Weak Form"
+          data-i18n-zh="弱形式">Weak Form</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"
+          data-i18n-en="Only needs &int;&psi; d&mu; = (1/N)&sum;&psi;(X&#7522;) — computable!"
+          data-i18n-zh="只需 &int;&psi; d&mu; = (1/N)&sum;&psi;(X&#7522;) — 可计算！">Only needs &int;&psi; d&mu; = (1/N)&sum;&psi;(X&#7522;) — computable!</p>
+      </div>
+      <div style="text-align: center; padding: 1rem; background: rgba(59, 130, 246, 0.06); border-radius: 10px; border-top: 3px solid #3b82f6;">
+        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #3b82f6; margin-bottom: 0.5rem;"
+          data-i18n-en="Key Property"
+          data-i18n-zh="关键性质">Key Property</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"
+          data-i18n-en="Linear in V and &Phi; &rarr; convex optimization"
+          data-i18n-zh="关于 V 和 &Phi; 线性 &rarr; 凸优化">Linear in V and &Phi; &rarr; convex optimization</p>
       </div>
     </div>
 
-    <!-- Loss Landscape -->
-    <h3 style="margin-top: 3rem;"
-      data-i18n-en="Why Not Just Square the Residual?"
-      data-i18n-zh="为什么不直接对残差取平方？">Why Not Just Square the Residual?</h3>
-    <p data-i18n-en="Squaring the residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). Our self-test loss has a strictly negative minimum at the true potentials, breaking this degeneracy."
-       data-i18n-zh="对残差取平方会在V=0, &Phi;=0处产生退化极小值（平凡解）。我们的自测损失在真实势函数处具有严格负的极小值，打破了这种退化。">
-      Squaring the residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). Our self-test loss has a strictly negative minimum at the true potentials, breaking this degeneracy.
+    <p data-i18n-en="The crucial advantage: because the weak form PDE is linear in V and &Phi;, we can choose the test function &psi; to be V and &Phi; themselves. This self-testing trick — using the unknowns as their own test functions — produces a loss with a remarkable property."
+       data-i18n-zh="关键优势：由于弱形式 PDE 关于 V 和 &Phi; 是线性的，我们可以选择测试函数 &psi; 就是 V 和 &Phi; 本身。这个自测技巧——用未知量作为自己的测试函数——产生了一个具有显著性质的损失函数。">
+      The crucial advantage: because the weak form PDE is linear in V and &Phi;, we can choose the test function &psi; to be V and &Phi; themselves. This self-testing trick — using the unknowns as their own test functions — produces a loss with a remarkable property.
     </p>
 
-    <div class="demo-container">
-      <div class="demo-canvas-wrap" style="aspect-ratio: 2/1;">
-        <canvas id="loss-landscape-canvas"></canvas>
-      </div>
-    </div>
+    <!-- Step 3: The Self-Test Loss -->
+    <h3 style="margin-top: 2.5rem;"
+      data-i18n-en="The Self-Test Loss"
+      data-i18n-zh="自测损失函数">The Self-Test Loss</h3>
+    <p data-i18n-en="Applying Ito's formula with &psi; = V + &Phi;*&mu; (the energy functional) as the test function, the weak form residual decomposes into three computable terms. Each term is an empirical average over particle snapshots — no velocity estimation, no trajectory matching."
+       data-i18n-zh="以 &psi; = V + &Phi;*&mu;（能量泛函）作为测试函数应用伊藤公式，弱形式残差分解为三个可计算项。每一项都是粒子快照上的经验平均——无需速度估计，无需轨迹匹配。">
+      Applying Ito's formula with &psi; = V + &Phi;*&mu; (the energy functional) as the test function, the weak form residual decomposes into three computable terms. Each term is an empirical average over particle snapshots — no velocity estimation, no trajectory matching.
+    </p>
 
     <div class="math-block">
       <Math tex={String.raw`\mathcal{L}(\theta) = \frac{1}{2}\, J_{\text{diss}}\, \Delta t \;-\; \frac{\sigma^2}{2}\, J_{\text{diff}}\, \Delta t \;+\; \delta E_{\text{tot}}`} />
@@ -284,9 +289,9 @@ import Math from '../components/Math.astro';
     <h3 style="margin-top: 2.5rem;"
       data-i18n-en="Anatomy of the Loss"
       data-i18n-zh="损失函数解剖">Anatomy of the Loss</h3>
-    <p data-i18n-en="Each term has a clear physical meaning. The loss balances three energy flows:"
-       data-i18n-zh="每一项都有清晰的物理含义。损失函数平衡三种能量流：">
-      Each term has a clear physical meaning. The loss balances three energy flows:
+    <p data-i18n-en="Each term comes from the weak form PDE tested against the energy functional:"
+       data-i18n-zh="每一项来自以能量泛函为测试函数的弱形式 PDE：">
+      Each term comes from the weak form PDE tested against the energy functional:
     </p>
 
     <div class="loss-anatomy">
@@ -302,9 +307,9 @@ import Math from '../components/Math.astro';
           <h4 style="color: #ef4444;">
             J<sub>diss</sub> = &Sigma;&Vert;drift&Vert;&sup2; / N
           </h4>
-          <p data-i18n-en="Energy dissipation: how much work the drift forces do. Always positive — stronger forces mean more dissipation."
-             data-i18n-zh="能量耗散：漂移力做了多少功。始终为正——力越强，耗散越大。">
-            Energy dissipation: how much work the drift forces do. Always positive — stronger forces mean more dissipation.
+          <p data-i18n-en="Dissipation: how much work the drift forces do. The 1/2 coefficient (from the self-test trick) is what breaks the degeneracy — it makes L(V*, &Phi;*) strictly negative."
+             data-i18n-zh="耗散：漂移力做了多少功。1/2 系数（来自自测技巧）是打破退化的关键——它使 L(V*, &Phi;*) 严格为负。">
+            Dissipation: how much work the drift forces do. The 1/2 coefficient (from the self-test trick) is what breaks the degeneracy — it makes L(V*, &Phi;*) strictly negative.
           </p>
         </div>
       </div>
@@ -315,9 +320,9 @@ import Math from '../components/Math.astro';
           <h4 style="color: #3b82f6;">
             J<sub>diff</sub> = (1/N) &Sigma;<sub>i</sub>&Delta;V + (1/N&sup2;) &Sigma;<sub>i&ne;j</sub>&Delta;&Phi;
           </h4>
-          <p data-i18n-en="Diffusion contribution: double sum over all particle pairs. Depends on the Laplacian of V and &Phi; — how curved the energy landscape is."
-             data-i18n-zh="扩散贡献：对所有粒子对的双重求和。取决于 V 和 &Phi; 的拉普拉斯量——能量曲面的曲率。">
-            Diffusion contribution: double sum over all particle pairs. Depends on the Laplacian of V and &Phi; — how curved the energy landscape is.
+          <p data-i18n-en="Diffusion contribution: depends on the Laplacian of V and &Phi;. Computable from snapshots via the basis expansion or neural network parameterization."
+             data-i18n-zh="扩散贡献：取决于 V 和 &Phi; 的拉普拉斯量。通过基函数展开或神经网络参数化可从快照计算。">
+            Diffusion contribution: depends on the Laplacian of V and &Phi;. Computable from snapshots via the basis expansion or neural network parameterization.
           </p>
         </div>
       </div>
@@ -340,10 +345,88 @@ import Math from '../components/Math.astro';
           <Math tex={String.raw`\mathbb{E}[\mathcal{L}(V^*, \Phi^*)] = -\tfrac{1}{2}\,\mathbb{E}[J_{\text{diss}}^*\,\Delta t] < 0 \qquad \text{vs.} \qquad \mathcal{L}(0, 0) = 0`} />
         </div>
         <p style="margin: 0; color: #22c55e; font-size: 0.85rem;"
-          data-i18n-en="The true potentials are strictly below the trivial solution — this breaks the degeneracy."
-          data-i18n-zh="真势严格低于平凡解——打破退化。">
-          The true potentials are strictly below the trivial solution — this breaks the degeneracy.
+          data-i18n-en="The true potentials produce a strictly negative loss, while the trivial solution gives zero — this breaks the degeneracy that plagues squared-residual approaches."
+          data-i18n-zh="真实势函数产生严格负的损失值，而平凡解给出零——这打破了困扰平方残差方法的退化性。">
+          The true potentials produce a strictly negative loss, while the trivial solution gives zero — this breaks the degeneracy that plagues squared-residual approaches.
         </p>
+      </div>
+    </div>
+
+    <!-- Loss Landscape -->
+    <h3 style="margin-top: 3rem;"
+      data-i18n-en="Why Not Just Square the Residual?"
+      data-i18n-zh="为什么不直接对残差取平方？">Why Not Just Square the Residual?</h3>
+    <p data-i18n-en="Squaring the weak form residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). Our self-test loss, by using V and &Phi; as their own test functions, has a strictly negative minimum at the true potentials."
+       data-i18n-zh="对弱形式残差取平方会在V=0, &Phi;=0处产生退化极小值（平凡解）。我们的自测损失通过用 V 和 &Phi; 作为自己的测试函数，在真实势函数处具有严格负的极小值。">
+      Squaring the weak form residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). Our self-test loss, by using V and &Phi; as their own test functions, has a strictly negative minimum at the true potentials.
+    </p>
+
+    <div class="demo-container">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 2/1;">
+        <canvas id="loss-landscape-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Why Not Energy Balance? -->
+    <h3 style="margin-top: 3rem;"
+      data-i18n-en="Why Not Energy Balance?"
+      data-i18n-zh="为什么不用能量平衡？">Why Not Energy Balance?</h3>
+    <p data-i18n-en="You might wonder: since the system conserves energy, couldn't we just match the dissipation and diffusion terms directly? This is mathematically valid — for the true potentials, the energy identity does hold. But there's a fatal problem: using this for parameter estimation requires matching |&nabla;V|&sup2; and |&nabla;&Phi;|&sup2; terms, which are 4th-order in the potentials. The resulting optimization landscape is non-convex and computationally intractable."
+       data-i18n-zh="你可能会想：既然系统守恒能量，能不能直接匹配耗散和扩散项？这在数学上是成立的——对于真实势函数，能量恒等式确实成立。但有一个致命问题：用此方法做参数估计需要匹配 |&nabla;V|&sup2; 和 |&nabla;&Phi;|&sup2; 项，这些是势函数的4次方。得到的优化问题是非凸的，计算上不可解。">
+      You might wonder: since the system conserves energy, couldn't we just match the dissipation and diffusion terms directly? This is mathematically valid — for the true potentials, the energy identity does hold. But there's a fatal problem: using this for parameter estimation requires matching |&nabla;V|&sup2; and |&nabla;&Phi;|&sup2; terms, which are 4th-order in the potentials. The resulting optimization landscape is non-convex and computationally intractable.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+      <div style="padding: 1rem 1.25rem; background: rgba(239, 68, 68, 0.06); border-radius: 10px; border-left: 3px solid #ef4444;">
+        <p style="font-weight: 600; font-size: 0.9rem; color: #ef4444; margin-bottom: 0.5rem;"
+          data-i18n-en="Energy Balance Approach"
+          data-i18n-zh="能量平衡方法">Energy Balance Approach</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+          data-i18n-en="Match dissipation = diffusion &minus; &delta;E. Involves |&nabla;V|&sup2; and |&nabla;&Phi;|&sup2; &rarr; 4th-order equations. Non-convex, intractable."
+          data-i18n-zh="匹配 耗散 = 扩散 &minus; &delta;E。涉及 |&nabla;V|&sup2; 和 |&nabla;&Phi;|&sup2; &rarr; 4次方程。非凸，不可解。">
+          Match dissipation = diffusion &minus; &delta;E. Involves |&nabla;V|&sup2; and |&nabla;&Phi;|&sup2; &rarr; 4th-order equations. Non-convex, intractable.
+        </p>
+      </div>
+      <div style="padding: 1rem 1.25rem; background: rgba(34, 197, 94, 0.06); border-radius: 10px; border-left: 3px solid #22c55e;">
+        <p style="font-weight: 600; font-size: 0.9rem; color: #22c55e; margin-bottom: 0.5rem;"
+          data-i18n-en="Our Self-Test (Variation Approach)"
+          data-i18n-zh="我们的自测（变分方法）">Our Self-Test (Variation Approach)</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+          data-i18n-en="Test the weak form PDE against &psi; = V + &Phi;*&mu;. Only 2nd-order terms. Linear in basis coefficients &rarr; convex, solvable."
+          data-i18n-zh="以 &psi; = V + &Phi;*&mu; 测试弱形式 PDE。只有2阶项。关于基函数系数线性 &rarr; 凸，可解。">
+          Test the weak form PDE against &psi; = V + &Phi;*&mu;. Only 2nd-order terms. Linear in basis coefficients &rarr; convex, solvable.
+        </p>
+      </div>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-muted);"
+      data-i18n-en="The demo below illustrates the energy identity: when V and &Phi; are correct (both scales = 1), the three terms cancel. But turning this into an estimator would require 4th-order optimization — our self-test achieves the same goal with only 2nd-order terms."
+      data-i18n-zh="下面的演示展示了能量恒等式：当 V 和 &Phi; 正确时（两个缩放均为1），三项相互抵消。但将此变为估计器需要4阶优化——我们的自测用2阶项达到了相同目标。">
+      The demo below illustrates the energy identity: when V and &Phi; are correct (both scales = 1), the three terms cancel. But turning this into an estimator would require 4th-order optimization — our self-test achieves the same goal with only 2nd-order terms.
+    </p>
+
+    <!-- Energy Balance Demo — now contextualized as illustration of the failed alternative -->
+    <div class="demo-container">
+      <div class="demo-canvas-wrap" style="aspect-ratio: 16/9; min-height: 380px;">
+        <canvas id="energy-canvas"></canvas>
+      </div>
+      <div class="demo-controls" style="flex-direction: column; align-items: stretch; gap: 0.75rem;">
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+          <label style="flex: 1; min-width: 200px;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);"
+              data-i18n-en="V scale (confinement strength)"
+              data-i18n-zh="V缩放（束缚强度）">V scale (confinement strength)</span>
+            <input type="range" id="v-scale" min="0" max="3" step="0.1" value="1"
+              style="width: 100%; accent-color: var(--accent-blue);" />
+          </label>
+          <label style="flex: 1; min-width: 200px;">
+            <span style="font-size: 0.8rem; color: var(--text-muted);"
+              data-i18n-en="&Phi; scale (interaction strength)"
+              data-i18n-zh="&Phi;缩放（交互强度）">&Phi; scale (interaction strength)</span>
+            <input type="range" id="phi-scale" min="0" max="3" step="0.1" value="1"
+              style="width: 100%; accent-color: var(--accent-purple);" />
+          </label>
+        </div>
       </div>
     </div>
   </section>
@@ -472,9 +555,9 @@ import Math from '../components/Math.astro';
       data-i18n-en="Results by Model"
       data-i18n-zh="各模型结果">Results by Model</h3>
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;"
-      data-i18n-en="Each model tests one theoretical assumption. Data at d=2, Self-Test basis vs NN."
+      data-i18n-en="Each model tests one theoretical assumption. Data at d=2, Self-Test LSE vs NN."
       data-i18n-zh="每个模型测试一个理论假设。数据为 d=2，自测基函数 vs 神经网络。">
-      Each model tests one theoretical assumption. Data at d=2, Self-Test basis vs NN.
+      Each model tests one theoretical assumption. Data at d=2, Self-Test LSE vs NN.
     </p>
 
     <div class="stress-cards">
@@ -487,8 +570,8 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="Piecewise-like &Phi; &rarr; stresses C&#8308; smoothness"
           data-i18n-zh="类分段 &Phi; &rarr; 挑战 C&#8308; 光滑性">Piecewise-like &Phi; &rarr; stresses C&#8308; smoothness</p>
-        <p class="sc-result">&nabla;V: Basis 1.07% &middot; NN 1.76%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 2.01% &middot; NN 3.32%</p>
+        <p class="sc-result">&nabla;V: LSE 1.07% &middot; NN 1.76%</p>
+        <p class="sc-result">&nabla;&Phi;: LSE 2.01% &middot; NN 3.32%</p>
         <p class="sc-verdict" style="color: #22c55e;"
           data-i18n-en="&check; Both handle non-smoothness well"
           data-i18n-zh="&check; 两种方法均良好应对非光滑">&check; Both handle non-smoothness well</p>
@@ -503,11 +586,11 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="Slow 1/r decay &rarr; &kappa;(A) = 146K, ill-conditioned"
           data-i18n-zh="慢 1/r 衰减 &rarr; &kappa;(A) = 146K，病态">Slow 1/r decay &rarr; &kappa;(A) = 146K, ill-conditioned</p>
-        <p class="sc-result">&nabla;V: Basis 1.46% &middot; NN 3.83%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 31.0% &middot; NN 26.7%</p>
+        <p class="sc-result">&nabla;V: LSE 1.46% &middot; NN 3.83%</p>
+        <p class="sc-result">&nabla;&Phi;: LSE 31.0% &middot; NN 26.7%</p>
         <p class="sc-verdict" style="color: #f59e0b;"
-          data-i18n-en="&triangle; Ill-conditioning: NN wins &nabla;&Phi;, basis wins &nabla;V"
-          data-i18n-zh="&triangle; 病态性：NN 赢 &nabla;&Phi;，基函数赢 &nabla;V">&triangle; Ill-conditioning: NN wins &nabla;&Phi;, basis wins &nabla;V</p>
+          data-i18n-en="&triangle; Ill-conditioning: NN wins &nabla;&Phi;, LSE wins &nabla;V"
+          data-i18n-zh="&triangle; 病态性：NN 赢 &nabla;&Phi;，LSE 赢 &nabla;V">&triangle; Ill-conditioning: NN wins &nabla;&Phi;, LSE wins &nabla;V</p>
       </div>
 
       <!-- C: Singularity (LJ) -->
@@ -519,8 +602,8 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="r⁻¹² blowup near origin → gradient explosion"
           data-i18n-zh="r⁻¹² 在原点附近爆炸 → 梯度爆炸">r<sup>&minus;12</sup> blowup near origin &rarr; gradient explosion</p>
-        <p class="sc-result">&nabla;V: Basis 8.88% &middot; NN 1.91%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 13.9% &middot; NN 40.4%</p>
+        <p class="sc-result">&nabla;V: LSE 8.88% &middot; NN 1.91%</p>
+        <p class="sc-result">&nabla;&Phi;: LSE 13.9% &middot; NN 40.4%</p>
         <p class="sc-verdict" style="color: #8b5cf6;"
           data-i18n-en="&#9733; NN wins &nabla;V by 4&times;; singular &nabla;&Phi; hard for both"
           data-i18n-zh="&#9733; NN 在 &nabla;V 赢 4 倍；奇异 &nabla;&Phi; 对两者都困难">&#9733; NN wins &nabla;V by 4&times;; singular &nabla;&Phi; hard for both</p>
@@ -535,8 +618,8 @@ import Math from '../components/Math.astro';
         <p class="sc-hypothesis"
           data-i18n-en="All C&#8308; assumptions satisfied &rarr; baseline"
           data-i18n-zh="所有 C&#8308; 假设满足 &rarr; 基准">All C&#8308; assumptions satisfied &rarr; baseline</p>
-        <p class="sc-result">&nabla;V: Basis 1.72% &middot; NN 2.34%</p>
-        <p class="sc-result">&nabla;&Phi;: Basis 1.69% &middot; NN 3.43%</p>
+        <p class="sc-result">&nabla;V: LSE 1.72% &middot; NN 2.34%</p>
+        <p class="sc-result">&nabla;&Phi;: LSE 1.69% &middot; NN 3.43%</p>
         <p class="sc-verdict" style="color: #22d3ee;"
           data-i18n-en="&check; Both excellent on smooth potentials"
           data-i18n-zh="&check; 两者在光滑势上均表现优异">&check; Both excellent on smooth potentials</p>
@@ -603,11 +686,11 @@ import Math from '../components/Math.astro';
         data-i18n-zh="误差界与标度律">Error Bound &amp; Scaling</h2>
 
     <div class="math-block" style="border-left-color: var(--accent-green);">
-      <Math tex={String.raw`|\widehat{\theta}_{M,\Delta t} - \theta_*| \;\le\; C\!\left(\underbrace{\Delta t}_{\text{discretization}} + \underbrace{\frac{1}{\sqrt{M}}}_{\text{statistical}}\right)`} />
+      <Math tex={String.raw`|\widehat{\theta}_{M,\Delta t} - \theta_*| \;\le\; C\!\left(\underbrace{(\Delta t)^\alpha}_{\text{discretization}} + \underbrace{\frac{1}{\sqrt{M}}}_{\text{statistical}}\right)`} />
     </div>
-    <p data-i18n-en="More snapshots M &rarr; statistical error drops as 1/&radic;M. Larger observation gap &Delta;t &rarr; discretization bias grows linearly. The self-test avoids velocity estimation, so its &Delta;t bias is weaker than MLE/Sinkhorn."
-       data-i18n-zh="更多快照 M &rarr; 统计误差按 1/&radic;M 下降。更大观测间隔 &Delta;t &rarr; 离散化偏差线性增长。自测避免了速度估计，所以 &Delta;t 偏差比 MLE/Sinkhorn 更小。">
-      More snapshots M &rarr; statistical error drops as 1/&radic;M. Larger observation gap &Delta;t &rarr; discretization bias grows linearly. The self-test avoids velocity estimation, so its &Delta;t bias is weaker than MLE/Sinkhorn.
+    <p data-i18n-en="More snapshots M &rarr; statistical error drops as 1/&radic;M. The discretization bias depends on the quadrature rule: &alpha;=1 for Riemann sum (O(&Delta;t) floor), &alpha;=2 for trapezoidal/chordwise rule (O((&Delta;t)&sup2;) floor). See Figure 2 below for the comparison."
+       data-i18n-zh="更多快照 M &rarr; 统计误差按 1/&radic;M 下降。离散化偏差取决于积分法则：Riemann 和对应 &alpha;=1（O(&Delta;t) 下限），梯形/chordwise 法则对应 &alpha;=2（O((&Delta;t)&sup2;) 下限）。见下方图 2 的对比。">
+      More snapshots M &rarr; statistical error drops as 1/&radic;M. The discretization bias depends on the quadrature rule: &alpha;=1 for Riemann sum (O(&Delta;t) floor), &alpha;=2 for trapezoidal/chordwise rule (O((&Delta;t)&sup2;) floor). See Figure 2 below for the comparison.
     </p>
 
     <!-- Condition Number Table -->
@@ -672,41 +755,100 @@ import Math from '../components/Math.astro';
   </section>
 
   <!-- ═══ Paper Figures: Error Bound & Scaling ═══ -->
-  <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 2rem; max-width: 900px; margin-left: auto; margin-right: auto; padding: 0 1rem;">
+  <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 3rem; max-width: 900px; margin-left: auto; margin-right: auto; padding: 0 1rem;">
+
+    <!-- Figure 2: M-scaling -->
     <div class="paper-figure">
-      <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
         data-i18n-en="Figure 2: M-scaling — Riemann vs Trapezoidal"
         data-i18n-zh="图 2：M-标度 — 黎曼和 vs 梯形法则">Figure 2: M-scaling — Riemann vs Trapezoidal</h4>
-      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_zerogap_multi_dt.png`} alt="M-scaling convergence rates" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
-        data-i18n-en="Riemann sum saturates at O(Δt) floor (left pair); trapezoidal rule achieves O((Δt)²) floor (right pair). 10 trials per point."
-        data-i18n-zh="黎曼和在 O(Δt) 下界处饱和（左图对）；梯形法则达到 O((Δt)²) 下界（右图对）。每点 10 次试验。">
-        Riemann sum saturates at O(&Delta;t) floor (left pair); trapezoidal rule achieves O((&Delta;t)&sup2;) floor (right pair). 10 trials per point.
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
+        data-i18n-en="This figure validates the error bound formula above. As the number of snapshots M increases, both ∇V and ∇Φ errors decrease — but they eventually hit a floor determined by the quadrature rule."
+        data-i18n-zh="此图验证了上方的误差界公式。随着快照数 M 增加，∇V 和 ∇Φ 误差都下降——但最终会触底，底线由积分法则决定。">
+        This figure validates the error bound formula above. As the number of snapshots M increases, both &nabla;V and &nabla;&Phi; errors decrease — but they eventually hit a floor determined by the quadrature rule.
       </p>
+      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_zerogap_multi_dt.png`} alt="M-scaling convergence rates" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.06); border-radius: 8px; border-left: 3px solid #ef4444;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #ef4444; margin-bottom: 0.25rem;"
+            data-i18n-en="Left pair: Riemann sum (&alpha;=1)"
+            data-i18n-zh="左图对：黎曼和（&alpha;=1）">Left pair: Riemann sum (&alpha;=1)</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="Error drops as 1/√M, then saturates at O(Δt) — the Riemann discretization floor. Adding more data doesn't help."
+            data-i18n-zh="误差按 1/&radic;M 下降，然后在 O(&Delta;t) 处饱和——黎曼离散化下限。增加更多数据也无济于事。">
+            Error drops as 1/&radic;M, then saturates at O(&Delta;t) — the Riemann discretization floor. Adding more data doesn't help.
+          </p>
+        </div>
+        <div style="padding: 0.75rem; background: rgba(34, 197, 94, 0.06); border-radius: 8px; border-left: 3px solid #22c55e;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #22c55e; margin-bottom: 0.25rem;"
+            data-i18n-en="Right pair: Trapezoidal rule (&alpha;=2)"
+            data-i18n-zh="右图对：梯形法则（&alpha;=2）">Right pair: Trapezoidal rule (&alpha;=2)</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="Same 1/√M statistical rate, but the floor drops to O((Δt)²) — quadratically better. This is why we use the trapezoidal rule."
+            data-i18n-zh="相同的 1/&radic;M 统计速率，但下限降至 O((&Delta;t)&sup2;)——二次方改进。这就是我们使用梯形法则的原因。">
+            Same 1/&radic;M statistical rate, but the floor drops to O((&Delta;t)&sup2;) — quadratically better. This is why we use the trapezoidal rule.
+          </p>
+        </div>
+      </div>
     </div>
 
+    <!-- Figure 3: Discrete-Model Bias -->
     <div class="paper-figure">
-      <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
         data-i18n-en="Figure 3: Discrete-Model Bias"
         data-i18n-zh="图 3：离散模型偏差">Figure 3: Discrete-Model Bias</h4>
-      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_discrete_bias.png`} alt="Discrete model bias" style="width: 70%; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
-        data-i18n-en="When δt = Δt (zero gap), the O(Δt) bias is intrinsic and cannot be removed by refining quadrature."
-        data-i18n-zh="当 δt = Δt（零间隙）时，O(Δt) 偏差是内在的，不能通过细化积分消除。">
-        When &delta;t = &Delta;t (zero gap), the O(&Delta;t) bias is intrinsic and cannot be removed by refining quadrature.
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
+        data-i18n-en="What happens when you observe data at the same resolution you simulate? When the fine simulation step δt equals the observation gap Δt (zero gap), there is no room to refine the quadrature. The O(Δt) bias becomes intrinsic to the discrete model itself."
+        data-i18n-zh="当你以模拟的相同精度观测数据会怎样？当精细模拟步长 &delta;t 等于观测间隔 &Delta;t（零间隙）时，没有空间细化积分。O(&Delta;t) 偏差成为离散模型本身的内在属性。">
+        What happens when you observe data at the same resolution you simulate? When the fine simulation step &delta;t equals the observation gap &Delta;t (zero gap), there is no room to refine the quadrature. The O(&Delta;t) bias becomes intrinsic to the discrete model itself.
       </p>
+      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_discrete_bias.png`} alt="Discrete model bias" style="width: 70%; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <div class="callout callout-insight" style="margin-top: 1rem;">
+        <p style="margin: 0; font-size: 0.85rem;"
+          data-i18n-en="Takeaway: the error floor in this regime is a fundamental limit of the discrete model, not a numerical artifact. To push accuracy below O(Δt), you must use finer simulation (δt &lt; Δt) and a higher-order quadrature rule."
+          data-i18n-zh="要点：这种情况下的误差下限是离散模型的根本极限，不是数值伪影。要将精度推到 O(&Delta;t) 以下，必须使用更精细的模拟（&delta;t &lt; &Delta;t）和更高阶的积分法则。">
+          Takeaway: the error floor in this regime is a fundamental limit of the discrete model, not a numerical artifact. To push accuracy below O(&Delta;t), you must use finer simulation (&delta;t &lt; &Delta;t) and a higher-order quadrature rule.
+        </p>
+      </div>
     </div>
 
+    <!-- Figure 4: Condition Number Scaling -->
     <div class="paper-figure">
-      <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
         data-i18n-en="Figure 4: Condition Number Scaling with N"
         data-i18n-zh="图 4：条件数随 N 的标度">Figure 4: Condition Number Scaling with N</h4>
-      <img src={`${import.meta.env.BASE_URL}/figures/condition_numbers_1x3.png`} alt="Condition number scaling" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
-        data-i18n-en="Left: κ* = O(N) at d=10. Center: κ_VV is N-independent. Right: κ_ΦΦ = O(N) driven by distance concentration."
-        data-i18n-zh="左：κ* = O(N)（d=10）。中：κ_VV 与 N 无关。右：κ_ΦΦ = O(N)，由距离集中驱动。">
-        Left: &kappa;<sub>*</sub> = O(N) at d=10. Center: &kappa;<sub>VV</sub> is N-independent. Right: &kappa;<sub>&Phi;&Phi;</sub> = O(N) driven by distance concentration.
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
+        data-i18n-en="The condition number κ controls how much noise gets amplified when solving the linear system. Three panels decompose the total κ into its V and Φ contributions, revealing which part drives the difficulty."
+        data-i18n-zh="条件数 &kappa; 控制求解线性系统时噪声被放大的程度。三个面板将总 &kappa; 分解为 V 和 &Phi; 的贡献，揭示了哪个部分驱动了问题难度。">
+        The condition number &kappa; controls how much noise gets amplified when solving the linear system. Three panels decompose the total &kappa; into its V and &Phi; contributions, revealing which part drives the difficulty.
       </p>
+      <img src={`${import.meta.env.BASE_URL}/figures/condition_numbers_1x3.png`} alt="Condition number scaling" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-top: 1rem;">
+        <div style="padding: 0.6rem; background: rgba(59, 130, 246, 0.06); border-radius: 8px; text-align: center;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #3b82f6; margin-bottom: 0.25rem;"
+            data-i18n-en="Left: &kappa;* (total)"
+            data-i18n-zh="左：&kappa;*（总）">Left: &kappa;* (total)</p>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="O(N) at d=10 — matches Proposition 3"
+            data-i18n-zh="O(N)（d=10）— 符合命题 3">O(N) at d=10 — matches Proposition 3</p>
+        </div>
+        <div style="padding: 0.6rem; background: rgba(34, 197, 94, 0.06); border-radius: 8px; text-align: center;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #22c55e; margin-bottom: 0.25rem;"
+            data-i18n-en="Center: &kappa;<sub>VV</sub>"
+            data-i18n-zh="中：&kappa;<sub>VV</sub>">Center: &kappa;<sub>VV</sub></p>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="N-independent — V is always well-conditioned"
+            data-i18n-zh="与 N 无关——V 始终良态">N-independent — V is always well-conditioned</p>
+        </div>
+        <div style="padding: 0.6rem; background: rgba(245, 158, 11, 0.06); border-radius: 8px; text-align: center;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #f59e0b; margin-bottom: 0.25rem;"
+            data-i18n-en="Right: &kappa;<sub>&Phi;&Phi;</sub>"
+            data-i18n-zh="右：&kappa;<sub>&Phi;&Phi;</sub>">Right: &kappa;<sub>&Phi;&Phi;</sub></p>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="O(N) — distance concentration makes &Phi; harder with more particles"
+            data-i18n-zh="O(N)——距离集中使 &Phi; 随粒子增加更难">O(N) — distance concentration makes &Phi; harder</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -739,41 +881,96 @@ import Math from '../components/Math.astro';
     </div>
 
     <!-- Paper Figures: NN & Boundary Recovery -->
-    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 2rem;">
+    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 3rem;">
+
+      <!-- Figure 5: Non-Radial -->
       <div class="paper-figure">
-        <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+        <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
           data-i18n-en="Figure 5: Non-Radial Potential Recovery (d=2)"
           data-i18n-zh="图 5：非径向势恢复（d=2）">Figure 5: Non-Radial Potential Recovery (d=2)</h4>
-        <img src={`${import.meta.env.BASE_URL}/figures/nn_model_aniso.png`} alt="Anisotropic potential recovery" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
-          data-i18n-en="NN recovers anisotropic V(x) with a=(1,4) and Gaussian Φ(z) with s=(0.5,1.5). Relative errors: ∇V 3.6%, ∇Φ 12.3%."
-          data-i18n-zh="NN 恢复各向异性 V(x)（a=(1,4)）和高斯 Φ(z)（s=(0.5,1.5)）。相对误差：∇V 3.6%，∇Φ 12.3%。">
-          NN recovers anisotropic V(x) with a=(1,4) and Gaussian &Phi;(z) with s=(0.5,1.5). Relative errors: &nabla;V 3.6%, &nabla;&Phi; 12.3%.
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
+          data-i18n-en="All stress tests above use radial potentials V(|x|) and Φ(|z|). But real systems can be anisotropic — forces vary by direction. This figure tests whether the NN can recover non-radial potentials where each spatial axis has different parameters."
+          data-i18n-zh="上面所有压力测试都用径向势 V(|x|) 和 &Phi;(|z|)。但真实系统可以是各向异性的——力随方向变化。此图测试 NN 能否恢复每个空间轴有不同参数的非径向势。">
+          All stress tests above use radial potentials V(|x|) and &Phi;(|z|). But real systems can be anisotropic — forces vary by direction. This figure tests whether the NN can recover non-radial potentials where each spatial axis has different parameters.
         </p>
+        <img src={`${import.meta.env.BASE_URL}/figures/nn_model_aniso.png`} alt="Anisotropic potential recovery" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+          <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.06); border-radius: 8px; border-left: 3px solid #3b82f6;">
+            <p style="font-weight: 600; font-size: 0.8rem; color: #3b82f6; margin-bottom: 0.25rem;"
+              data-i18n-en="V(x): anisotropic confinement"
+              data-i18n-zh="V(x)：各向异性束缚">V(x): anisotropic confinement</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+              data-i18n-en="a=(1,4) — 4× stronger along y-axis. NN recovers the elliptical shape with ∇V error 3.6%."
+              data-i18n-zh="a=(1,4)——y 轴方向强 4 倍。NN 以 &nabla;V 误差 3.6% 恢复椭圆形状。">
+              a=(1,4) — 4&times; stronger along y-axis. NN recovers the elliptical shape with &nabla;V error 3.6%.
+            </p>
+          </div>
+          <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.06); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+            <p style="font-weight: 600; font-size: 0.8rem; color: #8b5cf6; margin-bottom: 0.25rem;"
+              data-i18n-en="&Phi;(z): anisotropic interaction"
+              data-i18n-zh="&Phi;(z)：各向异性交互">&Phi;(z): anisotropic interaction</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+              data-i18n-en="Gaussian with s=(0.5, 1.5) — interaction range differs by axis. ∇Φ error 12.3%, harder due to pairwise coupling."
+              data-i18n-zh="高斯 s=(0.5, 1.5)——交互范围因轴而异。&nabla;&Phi; 误差 12.3%，因粒子对耦合更难。">
+              Gaussian with s=(0.5, 1.5) — interaction range differs by axis. &nabla;&Phi; error 12.3%, harder due to pairwise coupling.
+            </p>
+          </div>
+        </div>
       </div>
 
+      <!-- Figure 6: Boundary Recovery -->
       <div class="paper-figure">
-        <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+        <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
           data-i18n-en="Figure 6: Boundary Recovery — Four Stress Tests"
           data-i18n-zh="图 6：边界恢复 — 四个压力测试">Figure 6: Boundary Recovery — Four Stress Tests</h4>
-        <img src={`${import.meta.env.BASE_URL}/figures/boundary_recovery.png`} alt="Boundary recovery for four stress test models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
-          data-i18n-en="Typical Φ'(r) estimators for four boundary models (d=2, M=2000, σ=1, δt=10⁻⁴, Δt=10⁻²). Gray shading: exploration measure ρ_Φ."
-          data-i18n-zh="四个边界模型的典型 Φ'(r) 估计器（d=2, M=2000, σ=1, δt=10⁻⁴, Δt=10⁻²）。灰色阴影：探索测度 ρ_Φ。">
-          Typical &Phi;'(r) estimators for four boundary models (d=2, M=2000, &sigma;=1, &delta;t=10<sup>&minus;4</sup>, &Delta;t=10<sup>&minus;2</sup>). Gray shading: exploration measure &rho;<sub>&Phi;</sub>.
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
+          data-i18n-en="How well can we recover the interaction force Φ'(r) across different models? Each panel compares the true Φ' (black dashed) with LSE (green) and NN (blue) estimators. The gray shading shows the exploration measure ρ_Φ — where particles actually visit. Estimation quality degrades sharply outside the explored region."
+          data-i18n-zh="我们能多好地恢复交互力 &Phi;'(r)？每个面板对比真实 &Phi;'（黑色虚线）与 LSE（绿色）和 NN（蓝色）估计器。灰色阴影显示探索测度 &rho;<sub>&Phi;</sub>——粒子实际访问的区域。估计质量在探索区域外急剧退化。">
+          How well can we recover the interaction force &Phi;'(r) across different models? Each panel compares the true &Phi;' (black dashed) with LSE (green) and NN (blue) estimators. The gray shading shows the exploration measure &rho;<sub>&Phi;</sub> — where particles actually visit. Estimation quality degrades sharply outside the explored region.
         </p>
+        <img src={`${import.meta.env.BASE_URL}/figures/boundary_recovery.png`} alt="Boundary recovery for four stress test models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <div class="callout callout-insight" style="margin-top: 1rem;">
+          <p style="margin: 0; font-size: 0.85rem;"
+            data-i18n-en="Key insight: the gray exploration measure ρ_Φ is the fundamental limit. Both LSE and NN can only recover Φ' where data exists. Model C (Lennard-Jones) shows the most dramatic failure — the r⁻¹² singularity means particles rarely get close, leaving the short-range force unresolved."
+            data-i18n-zh="关键洞察：灰色探索测度 &rho;<sub>&Phi;</sub> 是根本极限。LSE 和 NN 都只能在有数据的地方恢复 &Phi;'。模型 C（Lennard-Jones）最为极端——r&sup1;&sup2; 奇异性意味着粒子很少靠近，短程力无法解析。">
+            Key insight: the gray exploration measure &rho;<sub>&Phi;</sub> is the fundamental limit. Both LSE and NN can only recover &Phi;' where data exists. Model C (Lennard-Jones) shows the most dramatic failure — the r<sup>&minus;12</sup> singularity means particles rarely get close, leaving the short-range force unresolved.
+          </p>
+        </div>
       </div>
 
+      <!-- Figure 7: All Methods Comparison -->
       <div class="paper-figure">
-        <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+        <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
           data-i18n-en="Figure 7: All Methods Comparison"
           data-i18n-zh="图 7：所有方法对比">Figure 7: All Methods Comparison</h4>
-        <img src={`${import.meta.env.BASE_URL}/figures/all_methods_combined.png`} alt="All methods comparison for four models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;"
-          data-i18n-en="Typical V' and Φ' estimators from all methods for four stress-test radial models (d=2). RBF basis produces oscillatory estimators, confirming the importance of basis specification."
-          data-i18n-zh="四个压力测试径向模型的所有方法典型 V' 和 Φ' 估计器（d=2）。RBF 基函数产生振荡估计器，确认了基函数选择的重要性。">
-          Typical V' and &Phi;' estimators from all methods for four stress-test radial models (d=2). RBF basis produces oscillatory estimators, confirming the importance of basis specification.
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
+          data-i18n-en="The full picture: Self-Test (LSE and NN) vs Labeled MLE vs Sinkhorn MLE vs RBF basis, across all four stress-test models. Each row is one model; left column shows V', right column shows Φ'."
+          data-i18n-zh="全景对比：自测（LSE 和 NN）vs 标签 MLE vs Sinkhorn MLE vs RBF 基函数，跨所有四个压力测试模型。每行一个模型；左列 V'，右列 &Phi;'。">
+          The full picture: Self-Test (LSE and NN) vs Labeled MLE vs Sinkhorn MLE vs RBF basis, across all four stress-test models. Each row is one model; left column shows V', right column shows &Phi;'.
         </p>
+        <img src={`${import.meta.env.BASE_URL}/figures/all_methods_combined.png`} alt="All methods comparison for four models" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+          <div style="padding: 0.75rem; background: rgba(34, 197, 94, 0.06); border-radius: 8px;">
+            <p style="font-weight: 600; font-size: 0.8rem; color: #22c55e; margin-bottom: 0.25rem;"
+              data-i18n-en="Self-Test (green/blue)"
+              data-i18n-zh="自测（绿色/蓝色）">Self-Test (green/blue)</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+              data-i18n-en="Consistently tracks the true potential across all models. NN especially excels on V' where it doesn't need basis specification."
+              data-i18n-zh="在所有模型中始终跟踪真实势。NN 在 V' 上尤其出色，无需基函数规格。">
+              Consistently tracks the true potential across all models. NN especially excels on V' where it doesn't need basis specification.
+            </p>
+          </div>
+          <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.06); border-radius: 8px;">
+            <p style="font-weight: 600; font-size: 0.8rem; color: #ef4444; margin-bottom: 0.25rem;"
+              data-i18n-en="RBF basis (orange)"
+              data-i18n-zh="RBF 基函数（橙色）">RBF basis (orange)</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+              data-i18n-en="Produces oscillatory estimators — the wrong basis choice amplifies noise into spurious wiggles. This confirms why basis specification matters."
+              data-i18n-zh="产生振荡估计器——错误的基函数选择将噪声放大为虚假波动。这确认了基函数选择的重要性。">
+              Produces oscillatory estimators — the wrong basis choice amplifies noise into spurious wiggles. This confirms why basis specification matters.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -864,14 +1061,14 @@ import Math from '../components/Math.astro';
     </details>
 
     <details>
-      <summary data-i18n-en="Energy Balance via Ito's Formula"
-               data-i18n-zh="通过伊藤公式的能量平衡">Energy Balance via Ito's Formula</summary>
+      <summary data-i18n-en="Weak Form PDE &amp; Self-Test Derivation"
+               data-i18n-zh="弱形式 PDE 与自测推导">Weak Form PDE &amp; Self-Test Derivation</summary>
       <div class="math-block">
-        <Math tex={String.raw`\underbrace{\delta E_{\text{tot}}}_{\text{energy change}} \;=\; \underbrace{\frac{\sigma^2}{2}\, J_{\text{diff}}\, \Delta t}_{\text{diffusion (income)}} \;-\; \underbrace{J_{\text{diss}}\, \Delta t}_{\text{dissipation (spending)}} \;+\; \text{martingale}`} />
+        <Math tex={String.raw`\underbrace{\delta E_{\text{tot}}}_{\text{energy change}} \;=\; \underbrace{\frac{\sigma^2}{2}\, J_{\text{diff}}\, \Delta t}_{\text{diffusion}} \;-\; \underbrace{J_{\text{diss}}\, \Delta t}_{\text{dissipation}} \;+\; \text{martingale}`} />
       </div>
-      <p data-i18n-en="Applying Ito's formula to the energy functional E = &lt;V + &Phi;*&mu;, &mu;&gt; gives the balance equation: energy change = diffusion income - dissipation spending."
-         data-i18n-zh="将伊藤公式应用于能量泛函 E = &lt;V + &Phi;*&mu;, &mu;&gt; 得到平衡方程：能量变化 = 扩散收入 - 耗散支出。">
-        Applying Ito's formula to the energy functional gives the balance equation: energy change = diffusion income - dissipation spending.
+      <p data-i18n-en="Applying Ito's formula to the energy functional E = &lt;V + &Phi;*&mu;, &mu;&gt; with the unknowns as test functions. The 1/2 self-test coefficient arises from using the variation perspective (testing against V,&Phi; themselves) rather than energy balance matching (which leads to 4th-order equations)."
+         data-i18n-zh="以能量泛函 E = &lt;V + &Phi;*&mu;, &mu;&gt; 应用伊藤公式，用未知量本身作为测试函数。1/2 自测系数来自变分视角（用 V,&Phi; 自身做测试），而非能量平衡匹配（那会导致4阶方程）。">
+        Applying Ito's formula to the energy functional with the unknowns as test functions. The 1/2 self-test coefficient arises from the variation perspective, not energy balance matching.
       </p>
     </details>
 
@@ -890,9 +1087,9 @@ import Math from '../components/Math.astro';
     <details>
       <summary data-i18n-en="Neural Network Architecture"
                data-i18n-zh="神经网络架构">Neural Network Architecture</summary>
-      <p data-i18n-en="Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions and C&sup2;-smooth activations (Softplus for the reference model, Tanh for boundary tests). The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters."
-         data-i18n-zh="V和&Phi;均由3层MLP参数化，隐藏维度为[64, 64, 64]，使用C&sup2;光滑激活函数（参考模型用 Softplus，边界测试用 Tanh）。对称性 &Phi;(x) = &Phi;(-x) 通过架构强制实现。总参数：约17,000。">
-        Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions and C&sup2;-smooth activations (Softplus for the reference model, Tanh for boundary tests). The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters.
+      <p data-i18n-en="Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions. The activation function must be C&sup2;-smooth (e.g. Softplus or Tanh) — ReLU is not allowed because the self-test loss requires computing Laplacians via automatic differentiation, which needs second derivatives to exist. The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters."
+         data-i18n-zh="V 和 &Phi; 均由 3 层 MLP 参数化，隐藏维度 [64, 64, 64]。激活函数必须是 C&sup2; 连续的（如 Softplus 或 Tanh）——不能用 ReLU，因为自测损失需要通过自动微分计算拉普拉斯量，要求二阶导数存在。对称性 &Phi;(x) = &Phi;(-x) 通过架构强制实现。总参数：约 17,000。">
+        Both V and &Phi; are parameterized by 3-layer MLPs with [64, 64, 64] hidden dimensions. The activation function must be C&sup2;-smooth (e.g. Softplus or Tanh) — ReLU is not allowed because the self-test loss requires computing Laplacians via automatic differentiation, which needs second derivatives to exist. The symmetry &Phi;(x) = &Phi;(-x) is enforced architecturally. Total: ~17,000 parameters.
       </p>
     </details>
   </section>

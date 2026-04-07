@@ -12,11 +12,12 @@ if (canvas) {
   const N = 3;
   const d = 2;
   const ref = MODELS.model_e;
-  const system = new ParticleSystem(ref.V, ref.Phi, 0.25, 0.01, N, d, 99);
-  const state = system.initialize(1.0);
+  // Higher sigma for visual spread; demo is illustrative, not quantitative
+  const system = new ParticleSystem(ref.V, ref.Phi, 0.7, 0.01, N, d, 99);
+  const state = system.initialize(1.5);
 
-  // Warmup
-  for (let i = 0; i < 200; i++) system.step(state);
+  // Short warmup — let particles settle slightly but stay spread
+  for (let i = 0; i < 80; i++) system.step(state);
 
   const PARTICLE_COLORS = ['#06b6d4', '#f59e0b', '#ec4899'];
   const ARROW_SCALE = 50; // scale force vectors for visibility
@@ -29,9 +30,11 @@ if (canvas) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  // Dynamic scale: computed each frame from particle positions
+  let dynamicScale = Math.min(800, 600) / 1.0; // fallback
+
   function worldToScreen(x: number, y: number, w: number, h: number): [number, number] {
-    const scale = Math.min(w, h) / 2.8;
-    return [w / 2 + x * scale, h / 2 - y * scale];
+    return [w / 2 + x * dynamicScale, h / 2 - y * dynamicScale];
   }
 
   function drawArrow(
@@ -72,11 +75,23 @@ if (canvas) {
     const h = canvas.height / window.devicePixelRatio;
     ctx.clearRect(0, 0, w, h);
 
-    // Step simulation
-    for (let s = 0; s < 3; s++) system.step(state);
+    // Step simulation (1 step per frame for smooth, readable motion)
+    system.step(state);
 
     const pos = state.positions;
-    const scale = Math.min(w, h) / 4.5;
+
+    // Dynamic scale: fit particles to ~60% of canvas with smooth interpolation
+    let maxR = 0;
+    for (let i = 0; i < N; i++) {
+      const r = Math.sqrt(pos[i * 2] ** 2 + pos[i * 2 + 1] ** 2);
+      if (r > maxR) maxR = r;
+    }
+    const worldExtent = Math.max(maxR * 1.6, 0.1); // leave room for arrows
+    const targetScale = Math.min(w, h) * 0.42 / worldExtent;
+    // Smooth interpolation to avoid jitter (fast convergence)
+    dynamicScale += (targetScale - dynamicScale) * 0.12;
+
+    const circleScale = Math.min(w, h) / 4.5;
 
     // Faint origin marker
     const [ox, oy] = worldToScreen(0, 0, w, h);
@@ -85,7 +100,7 @@ if (canvas) {
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(ox, oy, scale * 1.5, 0, Math.PI * 2);
+    ctx.arc(ox, oy, circleScale * 1.5, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -120,24 +135,25 @@ if (canvas) {
       fPhiY /= N;
 
       // Draw V arrow (blue) — in screen coords (flip y)
+      const arrowS = ARROW_SCALE * dynamicScale / 300;
       drawArrow(ctx, sx, sy,
-        fVx * ARROW_SCALE * scale / 30,
-        -fVy * ARROW_SCALE * scale / 30,
+        fVx * arrowS,
+        -fVy * arrowS,
         '#3b82f6', 3);
 
       // Draw Φ arrow (purple)
       drawArrow(ctx, sx, sy,
-        fPhiX * ARROW_SCALE * scale / 30,
-        -fPhiY * ARROW_SCALE * scale / 30,
+        fPhiX * arrowS,
+        -fPhiY * arrowS,
         '#8b5cf6', 3);
 
-      // Draw noise arrow (gray, small, random direction)
+      // Draw noise arrow (gray, visible random direction)
       const noiseAngle = Math.random() * Math.PI * 2;
-      const noiseLen = 10 + Math.random() * 8;
+      const noiseLen = 18 + Math.random() * 12;
       drawArrow(ctx, sx, sy,
         Math.cos(noiseAngle) * noiseLen,
         Math.sin(noiseAngle) * noiseLen,
-        'rgba(148,163,184,0.5)', 1.5);
+        'rgba(148,163,184,0.8)', 2.5);
 
       // Draw particle
       ctx.beginPath();

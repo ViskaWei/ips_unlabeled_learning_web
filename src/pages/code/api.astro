@@ -129,7 +129,7 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
 
         <div class="api-func">
           <h3><code>solve_selftest(data, t_obs, sigma, build_V_fn, build_Phi_fn, K_V, K_Phi, reg='auto')</code></h3>
-          <p>Trajectory-free learning via energy balance. <strong>No labels needed.</strong></p>
+          <p>Trajectory-free learning via the weak form self-test. <strong>No labels needed.</strong></p>
           <div class="api-params">
             <div class="api-param"><code>data</code>: ndarray (M, L, N, d) — unlabeled snapshot ensemble</div>
             <div class="api-param"><code>t_obs</code>: ndarray (L,) — observation times</div>
@@ -209,7 +209,7 @@ for epoch in range(200):
           </div>
           <div class="constraint warning">
             <span class="constraint-tag">WARNING</span>
-            <p>NN activation must be <code>Softplus</code> (not Tanh/ReLU) — C&sup2; smoothness required for AD-based Laplacians.</p>
+            <p>NN activation must be C&sup2;-smooth (<code>Softplus</code> or <code>Tanh</code>, not ReLU) — second derivatives required for AD-based Laplacians.</p>
           </div>
           <div class="constraint warning">
             <span class="constraint-tag">WARNING</span>

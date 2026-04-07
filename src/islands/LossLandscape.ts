@@ -31,14 +31,23 @@ if (canvas) {
       { x: padL + plotW + 40, label: 'Self-Test Loss (ours)', color: '#3b82f6', fn: 'selftest' },
     ];
 
-    // Simulate 1D loss landscape: scale factor s where V=s*V*, Phi=s*Phi*
-    // At s=1: true. At s=0: trivial.
-    // Self-test: L(s) = (1/2)*s²*J_diss - s*(σ²/2)*J_diff + s*dE
-    // At true: L(1) = -(1/2)*J_diss < 0
-    // Squared: |L|² has minimum at both s=0 and s=1
+    // Scale factor s: V = s*V*, Phi = s*Phi*
+    // At s=1: true parameters. At s=0: trivial solution.
+    const J_diss = 2.0;
 
-    const J_diss = 2.0; // example values
-    const J_diff = 1.0;
+    // Loss functions:
+    // Squared residual: residual = (J_diss/2)*s*(s-1), loss = residual²
+    //   → double well: loss=0 at BOTH s=0 and s=1 (degenerate!)
+    // Self-test: L(s) = (J_diss/2)*s² - J_diss*s
+    //   → single well: L(0)=0, L(1)=-J_diss/2 < 0 (true minimum is negative)
+    function computeLoss(fnName: string, s: number): number {
+      if (fnName === 'squared') {
+        const residual = 0.5 * J_diss * s * (s - 1);
+        return residual * residual;
+      } else {
+        return 0.5 * s * s * J_diss - s * J_diss;
+      }
+    }
 
     for (const panel of panels) {
       const { x: px, label, color, fn: fnName } = panel;
@@ -87,20 +96,10 @@ if (canvas) {
         const s = (i / nPts) * 2.0; // scale from 0 to 2
         const sx = px + (i / nPts) * plotW;
 
-        let loss: number;
-        if (fnName === 'squared') {
-          // Squared residual: (s² * J_diss/2 - s * J_diff/2 + s * dE)²
-          // Simplified: has minimums at s=0 and s≈1
-          const residual = 0.5 * s * s * J_diss - s * J_diff * 0.5;
-          loss = residual * residual;
-        } else {
-          // Self-test: (1/2)*s²*J_diss - s*(σ²/2)*J_diff
-          // True minimum at s=1: L = -(1/2)*J_diss (negative!)
-          loss = 0.5 * s * s * J_diss - s * J_diss; // simplified
-        }
+        const loss = computeLoss(fnName, s);
 
         // Map loss to screen
-        const lossScale = fnName === 'squared' ? 0.5 : 1.5;
+        const lossScale = fnName === 'squared' ? 1.2 : 1.5;
         const sy = zeroY - loss * (plotH * 0.3) * lossScale;
         const clampedY = Math.max(padT, Math.min(padT + plotH, sy));
 
@@ -112,14 +111,8 @@ if (canvas) {
       // Mark special points
       const markPoint = (s: number, label: string, markerColor: string) => {
         const sx = px + (s / 2.0) * plotW;
-        let loss: number;
-        if (fnName === 'squared') {
-          const residual = 0.5 * s * s * J_diss - s * J_diff * 0.5;
-          loss = residual * residual;
-        } else {
-          loss = 0.5 * s * s * J_diss - s * J_diss;
-        }
-        const lossScale = fnName === 'squared' ? 0.5 : 1.5;
+        const loss = computeLoss(fnName, s);
+        const lossScale = fnName === 'squared' ? 1.2 : 1.5;
         const sy = Math.max(padT, Math.min(padT + plotH, zeroY - loss * (plotH * 0.3) * lossScale));
 
         ctx.beginPath();
