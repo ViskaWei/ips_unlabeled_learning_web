@@ -155,6 +155,11 @@ import Math from '../components/Math.astro';
       Traditional methods estimate velocity as v &approx; &Delta;X/&Delta;t. This creates two fatal problems: when &Delta;t is small, noise explodes (&prop; &sigma;/&radic;&Delta;t); when &Delta;t is large, discretization bias grows as O(&Delta;t) and Sinkhorn matching accuracy drops to random chance. Drag the slider to see the collapse:
     </p>
 
+    <p class="prediction-label" style="font-size:0.8rem;color:var(--accent-cyan);font-style:italic;margin-bottom:0.5rem;padding:0.5rem 0.75rem;background:rgba(79,156,249,0.06);border-radius:6px;border-left:3px solid var(--accent-cyan);"
+      data-i18n-en="Prediction from §Solution: Self-test error is robust to large observation gaps Δt. Label-matching error explodes."
+      data-i18n-zh="来自§解法的预测：自测误差对大观测时间步 Δt 鲁棒。标签匹配误差爆炸。">
+      Prediction from &sect;Solution: Self-test error is robust to large observation gaps &Delta;t. Label-matching error explodes.
+    </p>
     <div class="demo-container">
       <div id="dt-slider-viz" style="padding: 1rem 2rem; min-height: 240px;">
         <!-- D3 chart injected here -->
@@ -210,6 +215,119 @@ import Math from '../components/Math.astro';
         data-i18n-zh="自测 &nabla;V: 0.67% &rarr; 6.84%。在同一个大 &Delta;t benchmark 行里，Sinkhorn 的退化要严重得多。">
         Self-Test &nabla;V: 0.67% &rarr; 6.84%. In the same large-&Delta;t benchmark row, Sinkhorn degrades much more severely.
       </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ BUT: Failed Approach 2 — Distribution Matching ═══ -->
+  <section id="dist-matching-fail" class="section section-wide">
+    <p class="section-label" data-i18n-en="But Approach 2 Also Fails" data-i18n-zh="但方法2也不行">But Approach 2 Also Fails</p>
+    <h2 data-i18n-en="Distribution Matching: Correct Idea, Prohibitive Cost" data-i18n-zh="分布匹配：想法对，代价不可承受">Distribution Matching: Correct Idea, Prohibitive Cost</h2>
+    <p data-i18n-en="Avoid labels entirely by minimizing Wasserstein distance between predicted and observed distributions. Sounds reasonable — BUT this requires simulating the full particle system at EVERY gradient step. For N=10 particles over 1000+ optimization steps, the compute cost explodes." data-i18n-zh="通过最小化预测分布和观测分布之间的 Wasserstein 距离来完全避免标签。听起来合理——但这需要在每个梯度步骤模拟完整粒子系统。对于 N=10 的粒子，超过 1000+ 优化步骤，计算代价爆炸。">
+      Avoid labels entirely by minimizing Wasserstein distance between predicted and observed distributions. Sounds reasonable — BUT this requires simulating the full particle system at EVERY gradient step. For N=10 particles over 1000+ optimization steps, the compute cost explodes.
+    </p>
+    <div class="demo-container">
+      <div class="demo-label" data-i18n-en="Drag to see how cost scales with number of particles" data-i18n-zh="拖动查看代价如何随粒子数扩展">Drag to see how cost scales</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;padding:0 1rem;">
+        <label style="font-size:0.875rem;white-space:nowrap;" data-i18n-en="N =" data-i18n-zh="N =">N = <span id="n-particles-value" style="font-family:var(--font-mono);color:var(--accent-cyan);">20</span></label>
+        <input type="range" id="n-particles-slider" min="5" max="100" step="5" value="20" style="flex:1;accent-color:var(--accent-cyan);" />
+      </div>
+      <div class="demo-canvas-wrap" style="aspect-ratio:3/1;"><canvas id="dist-matching-canvas"></canvas></div>
+    </div>
+    <div class="callout callout-warning" style="margin-top:1.5rem;">
+      <p data-i18n-en="Failure type: computational. Wasserstein minimization requires O(N² × optimization_steps) work — intractable for large systems." data-i18n-zh="失败类型：计算性。Wasserstein 最小化需要 O(N² × 优化步骤) 的工作量——对于大系统不可行。">
+        Failure type: computational. Wasserstein minimization requires O(N&sup2; &times; optimization_steps) work — intractable for large systems.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ BUT: Failed Approach 3 — Mean-Field Shortcut ═══ -->
+  <section id="mean-field-fail" class="section section-wide">
+    <p class="section-label" data-i18n-en="And Approach 3 Also Fails" data-i18n-zh="方法3也不行">And Approach 3 Also Fails</p>
+    <h2 data-i18n-en="Mean-Field: Elegant Theory, Wrong Regime" data-i18n-zh="均场：优雅的理论，错误的范围">Mean-Field: Elegant Theory, Wrong Regime</h2>
+    <p data-i18n-en="For N→∞, the empirical measure converges to a smooth density satisfying a PDE — enabling clean inference. BUT: we care about finite N. At N=10, the empirical measure is 10 discrete delta spikes. Mean-field theory breaks down exactly here." data-i18n-zh="当 N→∞ 时，经验测度收敛到满足 PDE 的光滑密度——支持干净的推断。但：我们关心有限 N。在 N=10 时，经验测度是 10 个离散 delta 尖峰。均场理论在此处正好失效。">
+      For N&rarr;&infin;, the empirical measure converges to a smooth density satisfying a PDE — enabling clean inference. BUT: we care about finite N. At N=10, the empirical measure is 10 discrete delta spikes. Mean-field theory breaks down exactly here.
+    </p>
+    <div class="demo-container">
+      <div class="demo-label" data-i18n-en="Drag N — observe when empirical measure becomes smooth enough for mean-field" data-i18n-zh="拖动 N——观察经验测度何时足够光滑以使用均场">Drag N — observe when empirical measure becomes smooth enough for mean-field</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:0.75rem 0;padding:0 1rem;">
+        <label style="font-size:0.875rem;white-space:nowrap;" data-i18n-en="N =" data-i18n-zh="N =">N = <span id="mean-field-n-value" style="font-family:var(--font-mono);color:var(--accent-cyan);">10</span></label>
+        <input type="range" id="mean-field-n-slider" min="5" max="200" step="5" value="10" style="flex:1;accent-color:var(--accent-cyan);" />
+      </div>
+      <div class="demo-canvas-wrap" style="aspect-ratio:2/1;"><canvas id="mean-field-canvas"></canvas></div>
+    </div>
+    <div class="callout callout-warning" style="margin-top:1.5rem;">
+      <p data-i18n-en="Failure type: theoretical. Mean-field is valid only as N→∞. Our paper uses N=10. The approximation error from mean-field is O(1/N) — at N=10, this is 10% error before we've even started." data-i18n-zh="失败类型：理论性。均场仅在 N→∞ 时有效。我们的论文使用 N=10。均场近似误差为 O(1/N)——在 N=10 时，这是 10% 的误差，甚至还没开始学习。">
+        Failure type: theoretical. Mean-field is valid only as N&rarr;&infin;. Our paper uses N=10. The approximation error from mean-field is O(1/N) — at N=10, this is 10% error before we've even started.
+      </p>
+    </div>
+    <!-- COGNITIVE GATE 1 -->
+    <div class="cognitive-gate" style="text-align:center;margin-top:2rem;padding:1.5rem;background:rgba(79,156,249,0.05);border:1px solid rgba(79,156,249,0.2);border-radius:12px;">
+      <p style="margin:0 0 1rem;color:rgba(255,255,255,0.7);font-size:0.9rem;" data-i18n-en="Three approaches. Three distinct failures. Time to ask a different question." data-i18n-zh="三种方法。三种不同的失败。该换一种问法了。">Three approaches. Three distinct failures. Time to ask a different question.</p>
+      <button id="gate-approaches-btn" class="btn btn-primary" style="font-size:1rem;" data-i18n-en="I see why obvious approaches fail — show me the right question →" data-i18n-zh="我明白了为什么这些方法不对路——告诉我正确的问法 →">I see why obvious approaches fail — show me the right question &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ═══ THEREFORE: The Pivot ═══ -->
+  <section id="pivot" class="section section-wide" style="display:none;">
+    <p class="section-label" data-i18n-en="The Key Reframe" data-i18n-zh="关键重构">The Key Reframe</p>
+    <h2 data-i18n-en="Stop Recovering What's Missing. Start From What We Have." data-i18n-zh="停止恢复缺失信息。从我们拥有的开始。">Stop Recovering What's Missing. Start From What We Have.</h2>
+    <p data-i18n-en="Every failed approach tried to RECOVER hidden information: labels, trajectories, or smooth density. None asked: what object do we ACTUALLY observe from unlabeled snapshots? And what can we build from THAT?" data-i18n-zh="每种失败方法都试图恢复隐藏信息：标签、轨迹或光滑密度。没有人问：我们从无标签快照实际观测到的对象是什么？我们能用这个对象做什么？">
+      Every failed approach tried to RECOVER hidden information: labels, trajectories, or smooth density. None asked: what object do we ACTUALLY observe from unlabeled snapshots? And what can we build from THAT?
+    </p>
+    <div class="demo-container">
+      <p id="pivot-phase-label" style="text-align:center;color:var(--accent-cyan);font-size:0.9rem;margin-bottom:0.75rem;padding-top:0.75rem;">Phase 1: Labeled trajectories (classical setting)</p>
+      <div class="demo-canvas-wrap" style="aspect-ratio:5/2;"><canvas id="pivot-canvas"></canvas></div>
+      <div style="text-align:center;margin-top:0.75rem;padding-bottom:0.75rem;">
+        <button id="pivot-next-btn" class="btn btn-outline" data-i18n-en="Erase labels →" data-i18n-zh="抹去标签 →">Erase labels &rarr;</button>
+      </div>
+    </div>
+    <div class="callout callout-insight" style="margin-top:1.5rem;">
+      <p data-i18n-en="This is the empirical measure μₙ = (1/N)∑ᵢ δ_{Xᵢ}. It is NOT a degraded version of trajectories. It is a different mathematical object — a random sum of N Dirac delta masses. And crucially: it has its own evolution equation." data-i18n-zh="这是经验测度 μₙ = (1/N)∑ᵢ δ_{Xᵢ}。它不是轨迹的退化版本。它是一个不同的数学对象——N 个 Dirac delta 质量的随机和。关键是：它有自己的演化方程。">
+        This is the empirical measure &mu;<sub>n</sub> = (1/N)&sum;<sub>i</sub> &delta;<sub>X<sub>i</sub></sub>. It is NOT a degraded version of trajectories. It is a different mathematical object — a random sum of N Dirac delta masses. And crucially: it has its own evolution equation.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ THEREFORE: Why Weak Form is FORCED ═══ -->
+  <section id="weak-form-necessity" class="section" style="display:none;">
+    <p class="section-label" data-i18n-en="Why This Formulation" data-i18n-zh="为什么是这个公式">Why This Formulation</p>
+    <h2 data-i18n-en="The Observable Forces the Formulation" data-i18n-zh="可观测量迫使我们进入这个公式">The Observable Forces the Formulation</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0;">
+      <div style="padding:1.25rem;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.25);border-radius:12px;">
+        <h4 style="color:#ef4444;margin:0 0 0.5rem;" data-i18n-en="Pointwise PDE: Impossible" data-i18n-zh="逐点 PDE：不可能">Pointwise PDE: Impossible</h4>
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin:0;" data-i18n-en="μₙ is a sum of delta spikes. Try ∂μₙ/∂x at a particle location: it's ∞. Pointwise derivatives don't exist for delta masses. We CANNOT write ∂ₜμₙ = ... in the classical sense." data-i18n-zh="μₙ 是 delta 尖峰的和。在粒子位置求 ∂μₙ/∂x：结果是 ∞。逐点导数对 delta 质量不存在。我们无法以经典意义写出 ∂ₜμₙ = ...">
+          &mu;<sub>n</sub> is a sum of delta spikes. Try &part;&mu;<sub>n</sub>/&part;x at a particle location: it's &infin;. Pointwise derivatives don't exist for delta masses. We CANNOT write &part;<sub>t</sub>&mu;<sub>n</sub> = ... in the classical sense.
+        </p>
+      </div>
+      <div style="padding:1.25rem;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.25);border-radius:12px;">
+        <h4 style="color:#22c55e;margin:0 0 0.5rem;" data-i18n-en="Weak Form: The Only Path" data-i18n-zh="弱形式：唯一的路">Weak Form: The Only Path</h4>
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin:0;" data-i18n-en="∫ψ dμₙ = (1/N)∑ᵢ ψ(Xᵢ). This is computable from any snapshot. Weak form turns the problem into: find (V,Φ) such that this empirical average matches the predicted evolution for all test functions ψ." data-i18n-zh="∫ψ dμₙ = (1/N)∑ᵢ ψ(Xᵢ)。这可以从任何快照计算。弱形式把问题变成：找到 (V,Φ) 使得对所有测试函数 ψ，这个经验平均与预测演化匹配。">
+          &int;&psi; d&mu;<sub>n</sub> = (1/N)&sum;<sub>i</sub> &psi;(X<sub>i</sub>). This is computable from any snapshot. Weak form turns the problem into: find (V,&Phi;) such that this empirical average matches the predicted evolution for all test functions &psi;.
+        </p>
+      </div>
+    </div>
+    <blockquote style="border-left:3px solid var(--accent-cyan);padding:1rem 1.5rem;margin:1.5rem 0;color:rgba(255,255,255,0.85);font-style:italic;background:rgba(79,156,249,0.04);border-radius:0 8px 8px 0;">
+      <span data-i18n-en='"We do not move to weak form because it is fancy. We move because the observable itself forces us to."' data-i18n-zh='"我们进入弱形式，不是因为它更高级。而是因为可观测量本身迫使我们这么做。"'>"We do not move to weak form because it is fancy. We move because the observable itself forces us to."</span>
+    </blockquote>
+  </section>
+
+  <!-- ═══ THEREFORE: Design Criteria Gate ═══ -->
+  <section id="design-criteria" class="section section-wide" style="display:none;">
+    <p class="section-label" data-i18n-en="What Must Any Solution Satisfy?" data-i18n-zh="任何解法必须满足什么？">What Must Any Solution Satisfy?</p>
+    <h2 data-i18n-en="Three Criteria for a Valid Test Family" data-i18n-zh="有效测试函数族的三条标准">Three Criteria for a Valid Test Family</h2>
+    <p data-i18n-en="Weak form reduces the problem to: choose a test function family ψ. But not any family works. Before we reveal the answer, check off each criterion that any valid family must satisfy." data-i18n-zh="弱形式把问题化简为：选择一个测试函数族 ψ。但并非任意族都能奏效。在我们揭示答案之前，检查任何有效族必须满足的每条标准。">
+      Weak form reduces the problem to: choose a test function family &psi;. But not any family works. Before we reveal the answer, check off each criterion that any valid family must satisfy.
+    </p>
+    <div id="criteria-gate-container"></div>
+    <div id="self-test-reveal" style="display:none;margin-top:2rem;">
+      <div class="callout callout-success" style="border-color:var(--accent-green);">
+        <h3 style="margin:0 0 0.75rem;" data-i18n-en="The Self-Test Family: ψ = V + Φ*μ" data-i18n-zh="自测函数族：ψ = V + Φ*μ">The Self-Test Family: &psi; = V + &Phi;*&mu;</h3>
+        <p style="margin:0;" data-i18n-en="Use the candidate potential ITSELF as the test function. This family satisfies all three criteria automatically: it's computable from μₙ, it's linear in (V,Φ), and it induces an SPD bilinear form. The self-test family is not a trick — it is the natural answer to the test-function design problem." data-i18n-zh="用候选势函数本身作为测试函数。这个族自动满足所有三条标准：可从 μₙ 计算、对 (V,Φ) 线性、诱导 SPD 双线性型。自测函数族不是技巧——它是测试函数设计问题的自然答案。">
+          Use the candidate potential ITSELF as the test function. This family satisfies all three criteria automatically: it's computable from &mu;<sub>n</sub>, it's linear in (V,&Phi;), and it induces an SPD bilinear form. The self-test family is not a trick — it is the natural answer to the test-function design problem.
+        </p>
+      </div>
     </div>
   </section>
 
@@ -436,6 +554,20 @@ import Math from '../components/Math.astro';
           </label>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ═══ THEREFORE: Five Freedoms ═══ -->
+  <section id="five-benefits" class="section">
+    <p class="section-label" data-i18n-en="What This Buys Us" data-i18n-zh="这给了我们什么">What This Buys Us</p>
+    <h2 data-i18n-en="Five Freedoms From The Self-Test Loss" data-i18n-zh="自测损失带来的五种自由">Five Freedoms From The Self-Test Loss</h2>
+    <p data-i18n-en="Each criterion the self-test family satisfies translates into a concrete freedom. These aren't abstract advantages — each one resolves a specific failure mode you've already seen." data-i18n-zh="自测函数族满足的每条标准都转化为具体的自由。这些不是抽象的优势——每一条都解决了你已经看到的特定失败模式。">
+      Each criterion the self-test family satisfies translates into a concrete freedom. These aren't abstract advantages — each one resolves a specific failure mode you've already seen.
+    </p>
+    <div id="five-benefits-container"></div>
+    <!-- COGNITIVE GATE 2 -->
+    <div class="cognitive-gate" style="text-align:center;margin-top:2rem;padding:1.5rem;background:rgba(79,156,249,0.05);border:1px solid rgba(79,156,249,0.2);border-radius:12px;">
+      <button id="gate-theory-btn" class="btn btn-primary" style="font-size:1rem;" data-i18n-en="I understand the method — show me theory and experiments →" data-i18n-zh="我理解了方法——给我看理论和实验 →">I understand the method — show me theory and experiments &rarr;</button>
     </div>
   </section>
 
@@ -775,6 +907,11 @@ import Math from '../components/Math.astro';
 
     <!-- Figure 2: M-scaling -->
     <div class="paper-figure">
+      <p class="prediction-label" style="font-size:0.8rem;color:var(--accent-cyan);font-style:italic;margin-bottom:0.5rem;padding:0.5rem 0.75rem;background:rgba(79,156,249,0.06);border-radius:6px;border-left:3px solid var(--accent-cyan);"
+        data-i18n-en="Prediction from §Theory (Convergence): Error ∝ 1/√M — improves with more samples."
+        data-i18n-zh="来自§理论（收敛性）的预测：误差 ∝ 1/√M——随样本增多而改善。">
+        Prediction from &sect;Theory (Convergence): Error &prop; 1/&radic;M — improves with more samples.
+      </p>
       <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
         data-i18n-en="Figure 2: M-scaling — Riemann vs Trapezoidal"
         data-i18n-zh="图 2：M-标度 — 黎曼和 vs 梯形法则">Figure 2: M-scaling — Riemann vs Trapezoidal</h4>
@@ -1124,6 +1261,32 @@ import Math from '../components/Math.astro';
   <!-- MathRenderer.ts replaced by SSR Math.astro component -->
   <script src="../islands/DtSliderDemo.ts"></script>
   <script src="../islands/LcurveDemo.ts"></script>
+
+  <!-- ═══ New Narrative Islands ═══ -->
+  <script src="../islands/DistributionMatchingFail.ts"></script>
+  <script src="../islands/MeanFieldFail.ts"></script>
+  <script src="../islands/EmpiricalMeasurePivot.ts"></script>
+  <script src="../islands/DesignCriteriaGate.ts"></script>
+  <script src="../islands/FiveBenefits.ts"></script>
+
+  <!-- ═══ Cognitive Gate Handlers ═══ -->
+  <script>
+    // Cognitive gate 1: unlock pivot section when user clicks
+    document.getElementById('gate-approaches-btn')?.addEventListener('click', () => {
+      const pivot = document.getElementById('pivot');
+      const weakForm = document.getElementById('weak-form-necessity');
+      const criteria = document.getElementById('design-criteria');
+      if (pivot) { pivot.style.display = 'block'; pivot.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      if (weakForm) weakForm.style.display = 'block';
+      if (criteria) criteria.style.display = 'block';
+    });
+
+    // Cognitive gate 2: unlock theory/experiments when user clicks
+    document.getElementById('gate-theory-btn')?.addEventListener('click', () => {
+      const impl = document.getElementById('implementations');
+      if (impl) { impl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  </script>
 </BaseLayout>
 
 <style>
