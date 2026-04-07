@@ -206,9 +206,9 @@ import Math from '../components/Math.astro';
         Our self-test avoids both pitfalls: no velocity estimation, no trajectory matching
       </p>
       <p style="margin: 0.25rem 0 0; font-size: 0.8rem; font-family: var(--font-mono); color: var(--text-muted);"
-        data-i18n-en="Self-Test &nabla;V: 0.67% &rarr; 6.84% (7&times; more robust than Sinkhorn at large &Delta;t)"
-        data-i18n-zh="自测 &nabla;V: 0.67% &rarr; 6.84%（大 &Delta;t 下比 Sinkhorn 鲁棒 7 倍）">
-        Self-Test &nabla;V: 0.67% &rarr; 6.84% (7&times; more robust than Sinkhorn at large &Delta;t)
+        data-i18n-en="Self-Test &nabla;V: 0.67% &rarr; 6.84%. In the same large-&Delta;t benchmark row, Sinkhorn degrades much more severely."
+        data-i18n-zh="自测 &nabla;V: 0.67% &rarr; 6.84%。在同一个大 &Delta;t benchmark 行里，Sinkhorn 的退化要严重得多。">
+        Self-Test &nabla;V: 0.67% &rarr; 6.84%. In the same large-&Delta;t benchmark row, Sinkhorn degrades much more severely.
       </p>
     </div>
   </section>
@@ -356,9 +356,9 @@ import Math from '../components/Math.astro';
     <h3 style="margin-top: 3rem;"
       data-i18n-en="Why Not Just Square the Residual?"
       data-i18n-zh="为什么不直接对残差取平方？">Why Not Just Square the Residual?</h3>
-    <p data-i18n-en="Squaring the weak form residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). Our self-test loss, by using V and &Phi; as their own test functions, has a strictly negative minimum at the true potentials."
-       data-i18n-zh="对弱形式残差取平方会在V=0, &Phi;=0处产生退化极小值（平凡解）。我们的自测损失通过用 V 和 &Phi; 作为自己的测试函数，在真实势函数处具有严格负的极小值。">
-      Squaring the weak form residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). Our self-test loss, by using V and &Phi; as their own test functions, has a strictly negative minimum at the true potentials.
+    <p data-i18n-en="Squaring the weak form residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). By contrast, the self-test loss gives the true potentials a strictly lower population loss than the trivial pair, which breaks that degeneracy."
+       data-i18n-zh="对弱形式残差取平方会在 V=0, &Phi;=0 处产生退化极小值（平凡解）。相比之下，自测损失在总体层面上会让真实势函数获得严格低于平凡解的损失值，从而打破这种退化。">
+      Squaring the weak form residual creates a degenerate minimum at V=0, &Phi;=0 (the trivial solution). By contrast, the self-test loss gives the true potentials a strictly lower population loss than the trivial pair, which breaks that degeneracy.
     </p>
 
     <div class="demo-container">
@@ -404,6 +404,14 @@ import Math from '../components/Math.astro';
       data-i18n-zh="下面的演示展示了一个自由能平衡恒等式。在接近真值的缩放下，图中各项会近似抵消。但若直接把该恒等式变成估计器，仍然会落入四次优化——这正是自测要避免的。">
       The demo below illustrates a free-energy balance identity. Near the ground-truth scales, the displayed terms nearly cancel. But turning that identity into an estimator would still require quartic optimization — exactly what the self-test avoids.
     </p>
+
+    <div class="callout callout-insight" style="margin-top: 1rem;">
+      <p style="margin: 0;"
+        data-i18n-en="Interpretation guide: this panel is a diagnostic visualization of the free-energy balance, not the training objective itself. The estimator we actually optimize is the quadratic self-test loss above."
+        data-i18n-zh="阅读提示：下面这个面板展示的是自由能平衡恒等式的诊断性可视化，并不是训练时直接优化的目标。真正被优化的是上面的二次自测损失。">
+        Interpretation guide: this panel is a diagnostic visualization of the free-energy balance, not the training objective itself. The estimator we actually optimize is the quadratic self-test loss above.
+      </p>
+    </div>
 
     <!-- Energy Balance Demo — now contextualized as illustration of the failed alternative -->
     <div class="demo-container">
@@ -455,13 +463,13 @@ import Math from '../components/Math.astro';
             data-i18n-zh="自测 LSE">Self-Test LSE</h3>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;"
-          data-i18n-en="Expand V, &Phi; in known polynomial/exponential basis functions. Solve via linear least squares — exact, fast, but requires prior knowledge of the potential form."
-          data-i18n-zh="用已知的多项式/指数基函数展开 V、&Phi;。通过线性最小二乘求解——精确、快速，但需要预先知道势函数形式。">
-          Expand V, &Phi; in known polynomial/exponential basis functions. Solve via linear least squares — exact, fast, but requires prior knowledge of the potential form.
+          data-i18n-en="Expand V, &Phi; in known polynomial/exponential basis functions. Solve the resulting linear least-squares system in closed form — fast within the chosen basis, but it requires prior knowledge of the potential family."
+          data-i18n-zh="用已知的多项式/指数基函数展开 V、&Phi;。对得到的线性最小二乘系统做闭式求解——在选定基函数内很快，但需要预先知道势函数族。">
+          Expand V, &Phi; in known polynomial/exponential basis functions. Solve the resulting linear least-squares system in closed form — fast within the chosen basis, but it requires prior knowledge of the potential family.
         </p>
         <div style="font-size: 0.8rem; color: var(--text-muted);">
           <span style="color: #22c55e;">&check;</span>
-          <span data-i18n-en="Exact solution" data-i18n-zh="精确解">Exact solution</span><br/>
+          <span data-i18n-en="Closed-form linear solve" data-i18n-zh="闭式线性求解">Closed-form linear solve</span><br/>
           <span style="color: #f59e0b;">&times;</span>
           <span data-i18n-en="Needs known basis" data-i18n-zh="需要已知基函数">Needs known basis</span>
         </div>
@@ -476,13 +484,13 @@ import Math from '../components/Math.astro';
             data-i18n-zh="自测 NN">Self-Test NN</h3>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;"
-          data-i18n-en="Parameterize V, &Phi; with MLPs. Optimize via gradient descent — flexible, no prior knowledge needed, but requires training."
-          data-i18n-zh="用 MLP 参数化 V、&Phi;。通过梯度下降优化——灵活，不需要先验知识，但需要训练。">
-          Parameterize V, &Phi; with MLPs. Optimize via gradient descent — flexible, no prior knowledge needed, but requires training.
+          data-i18n-en="Parameterize V, &Phi; with MLPs. Optimize via gradient descent — flexible, and it does not require a hand-specified oracle basis, but it still requires training and architectural assumptions."
+          data-i18n-zh="用 MLP 参数化 V、&Phi;。通过梯度下降优化——灵活，而且不需要手工指定 oracle 基函数，但仍然需要训练并依赖网络结构假设。">
+          Parameterize V, &Phi; with MLPs. Optimize via gradient descent — flexible, and it does not require a hand-specified oracle basis, but it still requires training and architectural assumptions.
         </p>
         <div style="font-size: 0.8rem; color: var(--text-muted);">
           <span style="color: #22c55e;">&check;</span>
-          <span data-i18n-en="No prior knowledge" data-i18n-zh="无需先验知识">No prior knowledge</span><br/>
+          <span data-i18n-en="No oracle basis needed" data-i18n-zh="无需 oracle 基函数">No oracle basis needed</span><br/>
           <span style="color: #f59e0b;">&times;</span>
           <span data-i18n-en="Requires training" data-i18n-zh="需要训练">Requires training</span>
         </div>
@@ -755,9 +763,9 @@ import Math from '../components/Math.astro';
 
     <div class="callout callout-insight" style="margin-top: 1rem;">
       <p style="margin:0; font-size: 0.9rem;"
-        data-i18n-en="Reference model has κ = O(N⁰·⁵), well below the O(N) ceiling. In this benchmark table, conditioning test (B) is the only case where MLE beats self-test on ∇Φ. LJ singularity (C) has nearly constant κ driven by the r⁻¹² blowup rather than by N."
-        data-i18n-zh="参考模型 κ = O(N⁰·⁵)，远低于 O(N) 上限。在这张 benchmark 表里，条件测试 (B) 是唯一一个 MLE 在 ∇Φ 上优于自测的情形。LJ 奇异性 (C) 的 κ 近似恒定，主因是 r⁻¹² 爆炸而不是 N。">
-        Reference model has &kappa; = O(N<sup>0.5</sup>), well below the O(N) ceiling. In this benchmark table, conditioning test (B) is the only case where MLE beats self-test on &nabla;&Phi;. LJ singularity (C) has nearly constant &kappa; driven by the r<sup>&minus;12</sup> blowup rather than by N.
+        data-i18n-en="Reference model has κ = O(N⁰·⁵), well below the O(N) ceiling. The table here is about conditioning only: it shows that test B is the ill-conditioned outlier, while LJ singularity (C) has nearly constant κ driven by the r⁻¹² blowup rather than by N."
+        data-i18n-zh="参考模型 κ = O(N⁰·⁵)，远低于 O(N) 上限。这里这张表只讨论条件数：它显示 B 是明显的病态离群点，而 LJ 奇异性 (C) 的 κ 近似恒定，主因是 r⁻¹² 爆炸而不是 N。">
+        Reference model has &kappa; = O(N<sup>0.5</sup>), well below the O(N) ceiling. The table here is about conditioning only: it shows that test B is the ill-conditioned outlier, while LJ singularity (C) has nearly constant &kappa; driven by the r<sup>&minus;12</sup> blowup rather than by N.
       </p>
     </div>
   </section>

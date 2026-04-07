@@ -71,9 +71,9 @@ alpha, beta, info = solve_selftest(
 )
 
 # 3. Evaluate
-errors = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
-                      build_V_fn=build_V, build_Phi_fn=build_Phi)
-print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']))</code></pre>
+v_err, phi_err = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
+                              build_V_fn=build_V, build_Phi_fn=build_Phi)
+print("V: %.1f%%, Phi: %.1f%%" % (100 * v_err, 100 * phi_err))</code></pre>
         </div>
       </section>
 
@@ -84,7 +84,7 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
         <div class="pipeline-cards">
           <div class="pipeline-card" style="border-left-color: var(--accent-green);">
             <h3 style="color: var(--accent-green);" data-i18n-en="Basis Regression" data-i18n-zh="基函数回归">Basis Regression</h3>
-            <p data-i18n-en="Expand V, &Phi; in known basis functions. Linear least-squares — <strong>exact, fast</strong>." data-i18n-zh="将 V 和 &Phi; 展开在已知基函数上。线性最小二乘，<strong>精确且快速</strong>。">Expand V, &Phi; in known basis functions. Linear least-squares — <strong>exact, fast</strong>.</p>
+            <p data-i18n-en="Expand V, &Phi; in known basis functions. Linear least-squares with a closed-form solve — <strong>fast within the chosen basis</strong>." data-i18n-zh="将 V 和 &Phi; 展开在已知基函数上。线性最小二乘并做闭式求解，<strong>在选定基函数内速度很快</strong>。">Expand V, &Phi; in known basis functions. Linear least-squares with a closed-form solve — <strong>fast within the chosen basis</strong>.</p>
             <pre><code>load_data → get_basis → solve_selftest → evaluate_kde</code></pre>
             <div class="pipeline-meta">
               <span data-i18n-en="Modules: lib.config, lib.basis, lib.solvers, lib.eval" data-i18n-zh="模块：lib.config、lib.basis、lib.solvers、lib.eval">Modules: lib.config, lib.basis, lib.solvers, lib.eval</span>
@@ -94,7 +94,7 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
 
           <div class="pipeline-card" style="border-left-color: var(--accent-purple);">
             <h3 style="color: var(--accent-purple);" data-i18n-en="Neural Network" data-i18n-zh="神经网络">Neural Network</h3>
-            <p data-i18n-en="MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no prior knowledge</strong>." data-i18n-zh="V 用 MLP，&Phi; 用对称 MLP。梯度下降优化，<strong>灵活且无需先验知识</strong>。">MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no prior knowledge</strong>.</p>
+            <p data-i18n-en="MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no hand-specified oracle basis</strong>." data-i18n-zh="V 用 MLP，&Phi; 用对称 MLP。梯度下降优化，<strong>灵活，而且不需要手工指定 oracle 基函数</strong>。">MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no hand-specified oracle basis</strong>.</p>
             <pre><code>load_data → create_networks → train_loop(selftest_loss) → evaluate</code></pre>
             <div class="pipeline-meta">
               <span data-i18n-en="Modules: core.nn_models, core.selftest_loss" data-i18n-zh="模块：core.nn_models、core.selftest_loss">Modules: core.nn_models, core.selftest_loss</span>
@@ -162,7 +162,7 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
           <h3><code>evaluate_kde(model_name, d, alpha, beta, build_V_fn, build_Phi_fn)</code></h3>
           <p data-i18n-en="Compute L&sup2;(&rho;)-weighted errors against true gradients on a 2000-point grid." data-i18n-zh="在 2000 个网格点上计算相对于真实梯度的 L&sup2;(&rho;) 加权误差。">Compute L&sup2;(&rho;)-weighted errors against true gradients on a 2000-point grid.</p>
           <div class="api-params">
-            <div class="api-param" data-i18n-en="<strong>Returns</strong>: dict with <code>V_error_pct</code>, <code>Phi_error_pct</code>" data-i18n-zh="<strong>返回</strong>：包含 <code>V_error_pct</code> 和 <code>Phi_error_pct</code> 的字典"><strong>Returns</strong>: dict with <code>V_error_pct</code>, <code>Phi_error_pct</code></div>
+            <div class="api-param" data-i18n-en="<strong>Returns</strong>: <code>(V_error, Phi_error)</code> as relative errors in [0, 1]. Multiply by 100 for percentages." data-i18n-zh="<strong>返回</strong>：<code>(V_error, Phi_error)</code>，二者都是 [0, 1] 区间内的相对误差。若要显示百分比，需要再乘以 100。"><strong>Returns</strong>: <code>(V_error, Phi_error)</code> as relative errors in [0, 1]. Multiply by 100 for percentages.</div>
           </div>
         </div>
       </section>

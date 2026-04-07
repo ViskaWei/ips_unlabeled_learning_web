@@ -116,9 +116,9 @@ import Footer from '../components/Footer.astro';
 
     <div class="callout callout-insight" style="margin-top: 1.5rem;">
       <p style="margin: 0;"
-        data-i18n-en="Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned normal matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers."
-        data-i18n-zh="试试切换到模型 B（条件数测试）——注意 &Phi; 估计因病态法方程矩阵（&kappa; = 146K）而退化。这是基函数方法最困难的情况；NN 部分恢复。">
-        Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned normal matrix (&kappa; = 146K). This is the hardest case for basis methods; the NN partially recovers.
+        data-i18n-en="Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned normal matrix (&kappa; = 146K). This is the most difficult benchmark here for basis methods; the NN partially recovers."
+        data-i18n-zh="试试切换到模型 B（条件数测试）——注意 &Phi; 估计因病态法方程矩阵（&kappa; = 146K）而退化。这是这里对基函数方法最困难的 benchmark；NN 部分恢复。">
+        Try switching to Model B (Conditioning) — notice how &Phi; estimation degrades due to the ill-conditioned normal matrix (&kappa; = 146K). This is the most difficult benchmark here for basis methods; the NN partially recovers.
       </p>
     </div>
   </section>
@@ -177,16 +177,72 @@ import Footer from '../components/Footer.astro';
 
   <div class="section-divider"></div>
 
-  <!-- ═══ Section 4: Quick Reference ═══ -->
+  <!-- ═══ Section 4: Why Self-Test Helps ═══ -->
+  <section id="robustness" class="section section-wide">
+    <p class="section-label"
+      data-i18n-en="Reading Guide"
+      data-i18n-zh="阅读提示">Reading Guide</p>
+    <h2 data-i18n-en="Why Self-Test Helps in the Unlabeled, Large-&Delta;t Regime"
+        data-i18n-zh="为什么自测在无标签、大 &Delta;t 区间更有优势">Why Self-Test Helps in the Unlabeled, Large-&Delta;t Regime</h2>
+    <p data-i18n-en="This is the key regime story behind the demos. The advantage is not &quot;magic denoising&quot;; it is that self-test works directly on unlabeled snapshots, avoids label matching, and avoids finite-difference velocity estimation."
+       data-i18n-zh="这几组 demo 背后的核心故事就是这个区间分析。优势不是&quot;神奇去噪&quot;，而是自测直接作用于无标签快照，避开标签匹配，也避开有限差分速度估计。">
+      This is the key regime story behind the demos. The advantage is not "magic denoising"; it is that self-test works directly on unlabeled snapshots, avoids label matching, and avoids finite-difference velocity estimation.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+      <div class="info-card">
+        <h3 style="font-size: 1rem; color: var(--accent-blue); margin-bottom: 0.5rem;"
+          data-i18n-en="Small &Delta;t, labeled: MLE is best-case"
+          data-i18n-zh="小 &Delta;t + 有标签：MLE 是理想上界">Small &Delta;t, labeled: MLE is best-case</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;"
+          data-i18n-en="If labels are known and &Delta;t is tiny, trajectory-based MLE can use nearly unbiased velocity information. Self-test is not claiming to dominate that ideal regime."
+          data-i18n-zh="如果标签已知且 &Delta;t 很小，基于轨迹的 MLE 可以利用近乎无偏的速度信息。自测并不声称在这个理想区间里全面压过它。">
+          If labels are known and &Delta;t is tiny, trajectory-based MLE can use nearly unbiased velocity information. Self-test is not claiming to dominate that ideal regime.
+        </p>
+      </div>
+      <div class="info-card">
+        <h3 style="font-size: 1rem; color: var(--accent-purple); margin-bottom: 0.5rem;"
+          data-i18n-en="Large &Delta;t: trajectory methods accumulate bias"
+          data-i18n-zh="大 &Delta;t：轨迹法开始累积偏差">Large &Delta;t: trajectory methods accumulate bias</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;"
+          data-i18n-en="As &Delta;t grows, label recovery worsens and finite-difference velocity estimation becomes biased. This is where MLE and Sinkhorn-style pipelines degrade quickly."
+          data-i18n-zh="当 &Delta;t 增大时，标签恢复会变差，有限差分速度估计也会出现偏差。这正是 MLE 和 Sinkhorn 这类流程开始快速退化的地方。">
+          As &Delta;t grows, label recovery worsens and finite-difference velocity estimation becomes biased. This is where MLE and Sinkhorn-style pipelines degrade quickly.
+        </p>
+      </div>
+      <div class="info-card">
+        <h3 style="font-size: 1rem; color: var(--accent-green); margin-bottom: 0.5rem;"
+          data-i18n-en="Self-test: snapshot-based and trajectory-free"
+          data-i18n-zh="自测：基于快照、无需轨迹">Self-test: snapshot-based and trajectory-free</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;"
+          data-i18n-en="Self-test still has quadrature/discretization error, but it avoids the extra failure mode coming from velocity estimation. That is why it is usually more stable in coarse-observation, unlabeled settings."
+          data-i18n-zh="自测仍然有积分/离散化误差，但它避开了速度估计带来的额外失效模式。这就是它在粗观测、无标签场景下通常更稳定的原因。">
+          Self-test still has quadrature/discretization error, but it avoids the extra failure mode coming from velocity estimation. That is why it is usually more stable in coarse-observation, unlabeled settings.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout callout-insight" style="margin-top: 1.5rem;">
+      <p style="margin: 0;"
+        data-i18n-en="Interpretation guide for the homepage energy panel: it is a diagnostic visualization of a free-energy balance identity, not the objective that Self-Test LSE/NN directly optimize. The optimized target is the quadratic self-test loss."
+        data-i18n-zh="首页能量面板的阅读提示：它展示的是自由能平衡恒等式的诊断性可视化，并不是 Self-Test LSE/NN 直接优化的目标。真正被优化的是二次自测损失。">
+        Interpretation guide for the homepage energy panel: it is a diagnostic visualization of a free-energy balance identity, not the objective that Self-Test LSE/NN directly optimize. The optimized target is the quadratic self-test loss.
+      </p>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══ Section 5: Quick Reference ═══ -->
   <section id="quickref" class="section section-wide">
     <p class="section-label"
       data-i18n-en="For Developers"
       data-i18n-zh="开发者指南">For Developers</p>
     <h2 data-i18n-en="Use This Code"
         data-i18n-zh="使用代码">Use This Code</h2>
-    <p data-i18n-en="Get started in 5 minutes. The codebase supports both basis regression (fast, exact) and neural network learning (flexible, no prior knowledge needed)."
-       data-i18n-zh="5 分钟上手。代码支持基函数回归（快速、精确）和神经网络学习（灵活、无需先验知识）。">
-      Get started in 5 minutes. The codebase supports both basis regression (fast, exact) and neural network learning (flexible, no prior knowledge needed).
+    <p data-i18n-en="Get started in 5 minutes. The codebase supports both basis regression (fast closed-form linear solve within a chosen basis) and neural network learning (flexible, without a hand-specified oracle basis)."
+       data-i18n-zh="5 分钟上手。代码同时支持基函数回归（在选定基函数内做快速闭式线性求解）和神经网络学习（灵活，不需要手工指定 oracle 基函数）。">
+      Get started in 5 minutes. The codebase supports both basis regression (fast closed-form linear solve within a chosen basis) and neural network learning (flexible, without a hand-specified oracle basis).
     </p>
 
     <div class="code-cards">
@@ -207,11 +263,11 @@ pip install -e .</code></pre>
           <span class="code-step">2</span>
           <span data-i18n-en="Generate Data" data-i18n-zh="生成数据">Generate Data</span>
         </div>
-        <pre class="code-block"><code>from core.potentials import QuadraticConfinement, GaussianBumpInteraction
+        <pre class="code-block"><code>from core.potentials import HarmonicPotential, GaussianInteraction
 from core.sde_simulator import SDESimulator
 
-V = QuadraticConfinement(alpha1=-1.0, alpha2=2.0)
-Phi = GaussianBumpInteraction(beta=[-3, 2], c=[0.75, 1.5], sigma=[0.125, 0.25])
+V = HarmonicPotential(k=2.0)
+Phi = GaussianInteraction(A=1.0, sigma=0.8)
 sim = SDESimulator(V=V, Phi=Phi, sigma=1.0, dt=0.0001)  # δt = 10⁻⁴
 data, t_obs = sim.simulate(N=10, d=2, T=1.0, L=100, M=2000)</code></pre>
       </div>
@@ -243,8 +299,8 @@ alpha, beta, info = solve_selftest(
 
 v_err, phi_err = evaluate_kde('model_e', d=2, alpha=alpha, beta=beta,
                               build_V_fn=build_V, build_Phi_fn=build_Phi)
-print("V error: %.2f%%" % (v_err * 100))
-print("Phi error: %.2f%%" % (phi_err * 100))
+print("V error: %.2f%%" % (100 * v_err))
+print("Phi error: %.2f%%" % (100 * phi_err))
 # Expected: V ~0.67%, Phi ~0.74% for Reference model at Δt=10⁻³</code></pre>
       </div>
     </div>
