@@ -246,7 +246,7 @@ export const MODELS: Record<string, ModelConfig> = {
     label: 'Model A (Quadratic + Piecewise)',
     V: new QuadraticConfinement(-1.0, 2.0),
     Phi: new PiecewiseInteraction(-3.0, 2.0),
-    sigma: 0.1,
+    sigma: 0.5,
     description: 'Quadratic confinement with piecewise constant interaction',
   },
   model_b: {
@@ -254,7 +254,7 @@ export const MODELS: Record<string, ModelConfig> = {
     label: 'Model B (Double-Well + Inverse)',
     V: new DoubleWellPotential(),
     Phi: new InverseInteraction(0.5),
-    sigma: 0.1,
+    sigma: 0.5,
     description: 'Double-well confinement with inverse-distance interaction',
   },
   model_lj: {
@@ -262,7 +262,7 @@ export const MODELS: Record<string, ModelConfig> = {
     label: 'Model C (Harmonic + Lennard-Jones)',
     V: new HarmonicPotential(2.0),
     Phi: new LennardJonesPotential(),
-    sigma: 0.1,
+    sigma: 0.5,
     description: 'Harmonic confinement with truncated Lennard-Jones interaction',
   },
   model_morse: {
@@ -270,7 +270,7 @@ export const MODELS: Record<string, ModelConfig> = {
     label: 'Model D (Double-Well + Morse)',
     V: new DoubleWellPotential(),
     Phi: new MorsePotential(0.5, 2.0, 0.8),
-    sigma: 0.1,
+    sigma: 0.5,
     description: 'Double-well confinement with Morse interaction',
   },
   model_e: {
@@ -278,7 +278,7 @@ export const MODELS: Record<string, ModelConfig> = {
     label: 'E: Reference ★',
     V: new QuadraticConfinement(0, 1.0),
     Phi: new GaussianInteraction(1.0, 0.8),
-    sigma: 0.1,
+    sigma: 0.5,
     description: 'Reference model — quadratic confinement with Gaussian interaction',
   },
   model_aniso: {
@@ -286,7 +286,7 @@ export const MODELS: Record<string, ModelConfig> = {
     label: 'Model E (Anisotropic)',
     V: new AnisotropicConfinement([1.0, 4.0]),
     Phi: new AnisotropicGaussianInteraction(2.0, [0.5, 1.5]),
-    sigma: 0.1,
+    sigma: 0.5,
     description: 'Anisotropic confinement with direction-dependent Gaussian interaction',
   },
 };

@@ -172,9 +172,9 @@ if (canvasTrue && canvasPred) {
     if (!overlay) resizeCanvas(canvasPred, ctxPred);
   }
 
+  let dynScale = 100;
   function worldToScreen(x: number, y: number, w: number, h: number): [number, number] {
-    const scale = Math.min(w, h) * 0.13;
-    return [w / 2 + x * scale, h / 2 - y * scale];
+    return [w / 2 + x * dynScale, h / 2 - y * dynScale];
   }
 
   function drawPanel(
@@ -257,6 +257,20 @@ if (canvasTrue && canvasPred) {
   }
 
   function draw() {
+    // Dynamic scale from both particle sets
+    let maxR = 0;
+    for (let i = 0; i < N; i++) {
+      const rt = Math.sqrt(stateTrue.positions[i * d] ** 2 + stateTrue.positions[i * d + 1] ** 2);
+      const rp = Math.sqrt(statePred.positions[i * d] ** 2 + statePred.positions[i * d + 1] ** 2);
+      if (rt > maxR) maxR = rt;
+      if (rp > maxR) maxR = rp;
+    }
+    const extent = Math.max(maxR * 1.6, 0.2);
+    const cw = canvasTrue.width / window.devicePixelRatio;
+    const ch = canvasTrue.height / window.devicePixelRatio;
+    const target = Math.min(cw, ch) * 0.40 / extent;
+    dynScale += (target - dynScale) * 0.08;
+
     if (playing) {
       for (let s = 0; s < STEPS_PER_FRAME; s++) {
         sysTrue.step(stateTrue);

@@ -91,15 +91,25 @@ if (canvas) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
+  let dynScale = 100; // dynamic scale, updated each frame
   function worldToScreen(x: number, y: number, w: number, h: number): [number, number] {
-    const scale = Math.min(w, h) * 0.13;
-    return [w / 2 + x * scale, h / 2 - y * scale];
+    return [w / 2 + x * dynScale, h / 2 - y * dynScale];
   }
 
   function draw() {
     const w = canvas.width / window.devicePixelRatio;
     const h = canvas.height / window.devicePixelRatio;
     ctx.clearRect(0, 0, w, h);
+
+    // Dynamic scale: fit particles to ~40% of canvas
+    let maxR = 0;
+    for (let i = 0; i < N; i++) {
+      const r = Math.sqrt(state.positions[i * d] ** 2 + state.positions[i * d + 1] ** 2);
+      if (r > maxR) maxR = r;
+    }
+    const extent = Math.max(maxR * 1.6, 0.2);
+    const target = Math.min(w, h) * 0.40 / extent;
+    dynScale += (target - dynScale) * 0.08;
 
     // Step simulation
     if (playing) {
