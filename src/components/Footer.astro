@@ -11,31 +11,39 @@ const bibtex = `@article{wei2026learning,
   <div class="footer-inner">
     <div class="footer-grid">
       <div>
-        <h4>Paper</h4>
+        <h4 data-i18n-en="Paper" data-i18n-zh="论文">Paper</h4>
         <div class="footer-links">
-          <a href="https://arxiv.org/abs/2604.02581" class="footer-link">Paper (arXiv)</a>
-          <a href="https://github.com/ViskaWei/lips_unlabeled_data" class="footer-link">Code</a>
-          <a href="https://github.com/ViskaWei/ips_unlabeled_learning_web" class="footer-link">Website Source</a>
+          <a href="https://arxiv.org/abs/2604.02581" class="footer-link" data-i18n-en="Paper (arXiv)" data-i18n-zh="论文（arXiv）">Paper (arXiv)</a>
+          <a href="https://github.com/ViskaWei/lips_unlabeled_data" class="footer-link" data-i18n-en="Code" data-i18n-zh="代码">Code</a>
+          <a href="https://github.com/ViskaWei/ips_unlabeled_learning_web" class="footer-link" data-i18n-en="Website Source" data-i18n-zh="网站源码">Website Source</a>
         </div>
       </div>
 
       <div>
-        <h4>Authors</h4>
+        <h4 data-i18n-en="Authors" data-i18n-zh="作者">Authors</h4>
         <p class="footer-text">Viska Wei &amp; Fei Lu</p>
-        <p class="footer-text footer-muted">Johns Hopkins University</p>
+        <p class="footer-text footer-muted" data-i18n-en="Johns Hopkins University" data-i18n-zh="约翰斯·霍普金斯大学">Johns Hopkins University</p>
       </div>
 
       <div>
-        <h4>Citation</h4>
+        <h4 data-i18n-en="Citation" data-i18n-zh="引用">Citation</h4>
         <div class="bibtex-wrap">
           <pre class="bibtex"><code>{bibtex}</code></pre>
-          <button id="copy-bibtex" class="btn btn-outline btn-sm" data-bibtex={bibtex}>Copy BibTeX</button>
+          <button
+            id="copy-bibtex"
+            class="btn btn-outline btn-sm"
+            data-bibtex={bibtex}
+            data-i18n-en="Copy BibTeX"
+            data-i18n-zh="复制 BibTeX"
+            data-copied-en="Copied!"
+            data-copied-zh="已复制"
+          >Copy BibTeX</button>
         </div>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <p class="footer-muted">&copy; 2026 Viska Wei &amp; Fei Lu. Built with Astro, Three.js, and D3.</p>
+      <p class="footer-muted" data-i18n-en="&copy; 2026 Viska Wei &amp; Fei Lu. Built with Astro, Three.js, and D3." data-i18n-zh="&copy; 2026 Viska Wei &amp; Fei Lu。使用 Astro、Three.js 和 D3 构建。">&copy; 2026 Viska Wei &amp; Fei Lu. Built with Astro, Three.js, and D3.</p>
     </div>
   </div>
 </footer>
@@ -124,12 +132,21 @@ const bibtex = `@article{wei2026learning,
 </style>
 
 <script>
+  function copyButtonIdleText(btn) {
+    return document.documentElement.lang === 'zh' ? btn.dataset.i18nZh : btn.dataset.i18nEn;
+  }
+
   document.getElementById('copy-bibtex')?.addEventListener('click', (e) => {
     const btn = e.currentTarget as HTMLButtonElement;
     const text = btn.dataset.bibtex || '';
     navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = 'Copy BibTeX'; }, 2000);
+      btn.textContent = document.documentElement.lang === 'zh' ? btn.dataset.copiedZh || '' : btn.dataset.copiedEn || '';
+      setTimeout(() => { btn.textContent = copyButtonIdleText(btn) || ''; }, 2000);
     });
+  });
+
+  window.addEventListener('ips:langchange', () => {
+    const btn = document.getElementById('copy-bibtex') as HTMLButtonElement | null;
+    if (btn) btn.textContent = copyButtonIdleText(btn) || '';
   });
 </script>

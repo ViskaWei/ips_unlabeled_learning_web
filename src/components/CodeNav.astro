@@ -9,19 +9,29 @@ const base = import.meta.env.BASE_URL;
 
 <nav class="code-nav">
   <div class="code-nav-inner">
-    <a href={`${base}/`} class="code-nav-back">&larr; Paper</a>
+    <a href={`${base}/`} class="code-nav-back" data-i18n-en="&larr; Paper" data-i18n-zh="&larr; 论文">&larr; Paper</a>
     <div class="code-nav-tabs">
       <a
         href={`${base}/code/overview/`}
         class:list={['code-nav-tab', { active: active === 'overview' }]}
+        data-i18n-en="Overview"
+        data-i18n-zh="概览"
       >Overview</a>
       <a
         href={`${base}/code/protocol/`}
         class:list={['code-nav-tab', { active: active === 'protocol' }]}
+        data-i18n-en="Protocol"
+        data-i18n-zh="流程"
       >Protocol</a>
     </div>
     <div class="code-nav-actions">
-      <button id="code-lang-toggle" class="toggle-btn active" title="Toggle language">EN</button>
+      <button
+        id="code-lang-toggle"
+        class="toggle-btn active"
+        title="Toggle language"
+        data-title-en="Toggle language"
+        data-title-zh="切换语言"
+      >EN</button>
     </div>
   </div>
 </nav>
@@ -109,10 +119,39 @@ const base = import.meta.env.BASE_URL;
 
 <script>
   const langBtn = document.getElementById('code-lang-toggle');
-  let currentLang = localStorage.getItem('ips-lang') || 'en';
+  const docLang = document.documentElement.lang.toLowerCase();
+  let currentLang = localStorage.getItem('ips-lang') || (docLang.startsWith('zh') ? 'zh' : 'en');
 
   function updateLang() {
     if (langBtn) langBtn.textContent = currentLang.toUpperCase();
+    if (langBtn) {
+      const title = currentLang === 'en' ? langBtn.dataset.titleEn : langBtn.dataset.titleZh;
+      if (title) langBtn.title = title;
+    }
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n-en]').forEach((el) => {
+      const text = currentLang === 'en'
+        ? el.getAttribute('data-i18n-en')
+        : el.getAttribute('data-i18n-zh');
+      if (text) el.innerHTML = text;
+    });
+    document.querySelectorAll<HTMLElement>('[data-title-en]').forEach((el) => {
+      const title = currentLang === 'en' ? el.dataset.titleEn : el.dataset.titleZh;
+      if (title) el.title = title;
+    });
+    document.querySelectorAll<HTMLElement>('[data-aria-label-en]').forEach((el) => {
+      const label = currentLang === 'en' ? el.dataset.ariaLabelEn : el.dataset.ariaLabelZh;
+      if (label) el.setAttribute('aria-label', label);
+    });
+    const pageTitle = document.querySelector('title[data-title-en]');
+    if (pageTitle instanceof HTMLTitleElement) {
+      pageTitle.textContent = currentLang === 'en' ? pageTitle.dataset.titleEn || '' : pageTitle.dataset.titleZh || '';
+    }
+    document.querySelectorAll<HTMLMetaElement>('meta[data-content-en]').forEach((el) => {
+      const content = currentLang === 'en' ? el.dataset.contentEn : el.dataset.contentZh;
+      if (content) el.setAttribute('content', content);
+    });
+    window.dispatchEvent(new CustomEvent('ips:langchange', { detail: { lang: currentLang } }));
   }
 
   langBtn?.addEventListener('click', () => {

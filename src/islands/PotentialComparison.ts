@@ -6,6 +6,7 @@
  * The perturbation levels match actual paper results (~1-5% error).
  */
 import { MODELS, type ModelConfig } from '../sim/potentials';
+import { onLangChange, t } from './i18n';
 
 const canvas = document.getElementById('potential-compare-canvas') as HTMLCanvasElement;
 if (canvas) {
@@ -167,7 +168,7 @@ if (canvas) {
     ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.font = '10px Inter, sans-serif';
-    ctx.fillText('True', x0 + 32, legY + 4);
+    ctx.fillText(t('True', '真值'), x0 + 32, legY + 4);
 
     // Estimated
     ctx.strokeStyle = estColor;
@@ -179,7 +180,7 @@ if (canvas) {
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillText('Estimated', x0 + 94, legY + 4);
+    ctx.fillText(t('Estimated', '估计'), x0 + 94, legY + 4);
 
     // X-axis labels
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
@@ -213,7 +214,7 @@ if (canvas) {
     const rMaxV = 2.5;
     drawCurve(
       padL, padT, plotW, plotH,
-      "V'(r) gradient", '#3b82f6', '#60a5fa',
+      t("V'(r) gradient", "V'(r) 梯度"), '#3b82f6', '#60a5fa',
       (r: number) => getGradV(config, r),
       (r: number) => getGradV(config, r) * perturb.vScale,
       0, rMaxV,
@@ -224,7 +225,7 @@ if (canvas) {
       const rMaxPhi = currentModel === 'model_lj' ? 2.0 : 3.0;
       drawCurve(
         padL + plotW + gap, padT, plotW, plotH,
-        "\u03A6'(r) gradient", '#8b5cf6', '#a78bfa',
+        t("\u03A6'(r) gradient", "\u03A6'(r) 梯度"), '#8b5cf6', '#a78bfa',
         (r: number) => getGradPhi(config, r),
         (r: number) => getGradPhi(config, r) * perturb.phiScale,
         0.1, rMaxPhi,
@@ -238,11 +239,12 @@ if (canvas) {
     ctx.font = '11px var(--font-mono, monospace)';
     ctx.textAlign = 'center';
     ctx.fillText(
-      `\u2207V err: ${vErr.toFixed(1)}%  |  \u2207\u03A6 err: ${phiErr.toFixed(1)}%`,
+      `${t('\u2207V err', '\u2207V 误差')}: ${vErr.toFixed(1)}%  |  ${t('\u2207\u03A6 err', '\u2207\u03A6 误差')}: ${phiErr.toFixed(1)}%`,
       w / 2, h - 4,
     );
   }
 
+  onLangChange(drawAll);
   resize();
   window.addEventListener('resize', resize);
 }

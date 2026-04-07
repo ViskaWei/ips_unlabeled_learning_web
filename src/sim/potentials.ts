@@ -238,6 +238,7 @@ export interface ModelConfig {
   Phi: InteractionPotential;
   sigma: number;
   description: string;
+  descriptionZh?: string;
 }
 
 export const MODELS: Record<string, ModelConfig> = {
@@ -248,6 +249,7 @@ export const MODELS: Record<string, ModelConfig> = {
     Phi: new PiecewiseInteraction(-3.0, 2.0),
     sigma: 0.5,
     description: 'Quadratic confinement with piecewise constant interaction',
+    descriptionZh: '分段常值交互下的二次束缚',
   },
   model_b: {
     name: 'model_b',
@@ -256,6 +258,7 @@ export const MODELS: Record<string, ModelConfig> = {
     Phi: new InverseInteraction(0.5),
     sigma: 0.5,
     description: 'Double-well confinement with inverse-distance interaction',
+    descriptionZh: '带反距离交互的双井束缚',
   },
   model_lj: {
     name: 'model_lj',
@@ -264,6 +267,7 @@ export const MODELS: Record<string, ModelConfig> = {
     Phi: new LennardJonesPotential(),
     sigma: 0.5,
     description: 'Harmonic confinement with truncated Lennard-Jones interaction',
+    descriptionZh: '带截断 Lennard-Jones 交互的谐束缚',
   },
   model_morse: {
     name: 'model_morse',
@@ -272,6 +276,7 @@ export const MODELS: Record<string, ModelConfig> = {
     Phi: new MorsePotential(0.5, 2.0, 0.8),
     sigma: 0.5,
     description: 'Double-well confinement with Morse interaction',
+    descriptionZh: '带 Morse 交互的双井束缚',
   },
   model_e: {
     name: 'model_e',
@@ -280,6 +285,7 @@ export const MODELS: Record<string, ModelConfig> = {
     Phi: new GaussianInteraction(1.0, 0.8),
     sigma: 0.5,
     description: 'Reference model — quadratic confinement with Gaussian interaction',
+    descriptionZh: '基准模型：二次束缚 + 高斯交互',
   },
   model_aniso: {
     name: 'model_aniso',
@@ -288,5 +294,6 @@ export const MODELS: Record<string, ModelConfig> = {
     Phi: new AnisotropicGaussianInteraction(2.0, [0.5, 1.5]),
     sigma: 0.5,
     description: 'Anisotropic confinement with direction-dependent Gaussian interaction',
+    descriptionZh: '各向异性束缚 + 方向相关的高斯交互',
   },
 };

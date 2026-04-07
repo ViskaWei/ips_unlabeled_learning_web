@@ -5,6 +5,7 @@
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
 import { MODELS } from '../sim/potentials';
+import { t } from './i18n';
 
 const canvas = document.getElementById('energy-canvas') as HTMLCanvasElement;
 const vSlider = document.getElementById('v-scale') as HTMLInputElement;
@@ -245,7 +246,7 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.font = 'bold 13px Inter, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Energy Components', ledgerX, ledgerY);
+    ctx.fillText(t('Free-Energy Terms', '自由能项'), ledgerX, ledgerY);
 
     // Dissipation bar (red) — amplified for visual clarity
     const maxBar = ledgerW * 0.8;
@@ -258,7 +259,7 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillRect(ledgerX, row1Y, dissBar, barH);
     ctx.fillStyle = '#ef4444';
     ctx.font = '11px Inter, sans-serif';
-    ctx.fillText('Dissipation', ledgerX + 5, row1Y + 15);
+    ctx.fillText(t('Dissipation', '耗散'), ledgerX + 5, row1Y + 15);
     // Value label at bar end
     ctx.textAlign = 'right';
     ctx.fillText(dissipation.toFixed(5), ledgerX + ledgerW - 4, row1Y + 15);
@@ -273,7 +274,7 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
     ctx.fillRect(ledgerX, row2Y, diffBar, barH);
     ctx.fillStyle = '#06b6d4';
-    ctx.fillText('Diffusion', ledgerX + 5, row2Y + 15);
+    ctx.fillText(t('Diffusion', '扩散'), ledgerX + 5, row2Y + 15);
     ctx.textAlign = 'right';
     ctx.fillText(diffusion.toFixed(5), ledgerX + ledgerW - 4, row2Y + 15);
     ctx.textAlign = 'left';
@@ -287,7 +288,7 @@ if (canvas && vSlider && phiSlider) {
     ctx.fillStyle = energyChange < 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(245, 158, 11, 0.6)';
     ctx.fillRect(ledgerX, row3Y, eBar, barH);
     ctx.fillStyle = '#f59e0b';
-    ctx.fillText('Energy change', ledgerX + 5, row3Y + 15);
+    ctx.fillText(t('Free-energy change', '自由能变化'), ledgerX + 5, row3Y + 15);
     ctx.textAlign = 'right';
     ctx.fillText(energyChange.toFixed(5), ledgerX + ledgerW - 4, row3Y + 15);
     ctx.textAlign = 'left';
@@ -297,17 +298,23 @@ if (canvas && vSlider && phiSlider) {
     const resColor = Math.abs(residual) < 0.001 ? '#22c55e' : '#ef4444';
     ctx.fillStyle = resColor;
     ctx.font = 'bold 13px Inter, sans-serif';
-    ctx.fillText(`Self-test loss: ${residual.toFixed(5)}`, ledgerX, row4Y + 5);
+    ctx.fillText(`${t('Displayed self-test loss', '展示的自测损失')}: ${residual.toFixed(5)}`, ledgerX, row4Y + 5);
 
     // Scale labels
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.font = '11px Inter, sans-serif';
-    ctx.fillText(`V scale: ${vScale.toFixed(1)}×  |  Φ scale: ${phiScale.toFixed(1)}×`, ledgerX, row4Y + 25);
+    ctx.fillText(
+      `${t('V scale', 'V 缩放')}: ${vScale.toFixed(1)}×  |  ${t('Φ scale', 'Φ 缩放')}: ${phiScale.toFixed(1)}×`,
+      ledgerX,
+      row4Y + 25,
+    );
 
     const atTruth = Math.abs(vScale - 1) < 0.05 && Math.abs(phiScale - 1) < 0.05;
     ctx.fillStyle = atTruth ? '#22c55e' : '#f59e0b';
     ctx.fillText(
-      atTruth ? '✓ True potentials — loss is negative' : '✗ Wrong potentials — residual grows',
+      atTruth
+        ? t('✓ Near ground-truth scales, the displayed loss is negative', '✓ 在接近真值的缩放下，展示的损失为负')
+        : t('✗ Rescaling the potentials usually increases the displayed residual', '✗ 改变势函数缩放通常会增大展示的残差'),
       ledgerX,
       row4Y + 45,
     );

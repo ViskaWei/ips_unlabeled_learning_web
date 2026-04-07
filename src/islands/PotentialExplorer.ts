@@ -3,6 +3,7 @@
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
 import { MODELS } from '../sim/potentials';
+import { onLangChange, t } from './i18n';
 
 const curveCanvas = document.getElementById('potential-curves-canvas') as HTMLCanvasElement;
 const simCanvas = document.getElementById('model-sim-canvas') as HTMLCanvasElement;
@@ -31,6 +32,9 @@ if (curveCanvas && simCanvas) {
   }
 
   window.addEventListener('resize', resizeAll);
+  onLangChange(() => {
+    drawCurves();
+  });
 
   function initModel(modelKey: string) {
     const config = MODELS[modelKey];
@@ -213,7 +217,7 @@ if (curveCanvas && simCanvas) {
     simCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     simCtx.font = '11px Inter, sans-serif';
     simCtx.textAlign = 'left';
-    simCtx.fillText(config?.description || '', 10, h - 10);
+    simCtx.fillText(t(config?.description || '', config?.descriptionZh || config?.description || ''), 10, h - 10);
 
     requestAnimationFrame(drawSim);
   }

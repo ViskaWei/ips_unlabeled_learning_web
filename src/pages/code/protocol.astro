@@ -6,18 +6,28 @@ import Footer from '../../components/Footer.astro';
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title="Experiment Protocol — IPS Pipeline">
+<BaseLayout
+  title="Experiment Protocol — IPS Pipeline"
+  titleZh="实验流程 · IPS 流程"
+  description="Full experiment protocol diagram for the IPS unlabeled-learning pipeline."
+  descriptionZh="IPS 无标签学习流程的完整实验协议图。"
+>
   <CodeNav active="protocol" />
   <main class="code-page">
     <div class="code-page-header">
-      <span class="code-page-label">Code Understanding</span>
-      <h2>Experiment Protocol</h2>
-      <p>Full-fidelity protocol diagram showing every step, parameter, and code reference in the IPS pipeline.</p>
+      <span class="code-page-label" data-i18n-en="Code Understanding" data-i18n-zh="代码理解">Code Understanding</span>
+      <h2 data-i18n-en="Experiment Protocol" data-i18n-zh="实验流程">Experiment Protocol</h2>
+      <p
+        data-i18n-en="Full-fidelity protocol diagram showing every step, parameter, and code reference in the IPS pipeline."
+        data-i18n-zh="完整实验流程图，展示 IPS 管线中的各个步骤、参数和代码对应关系。"
+      >Full-fidelity protocol diagram showing every step, parameter, and code reference in the IPS pipeline.</p>
     </div>
     <div class="iframe-container">
       <iframe
         src={`${base}/code/protocol.html`}
         title="IPS Experiment Protocol Flowchart"
+        data-title-en="IPS Experiment Protocol Flowchart"
+        data-title-zh="IPS 实验流程图"
         loading="lazy"
       ></iframe>
     </div>

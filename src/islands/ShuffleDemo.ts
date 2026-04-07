@@ -2,6 +2,7 @@
  * Shuffle Demo — two side-by-side snapshots with animated label scrambling.
  */
 import { PRNG } from '../sim/prng';
+import { t } from './i18n';
 
 const canvas = document.getElementById('shuffle-demo-canvas') as HTMLCanvasElement;
 const shuffleBtn = document.getElementById('shuffle-btn') as HTMLButtonElement;
@@ -78,13 +79,13 @@ if (canvas && shuffleBtn) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.font = '15px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Snapshot t₁', halfW / 2, 25);
+    ctx.fillText(t('Snapshot t₁', '快照 t₁'), halfW / 2, 25);
 
     // Right panel: t₂
     ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
     ctx.fillRect(halfW + 1, 0, halfW, h);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText('Snapshot t₂', halfW + halfW / 2, 25);
+    ctx.fillText(t('Snapshot t₂', '快照 t₂'), halfW + halfW / 2, 25);
 
     // Draw matching lines
     for (let i = 0; i < N; i++) {
@@ -148,7 +149,10 @@ if (canvas && shuffleBtn) {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.font = '12px Inter, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`Random matching: ${correct}/${N} correct`, w / 2, h - 15);
+      ctx.fillText(
+        t(`Random matching: ${correct}/${N} correct`, `随机匹配：${correct}/${N} 个正确`),
+        w / 2, h - 15,
+      );
     }
 
     requestAnimationFrame(draw);

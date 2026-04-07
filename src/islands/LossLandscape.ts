@@ -2,6 +2,7 @@
  * Loss Landscape — shows self-test loss vs squared residual.
  * Illustrates why the (1/2) coefficient breaks the V=Phi=0 degeneracy.
  */
+import { onLangChange, t } from './i18n';
 
 const canvas = document.getElementById('loss-landscape-canvas') as HTMLCanvasElement;
 
@@ -27,8 +28,8 @@ if (canvas) {
 
     // Two panels: Left = squared, Right = self-test
     const panels = [
-      { x: padL, label: '|Residual|² (degenerate)', color: '#ef4444', fn: 'squared' },
-      { x: padL + plotW + 40, label: 'Self-Test Loss (ours)', color: '#3b82f6', fn: 'selftest' },
+      { x: padL, label: t('|Residual|² (degenerate)', '|残差|²（退化）'), color: '#ef4444', fn: 'squared' },
+      { x: padL + plotW + 40, label: t('Self-Test Loss (ours)', '自测损失（我们的方法）'), color: '#3b82f6', fn: 'selftest' },
     ];
 
     // Scale factor s: V = s*V*, Phi = s*Phi*
@@ -82,8 +83,8 @@ if (canvas) {
 
       // X-axis labels
       ctx.fillText('0', px, padT + plotH + 18);
-      ctx.fillText('scale s', px + plotW / 2, padT + plotH + 35);
-      ctx.fillText('1 (true)', px + plotW * 0.5, padT + plotH + 18);
+      ctx.fillText(t('scale s', '缩放 s'), px + plotW / 2, padT + plotH + 35);
+      ctx.fillText(t('1 (true)', '1（真值）'), px + plotW * 0.5, padT + plotH + 18);
       ctx.fillText('2', px + plotW, padT + plotH + 18);
 
       // Draw curve
@@ -128,23 +129,24 @@ if (canvas) {
 
       // Mark s=0 (trivial) and s=1 (true)
       markPoint(0, 's=0', '#f59e0b');
-      markPoint(1, 's=1 (true)', '#22c55e');
+      markPoint(1, t('s=1 (true)', 's=1（真值）'), '#22c55e');
 
       // For squared: both are minima (problem!)
       if (fnName === 'squared') {
         ctx.fillStyle = '#ef4444';
         ctx.font = '11px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Both are minima!', px + plotW / 2, padT + plotH - 10);
+        ctx.fillText(t('Both are minima!', '两个点都是极小值！'), px + plotW / 2, padT + plotH - 10);
       } else {
         ctx.fillStyle = '#22c55e';
         ctx.font = '11px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Only true minimum is negative', px + plotW / 2, padT + plotH - 10);
+        ctx.fillText(t('Only true minimum is negative', '只有真值极小点是负的'), px + plotW / 2, padT + plotH - 10);
       }
     }
   }
 
+  onLangChange(draw);
   resize();
   window.addEventListener('resize', resize);
 }

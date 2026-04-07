@@ -6,18 +6,28 @@ import Footer from '../../components/Footer.astro';
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title="Code Overview — IPS Pipeline">
+<BaseLayout
+  title="Code Overview — IPS Pipeline"
+  titleZh="代码概览 · IPS 流程"
+  description="High-level overview of the IPS computation pipeline and its quality gates."
+  descriptionZh="IPS 计算流程及其质量检查点的高层概览。"
+>
   <CodeNav active="overview" />
   <main class="code-page">
     <div class="code-page-header">
-      <span class="code-page-label">Code Understanding</span>
-      <h2>Pipeline Overview</h2>
-      <p>High-level view of the IPS computational pipeline. Click expandable nodes to reveal quality gates.</p>
+      <span class="code-page-label" data-i18n-en="Code Understanding" data-i18n-zh="代码理解">Code Understanding</span>
+      <h2 data-i18n-en="Pipeline Overview" data-i18n-zh="流程概览">Pipeline Overview</h2>
+      <p
+        data-i18n-en="High-level view of the IPS computational pipeline. Click expandable nodes to reveal quality gates."
+        data-i18n-zh="IPS 计算流程的高层视图。点击可展开节点可查看关键质量检查点。"
+      >High-level view of the IPS computational pipeline. Click expandable nodes to reveal quality gates.</p>
     </div>
     <div class="iframe-container">
       <iframe
         src={`${base}/code/overview.html`}
         title="IPS Pipeline Overview Flowchart"
+        data-title-en="IPS Pipeline Overview Flowchart"
+        data-title-zh="IPS 流程概览图"
         loading="lazy"
       ></iframe>
     </div>

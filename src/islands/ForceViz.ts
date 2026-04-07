@@ -5,6 +5,7 @@
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
 import { MODELS } from '../sim/potentials';
+import { t } from './i18n';
 
 const canvas = document.getElementById('force-viz-canvas') as HTMLCanvasElement;
 if (canvas) {
@@ -182,9 +183,9 @@ if (canvas) {
     ctx.textAlign = 'center';
 
     const legendItems = [
-      { color: '#3b82f6', label: '-\u2207V (confinement)' },
-      { color: '#8b5cf6', label: '-\u2207\u03A6 (interaction)' },
-      { color: 'rgba(148,163,184,0.7)', label: '\u03C3dW (noise)' },
+      { color: '#3b82f6', label: t('-\u2207V (confinement)', '-\u2207V（束缚）') },
+      { color: '#8b5cf6', label: t('-\u2207\u03A6 (interaction)', '-\u2207\u03A6（交互）') },
+      { color: 'rgba(148,163,184,0.7)', label: t('\u03C3dW (noise)', '\u03C3dW（噪声）') },
     ];
     const totalW = legendItems.length * 140;
     let lx = (w - totalW) / 2 + 20;

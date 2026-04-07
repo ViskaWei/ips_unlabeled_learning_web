@@ -6,7 +6,12 @@ import Math from '../../components/Math.astro';
 const base = import.meta.env.BASE_URL;
 ---
 
-<BaseLayout title="API Guide — IPS Unlabeled Learning">
+<BaseLayout
+  title="API Guide — IPS Unlabeled Learning"
+  titleZh="API 指南 · IPS 无标签学习"
+  description="Developer API guide for the IPS unlabeled-learning codebase."
+  descriptionZh="IPS 无标签学习代码库的开发者 API 指南。"
+>
   <Nav />
 
   <div style="height: 56px;"></div>
@@ -14,31 +19,31 @@ const base = import.meta.env.BASE_URL;
   <div class="api-page">
     <!-- Sidebar Navigation -->
     <aside class="api-sidebar">
-      <h3>API Guide</h3>
+      <h3 data-i18n-en="API Guide" data-i18n-zh="API 指南">API Guide</h3>
       <nav>
-        <a href="#quickstart" class="api-nav-link active">Quick Start</a>
-        <a href="#pipelines" class="api-nav-link">Pipelines</a>
-        <a href="#potentials" class="api-nav-link">Potentials</a>
-        <a href="#solvers" class="api-nav-link">Solvers</a>
-        <a href="#evaluation" class="api-nav-link">Evaluation</a>
-        <a href="#nn" class="api-nav-link">Neural Networks</a>
-        <a href="#constraints" class="api-nav-link">Constraints</a>
+        <a href="#quickstart" class="api-nav-link active" data-i18n-en="Quick Start" data-i18n-zh="快速开始">Quick Start</a>
+        <a href="#pipelines" class="api-nav-link" data-i18n-en="Pipelines" data-i18n-zh="两条流程">Pipelines</a>
+        <a href="#potentials" class="api-nav-link" data-i18n-en="Potentials" data-i18n-zh="势函数">Potentials</a>
+        <a href="#solvers" class="api-nav-link" data-i18n-en="Solvers" data-i18n-zh="求解器">Solvers</a>
+        <a href="#evaluation" class="api-nav-link" data-i18n-en="Evaluation" data-i18n-zh="评估">Evaluation</a>
+        <a href="#nn" class="api-nav-link" data-i18n-en="Neural Networks" data-i18n-zh="神经网络">Neural Networks</a>
+        <a href="#constraints" class="api-nav-link" data-i18n-en="Constraints" data-i18n-zh="约束与注意事项">Constraints</a>
       </nav>
     </aside>
 
     <!-- Main Content -->
     <main class="api-content">
 
-      <h1>Developer API Guide</h1>
-      <p class="api-subtitle">Everything you need to use the IPS Unlabeled Learning codebase.</p>
+      <h1 data-i18n-en="Developer API Guide" data-i18n-zh="开发者 API 指南">Developer API Guide</h1>
+      <p class="api-subtitle" data-i18n-en="Everything you need to use the IPS Unlabeled Learning codebase." data-i18n-zh="使用 IPS 无标签学习代码库所需的核心信息都在这里。">Everything you need to use the IPS Unlabeled Learning codebase.</p>
 
       <!-- Quick Start -->
       <section id="quickstart">
-        <h2>Quick Start</h2>
-        <p>From zero to results in 4 steps. The self-test method needs <strong>no trajectory labels</strong> — just unlabeled snapshots.</p>
+        <h2 data-i18n-en="Quick Start" data-i18n-zh="快速开始">Quick Start</h2>
+        <p data-i18n-en="From zero to results in 4 steps. The self-test method needs <strong>no trajectory labels</strong> — just unlabeled snapshots." data-i18n-zh="4 步从零到结果。自测方法<strong>不需要轨迹标签</strong>，只需要无标签快照。">From zero to results in 4 steps. The self-test method needs <strong>no trajectory labels</strong> — just unlabeled snapshots.</p>
 
         <div class="api-code-block">
-          <div class="api-code-header">Install & Import</div>
+          <div class="api-code-header" data-i18n-en="Install &amp; Import" data-i18n-zh="安装与导入">Install & Import</div>
           <pre><code>git clone https://github.com/ViskaWei/lips_unlabeled_data
 cd lips_unlabeled_data && pip install -e .
 
@@ -50,7 +55,7 @@ from lib.eval import evaluate_kde</code></pre>
         </div>
 
         <div class="api-code-block">
-          <div class="api-code-header">Generate → Learn → Evaluate</div>
+          <div class="api-code-header" data-i18n-en="Generate → Learn → Evaluate" data-i18n-zh="生成 → 学习 → 评估">Generate → Learn → Evaluate</div>
           <pre><code># 1. Simulate particle data
 V = HarmonicPotential(k=2.0)
 Phi = GaussianInteraction(A=1.0, sigma=0.8)
@@ -74,26 +79,26 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
 
       <!-- Pipelines -->
       <section id="pipelines">
-        <h2>Two Pipelines</h2>
+        <h2 data-i18n-en="Two Pipelines" data-i18n-zh="两条流程">Two Pipelines</h2>
 
         <div class="pipeline-cards">
           <div class="pipeline-card" style="border-left-color: var(--accent-green);">
-            <h3 style="color: var(--accent-green);">Basis Regression</h3>
-            <p>Expand V, &Phi; in known basis functions. Linear least-squares — <strong>exact, fast</strong>.</p>
+            <h3 style="color: var(--accent-green);" data-i18n-en="Basis Regression" data-i18n-zh="基函数回归">Basis Regression</h3>
+            <p data-i18n-en="Expand V, &Phi; in known basis functions. Linear least-squares — <strong>exact, fast</strong>." data-i18n-zh="将 V 和 &Phi; 展开在已知基函数上。线性最小二乘，<strong>精确且快速</strong>。">Expand V, &Phi; in known basis functions. Linear least-squares — <strong>exact, fast</strong>.</p>
             <pre><code>load_data → get_basis → solve_selftest → evaluate_kde</code></pre>
             <div class="pipeline-meta">
-              <span>Modules: lib.config, lib.basis, lib.solvers, lib.eval</span>
-              <span>Time: ~seconds</span>
+              <span data-i18n-en="Modules: lib.config, lib.basis, lib.solvers, lib.eval" data-i18n-zh="模块：lib.config、lib.basis、lib.solvers、lib.eval">Modules: lib.config, lib.basis, lib.solvers, lib.eval</span>
+              <span data-i18n-en="Time: ~seconds" data-i18n-zh="耗时：约数秒">Time: ~seconds</span>
             </div>
           </div>
 
           <div class="pipeline-card" style="border-left-color: var(--accent-purple);">
-            <h3 style="color: var(--accent-purple);">Neural Network</h3>
-            <p>MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no prior knowledge</strong>.</p>
+            <h3 style="color: var(--accent-purple);" data-i18n-en="Neural Network" data-i18n-zh="神经网络">Neural Network</h3>
+            <p data-i18n-en="MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no prior knowledge</strong>." data-i18n-zh="V 用 MLP，&Phi; 用对称 MLP。梯度下降优化，<strong>灵活且无需先验知识</strong>。">MLP for V, Symmetric MLP for &Phi;. Gradient descent — <strong>flexible, no prior knowledge</strong>.</p>
             <pre><code>load_data → create_networks → train_loop(selftest_loss) → evaluate</code></pre>
             <div class="pipeline-meta">
-              <span>Modules: core.nn_models, core.selftest_loss</span>
-              <span>Time: ~hours (GPU)</span>
+              <span data-i18n-en="Modules: core.nn_models, core.selftest_loss" data-i18n-zh="模块：core.nn_models、core.selftest_loss">Modules: core.nn_models, core.selftest_loss</span>
+              <span data-i18n-en="Time: ~hours (GPU)" data-i18n-zh="耗时：约数小时（GPU）">Time: ~hours (GPU)</span>
             </div>
           </div>
         </div>
@@ -101,13 +106,13 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
 
       <!-- Potentials -->
       <section id="potentials">
-        <h2>Available Potentials</h2>
-        <p>All potentials implement <code>evaluate(x)</code> and <code>gradient(x)</code>.</p>
+        <h2 data-i18n-en="Available Potentials" data-i18n-zh="可用势函数">Available Potentials</h2>
+        <p data-i18n-en="All potentials implement <code>evaluate(x)</code> and <code>gradient(x)</code>." data-i18n-zh="所有势函数都实现 <code>evaluate(x)</code> 和 <code>gradient(x)</code>。">All potentials implement <code>evaluate(x)</code> and <code>gradient(x)</code>.</p>
 
         <div class="api-table-wrap">
           <table class="api-table">
             <thead>
-              <tr><th>Class</th><th>Formula</th><th>Model</th></tr>
+              <tr><th data-i18n-en="Class" data-i18n-zh="类">Class</th><th data-i18n-en="Formula" data-i18n-zh="公式">Formula</th><th data-i18n-en="Model" data-i18n-zh="模型">Model</th></tr>
             </thead>
             <tbody>
               <tr><td><code>HarmonicPotential(k)</code></td><td>V(x) = k|x|&sup2;/2</td><td>C, E</td></tr>
@@ -125,49 +130,49 @@ print("V: %.1f%%, Phi: %.1f%%" % (errors['V_error_pct'], errors['Phi_error_pct']
 
       <!-- Solvers -->
       <section id="solvers">
-        <h2>Solver API</h2>
+        <h2 data-i18n-en="Solver API" data-i18n-zh="求解器 API">Solver API</h2>
 
         <div class="api-func">
           <h3><code>solve_selftest(data, t_obs, sigma, build_V_fn, build_Phi_fn, K_V, K_Phi, reg='auto')</code></h3>
-          <p>Trajectory-free learning via the weak form self-test. <strong>No labels needed.</strong></p>
+          <p data-i18n-en="Trajectory-free learning via the weak form self-test. <strong>No labels needed.</strong>" data-i18n-zh="通过弱形式自测实现无轨迹学习。<strong>不需要标签。</strong>">Trajectory-free learning via the weak form self-test. <strong>No labels needed.</strong></p>
           <div class="api-params">
-            <div class="api-param"><code>data</code>: ndarray (M, L, N, d) — unlabeled snapshot ensemble</div>
-            <div class="api-param"><code>t_obs</code>: ndarray (L,) — observation times</div>
-            <div class="api-param"><code>sigma</code>: float — diffusion coefficient</div>
-            <div class="api-param"><code>reg</code>: 'auto' | float — Tikhonov regularization (auto = Hansen L-curve)</div>
-            <div class="api-param"><strong>Returns</strong>: alpha (K_V,), beta (K_Phi,), info dict</div>
+            <div class="api-param" data-i18n-en="<code>data</code>: ndarray (M, L, N, d) — unlabeled snapshot ensemble" data-i18n-zh="<code>data</code>：ndarray (M, L, N, d) —— 无标签快照集合"><code>data</code>: ndarray (M, L, N, d) — unlabeled snapshot ensemble</div>
+            <div class="api-param" data-i18n-en="<code>t_obs</code>: ndarray (L,) — observation times" data-i18n-zh="<code>t_obs</code>：ndarray (L,) —— 观测时刻"><code>t_obs</code>: ndarray (L,) — observation times</div>
+            <div class="api-param" data-i18n-en="<code>sigma</code>: float — diffusion coefficient" data-i18n-zh="<code>sigma</code>：float —— 扩散系数"><code>sigma</code>: float — diffusion coefficient</div>
+            <div class="api-param" data-i18n-en="<code>reg</code>: 'auto' | float — Tikhonov regularization (auto = Hansen L-curve)" data-i18n-zh="<code>reg</code>：'auto' | float —— Tikhonov 正则化（auto = Hansen L-curve）"><code>reg</code>: 'auto' | float — Tikhonov regularization (auto = Hansen L-curve)</div>
+            <div class="api-param" data-i18n-en="<strong>Returns</strong>: alpha (K_V,), beta (K_Phi,), info dict" data-i18n-zh="<strong>返回</strong>：alpha (K_V,)、beta (K_Phi,) 和 info 字典"><strong>Returns</strong>: alpha (K_V,), beta (K_Phi,), info dict</div>
           </div>
         </div>
 
         <div class="api-func">
           <h3><code>solve_mle(data_labeled, t_obs, ...)</code></h3>
-          <p>Maximum likelihood estimation. <strong>Requires labeled trajectory pairs.</strong></p>
+          <p data-i18n-en="Maximum likelihood estimation. <strong>Requires labeled trajectory pairs.</strong>" data-i18n-zh="极大似然估计。<strong>需要带标签的轨迹配对。</strong>">Maximum likelihood estimation. <strong>Requires labeled trajectory pairs.</strong></p>
         </div>
 
         <div class="api-func">
           <h3><code>solve_sinkhorn(data_unlabeled, t_obs, ..., eps_factor=0.01)</code></h3>
-          <p>Optimal transport label imputation + MLE. Unlabeled input, but degrades at large &Delta;t.</p>
+          <p data-i18n-en="Optimal transport label imputation + MLE. Unlabeled input, but degrades at large &Delta;t." data-i18n-zh="最优传输补标签 + MLE。输入可无标签，但在较大 &Delta;t 下会退化。">Optimal transport label imputation + MLE. Unlabeled input, but degrades at large &Delta;t.</p>
         </div>
       </section>
 
       <!-- Evaluation -->
       <section id="evaluation">
-        <h2>Evaluation</h2>
+        <h2 data-i18n-en="Evaluation" data-i18n-zh="评估">Evaluation</h2>
         <div class="api-func">
           <h3><code>evaluate_kde(model_name, d, alpha, beta, build_V_fn, build_Phi_fn)</code></h3>
-          <p>Compute L&sup2;(&rho;)-weighted errors against true gradients on a 2000-point grid.</p>
+          <p data-i18n-en="Compute L&sup2;(&rho;)-weighted errors against true gradients on a 2000-point grid." data-i18n-zh="在 2000 个网格点上计算相对于真实梯度的 L&sup2;(&rho;) 加权误差。">Compute L&sup2;(&rho;)-weighted errors against true gradients on a 2000-point grid.</p>
           <div class="api-params">
-            <div class="api-param"><strong>Returns</strong>: dict with <code>V_error_pct</code>, <code>Phi_error_pct</code></div>
+            <div class="api-param" data-i18n-en="<strong>Returns</strong>: dict with <code>V_error_pct</code>, <code>Phi_error_pct</code>" data-i18n-zh="<strong>返回</strong>：包含 <code>V_error_pct</code> 和 <code>Phi_error_pct</code> 的字典"><strong>Returns</strong>: dict with <code>V_error_pct</code>, <code>Phi_error_pct</code></div>
           </div>
         </div>
       </section>
 
       <!-- Neural Networks -->
       <section id="nn">
-        <h2>Neural Network Training</h2>
+        <h2 data-i18n-en="Neural Network Training" data-i18n-zh="神经网络训练">Neural Network Training</h2>
 
         <div class="api-code-block">
-          <div class="api-code-header">Complete NN Pipeline</div>
+          <div class="api-code-header" data-i18n-en="Complete NN Pipeline" data-i18n-zh="完整 NN 流程">Complete NN Pipeline</div>
           <pre><code>import torch
 from core.nn_models import RadialNet, RadialInteractionNet
 from core.selftest_loss import compute_selftest_loss_batch
@@ -196,28 +201,32 @@ for epoch in range(200):
 
       <!-- Constraints -->
       <section id="constraints">
-        <h2>Constraints & Gotchas</h2>
+        <h2 data-i18n-en="Constraints &amp; Gotchas" data-i18n-zh="约束与注意事项">Constraints & Gotchas</h2>
 
         <div class="constraint-list">
           <div class="constraint critical">
             <span class="constraint-tag">CRITICAL</span>
-            <p>Self-test loss converges to a <strong>negative</strong> value, not zero. L(V*, &Phi;*) = -&frac12; E[J_diss &middot; &Delta;t] &lt; 0.</p>
+            <p data-i18n-en="Self-test loss converges to a <strong>negative</strong> value, not zero. L(V*, &Phi;*) = -&frac12; E[J_diss &middot; &Delta;t] &lt; 0." data-i18n-zh="自测损失收敛到<strong>负值</strong>，而不是零。L(V*, &Phi;*) = -&frac12; E[J_diss &middot; &Delta;t] &lt; 0。">Self-test loss converges to a <strong>negative</strong> value, not zero. L(V*, &Phi;*) = -&frac12; E[J_diss &middot; &Delta;t] &lt; 0.</p>
           </div>
           <div class="constraint critical">
             <span class="constraint-tag">CRITICAL</span>
-            <p>L-curve regularization <strong>fails at dt_obs=0.1</strong> (Bakushinskii phenomenon). Use fixed reg=1e-6 instead.</p>
+            <p data-i18n-en="L-curve regularization <strong>fails at dt_obs=0.1</strong> (Bakushinskii phenomenon). Use fixed reg=1e-6 instead." data-i18n-zh="L-curve 正则化在 <strong>dt_obs=0.1</strong> 时失效（Bakushinskii 现象）。此时应改用固定 reg=1e-6。">L-curve regularization <strong>fails at dt_obs=0.1</strong> (Bakushinskii phenomenon). Use fixed reg=1e-6 instead.</p>
           </div>
           <div class="constraint warning">
             <span class="constraint-tag">WARNING</span>
-            <p>NN activation must be C&sup2;-smooth (<code>Softplus</code> or <code>Tanh</code>, not ReLU) — second derivatives required for AD-based Laplacians.</p>
+            <p data-i18n-en="NN activation must be C&sup2;-smooth (<code>Softplus</code> or <code>Tanh</code>, not ReLU) — second derivatives required for AD-based Laplacians." data-i18n-zh="NN 激活函数必须是 C&sup2; 光滑的（<code>Softplus</code> 或 <code>Tanh</code>，不能用 ReLU），因为基于自动微分的拉普拉斯计算需要二阶导数。">NN activation must be C&sup2;-smooth (<code>Softplus</code> or <code>Tanh</code>, not ReLU) — second derivatives required for AD-based Laplacians.</p>
           </div>
           <div class="constraint warning">
             <span class="constraint-tag">WARNING</span>
-            <p>KDE evaluation only works for <strong>radial models</strong> (model_a/b/lj/morse/e). Non-radial models (aniso/dipole) use grid evaluation.</p>
+            <p data-i18n-en="KDE evaluation only works for <strong>radial models</strong> (model_a/b/lj/morse/e). Non-radial models (aniso/dipole) use grid evaluation." data-i18n-zh="KDE 评估只适用于<strong>径向模型</strong>（model_a/b/lj/morse/e）。非径向模型（aniso/dipole）应使用网格评估。">KDE evaluation only works for <strong>radial models</strong> (model_a/b/lj/morse/e). Non-radial models (aniso/dipole) use grid evaluation.</p>
           </div>
           <div class="constraint info">
             <span class="constraint-tag">INFO</span>
-            <p>Mean-field energy 1/(2N&sup2;) has N(N-1) terms → gradients are O(1), not O(1/N&sup2;). This is normalization, not signal suppression.</p>
+            <p data-i18n-en="Mean-field energy 1/(2N&sup2;) has N(N-1) terms → gradients are O(1), not O(1/N&sup2;). This is normalization, not signal suppression." data-i18n-zh="平均场能量 1/(2N&sup2;) 含有 N(N-1) 项，因此梯度量级是 O(1)，而不是 O(1/N&sup2;)。这是归一化，不是信号被压没。">Mean-field energy 1/(2N&sup2;) has N(N-1) terms → gradients are O(1), not O(1/N&sup2;). This is normalization, not signal suppression.</p>
+          </div>
+          <div class="constraint info">
+            <span class="constraint-tag">INFO</span>
+            <p data-i18n-en="Potentials are identifiable only up to additive constants, so equivalent shifted formulas may appear in the paper or visualizations. Reported quantitative errors are gradient errors." data-i18n-zh="势函数只能识别到加法常数，因此论文或可视化里可能出现具有相同梯度的等价平移形式。这里汇报的定量误差都是梯度误差。">Potentials are identifiable only up to additive constants, so equivalent shifted formulas may appear in the paper or visualizations. Reported quantitative errors are gradient errors.</p>
           </div>
         </div>
       </section>

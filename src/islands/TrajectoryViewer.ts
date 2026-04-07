@@ -4,6 +4,7 @@
  */
 import { ParticleSystem, type ParticleState } from '../sim/euler-maruyama';
 import { MODELS } from '../sim/potentials';
+import { modelLabel, onLangChange, t } from './i18n';
 
 const canvas = document.getElementById('traj-viewer-canvas') as HTMLCanvasElement;
 if (canvas) {
@@ -56,9 +57,16 @@ if (canvas) {
   const trailToggle = document.getElementById('traj-trail-toggle');
   const modelBtns = document.querySelectorAll('[data-traj-model]');
 
+  function updateControlLabels() {
+    if (playBtn) playBtn.textContent = t(playing ? 'Pause' : 'Play', playing ? '暂停' : '播放');
+    if (trailToggle) {
+      trailToggle.textContent = t(showTrails ? 'Hide Trails' : 'Show Trails', showTrails ? '隐藏轨迹' : '显示轨迹');
+    }
+  }
+
   playBtn?.addEventListener('click', () => {
     playing = !playing;
-    playBtn.textContent = playing ? 'Pause' : 'Play';
+    updateControlLabels();
   });
 
   speedBtns.forEach((btn) => {
@@ -71,7 +79,7 @@ if (canvas) {
 
   trailToggle?.addEventListener('click', () => {
     showTrails = !showTrails;
-    trailToggle.textContent = showTrails ? 'Hide Trails' : 'Show Trails';
+    updateControlLabels();
   });
 
   modelBtns.forEach((btn) => {
@@ -189,13 +197,14 @@ if (canvas) {
     ctx.fillText(`t = ${(frameIdx * 0.005 * STEPS_PER_FRAME).toFixed(2)}`, w - 10, h - 10);
 
     // Model label
-    const config = MODELS[currentModel];
     ctx.textAlign = 'left';
-    ctx.fillText(config?.label || '', 10, h - 10);
+    ctx.fillText(modelLabel(currentModel), 10, h - 10);
 
     requestAnimationFrame(draw);
   }
 
+  updateControlLabels();
+  onLangChange(updateControlLabels);
   initModel('model_e');
   resize();
   window.addEventListener('resize', resize);

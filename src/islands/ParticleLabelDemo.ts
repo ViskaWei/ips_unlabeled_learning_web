@@ -7,6 +7,7 @@
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
 import { MODELS } from '../sim/potentials';
+import { t } from './i18n';
 
 const canvas = document.getElementById('label-demo-canvas') as HTMLCanvasElement;
 if (canvas) {
@@ -234,11 +235,14 @@ if (canvas) {
     ctx.textBaseline = 'top';
     if (prevPositions) {
       ctx.fillText(
-        `Snapshot ${snapshotCount} → ${snapshotCount + 1}  —  which dot moved where?`,
+        t(
+          `Snapshot ${snapshotCount} → ${snapshotCount + 1}  —  which dot moved where?`,
+          `快照 ${snapshotCount} → ${snapshotCount + 1} —— 哪个点移动到了哪里？`,
+        ),
         w / 2, h - 24,
       );
     } else {
-      ctx.fillText('Observing snapshot 1 ...', w / 2, h - 24);
+      ctx.fillText(t('Observing snapshot 1 ...', '正在观察快照 1 ...'), w / 2, h - 24);
     }
 
     // Countdown bar at bottom

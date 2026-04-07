@@ -4,7 +4,12 @@ import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="Try It — IPS Unlabeled Learning">
+<BaseLayout
+  title="Try It — IPS Unlabeled Learning"
+  titleZh="交互演示 · IPS 无标签学习"
+  description="Interactive demos for trajectory-free learning of IPS potentials from unlabeled data."
+  descriptionZh="面向无标签数据 IPS 势函数学习的交互式演示页面。"
+>
   <Nav />
 
   <div style="height: 56px;"></div>
@@ -16,7 +21,7 @@ import Footer from '../components/Footer.astro';
         data-i18n-en="Interactive Demo"
         data-i18n-zh="交互式演示">Interactive Demo</p>
       <h1 data-i18n-en="Try It Yourself"
-          data-i18n-zh="亲自试试">Try It Yourself</h1>
+          data-i18n-zh="交互体验">Try It Yourself</h1>
       <p style="max-width: 600px; margin: 0 auto; color: var(--text-secondary);"
         data-i18n-en="See how our self-test method learns particle interactions from unlabeled data. All simulations run in your browser — no server needed."
         data-i18n-zh="看看我们的自测方法如何从无标签数据学习粒子交互。所有模拟在浏览器中运行——无需服务器。">
@@ -43,8 +48,8 @@ import Footer from '../components/Footer.astro';
       </div>
       <div class="demo-controls">
         <div class="toggle-group">
-          <button id="traj-play-btn" class="toggle-btn active">Pause</button>
-          <button id="traj-trail-toggle" class="toggle-btn">Hide Trails</button>
+          <button id="traj-play-btn" class="toggle-btn active" data-i18n-en="Pause" data-i18n-zh="暂停">Pause</button>
+          <button id="traj-trail-toggle" class="toggle-btn" data-i18n-en="Hide Trails" data-i18n-zh="隐藏轨迹">Hide Trails</button>
         </div>
         <div class="toggle-group">
           <button class="toggle-btn active" data-traj-speed="1">1x</button>
@@ -54,11 +59,11 @@ import Footer from '../components/Footer.astro';
       </div>
       <div class="demo-controls" style="margin-top: 0.5rem;">
         <div class="toggle-group">
-          <button class="toggle-btn active" data-traj-model="model_e">E: Reference</button>
-          <button class="toggle-btn" data-traj-model="model_a">A: Smoothness</button>
-          <button class="toggle-btn" data-traj-model="model_b">B: Conditioning</button>
-          <button class="toggle-btn" data-traj-model="model_lj">C: LJ</button>
-          <button class="toggle-btn" data-traj-model="model_morse">D: Morse</button>
+          <button class="toggle-btn active" data-traj-model="model_e" data-i18n-en="E: Reference" data-i18n-zh="E：基准">E: Reference</button>
+          <button class="toggle-btn" data-traj-model="model_a" data-i18n-en="A: Smoothness" data-i18n-zh="A：光滑性">A: Smoothness</button>
+          <button class="toggle-btn" data-traj-model="model_b" data-i18n-en="B: Conditioning" data-i18n-zh="B：条件数">B: Conditioning</button>
+          <button class="toggle-btn" data-traj-model="model_lj" data-i18n-en="C: LJ" data-i18n-zh="C：LJ">C: LJ</button>
+          <button class="toggle-btn" data-traj-model="model_morse" data-i18n-en="D: Morse" data-i18n-zh="D：Morse">D: Morse</button>
         </div>
       </div>
     </div>
@@ -100,11 +105,11 @@ import Footer from '../components/Footer.astro';
       </div>
       <div class="demo-controls" style="margin-top: 0.5rem;">
         <div class="toggle-group">
-          <button class="toggle-btn active" data-compare-model="model_e">E: Reference</button>
-          <button class="toggle-btn" data-compare-model="model_a">A</button>
-          <button class="toggle-btn" data-compare-model="model_b">B</button>
-          <button class="toggle-btn" data-compare-model="model_lj">C: LJ</button>
-          <button class="toggle-btn" data-compare-model="model_morse">D: Morse</button>
+          <button class="toggle-btn active" data-compare-model="model_e" data-i18n-en="E: Reference" data-i18n-zh="E：基准">E: Reference</button>
+          <button class="toggle-btn" data-compare-model="model_a" data-i18n-en="A: Smoothness" data-i18n-zh="A：光滑性">A: Smoothness</button>
+          <button class="toggle-btn" data-compare-model="model_b" data-i18n-en="B: Conditioning" data-i18n-zh="B：条件数">B: Conditioning</button>
+          <button class="toggle-btn" data-compare-model="model_lj" data-i18n-en="C: LJ" data-i18n-zh="C：LJ">C: LJ</button>
+          <button class="toggle-btn" data-compare-model="model_morse" data-i18n-en="D: Morse" data-i18n-zh="D：Morse">D: Morse</button>
         </div>
       </div>
     </div>
@@ -127,9 +132,9 @@ import Footer from '../components/Footer.astro';
       data-i18n-zh="演示 3">Demo 3</p>
     <h2 data-i18n-en="Predicted vs True Trajectories"
         data-i18n-zh="预测轨迹 vs 真实轨迹">Predicted vs True Trajectories</h2>
-    <p data-i18n-en="The ultimate test: use the learned potentials to forward-simulate trajectories. Left: true dynamics. Right: predicted dynamics using estimated V&#x0302; and &Phi;&#x0302;. Both start from identical initial conditions with the same noise — any divergence is purely from estimation error."
-       data-i18n-zh="终极测试：用学到的势函数前向模拟轨迹。左：真实动力学。右：用估计的 V&#x0302; 和 &Phi;&#x0302; 预测的动力学。两者从相同初始条件和噪声出发——任何偏差都纯粹来自估计误差。">
-      The ultimate test: use the learned potentials to forward-simulate trajectories. Left: true dynamics. Right: predicted dynamics using estimated V&#x0302; and &Phi;&#x0302;. Both start from identical initial conditions with the same noise — any divergence is purely from estimation error.
+    <p data-i18n-en="A more stringent qualitative test: use the learned potentials to forward-simulate trajectories. Left: true dynamics. Right: predicted dynamics using estimated V&#x0302; and &Phi;&#x0302;. Both start from identical initial conditions with the same noise realization, so trajectory divergence mainly reflects estimation error in the learned potentials."
+       data-i18n-zh="一个更严格的定性测试：用学到的势函数前向模拟轨迹。左：真实动力学。右：用估计的 V&#x0302; 和 &Phi;&#x0302; 预测的动力学。两者从相同初始条件和同一噪声实现出发，因此轨迹分离主要反映势函数估计误差。">
+      A more stringent qualitative test: use the learned potentials to forward-simulate trajectories. Left: true dynamics. Right: predicted dynamics using estimated V&#x0302; and &Phi;&#x0302;. Both start from identical initial conditions with the same noise realization, so trajectory divergence mainly reflects estimation error in the learned potentials.
     </p>
 
     <div class="demo-container">
@@ -143,7 +148,7 @@ import Footer from '../components/Footer.astro';
       </div>
       <div class="demo-controls">
         <div class="toggle-group">
-          <button id="compare-play-btn" class="toggle-btn active">Pause</button>
+          <button id="compare-play-btn" class="toggle-btn active" data-i18n-en="Pause" data-i18n-zh="暂停">Pause</button>
           <button id="compare-overlay-btn" class="toggle-btn"
             data-i18n-en="Overlay" data-i18n-zh="叠加">Overlay</button>
           <button id="compare-reset-btn" class="toggle-btn"
@@ -152,11 +157,11 @@ import Footer from '../components/Footer.astro';
       </div>
       <div class="demo-controls" style="margin-top: 0.5rem;">
         <div class="toggle-group">
-          <button class="toggle-btn active" data-compare-traj-model="model_e">E: Reference</button>
-          <button class="toggle-btn" data-compare-traj-model="model_a">A</button>
-          <button class="toggle-btn" data-compare-traj-model="model_b">B</button>
-          <button class="toggle-btn" data-compare-traj-model="model_lj">C: LJ</button>
-          <button class="toggle-btn" data-compare-traj-model="model_morse">D: Morse</button>
+          <button class="toggle-btn active" data-compare-traj-model="model_e" data-i18n-en="E: Reference" data-i18n-zh="E：基准">E: Reference</button>
+          <button class="toggle-btn" data-compare-traj-model="model_a" data-i18n-en="A: Smoothness" data-i18n-zh="A：光滑性">A: Smoothness</button>
+          <button class="toggle-btn" data-compare-traj-model="model_b" data-i18n-en="B: Conditioning" data-i18n-zh="B：条件数">B: Conditioning</button>
+          <button class="toggle-btn" data-compare-traj-model="model_lj" data-i18n-en="C: LJ" data-i18n-zh="C：LJ">C: LJ</button>
+          <button class="toggle-btn" data-compare-traj-model="model_morse" data-i18n-en="D: Morse" data-i18n-zh="D：Morse">D: Morse</button>
         </div>
       </div>
     </div>
@@ -258,7 +263,7 @@ print("Phi error: %.2f%%" % (phi_err * 100))
     </div>
 
     <div style="text-align: center; margin-top: 2rem;">
-      <a href="https://github.com/ViskaWei/lips_unlabeled_data" class="btn btn-outline" style="font-size: 1rem; padding: 0.75rem 2rem;">
+      <a href="https://github.com/ViskaWei/lips_unlabeled_data" class="btn btn-outline" style="font-size: 1rem; padding: 0.75rem 2rem;" data-i18n-en="View on GitHub &rarr;" data-i18n-zh="查看 GitHub &rarr;">
         View on GitHub &rarr;
       </a>
     </div>

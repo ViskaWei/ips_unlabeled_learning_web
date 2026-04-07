@@ -1,11 +1,11 @@
 ---
 const sections = [
-  { id: 'problem', label: 'The Problem' },
-  { id: 'challenge', label: 'Why It\'s Hard' },
-  { id: 'insight', label: 'Our Approach' },
-  { id: 'models', label: 'Models' },
-  { id: 'results', label: 'Results' },
-  { id: 'deep-dive', label: 'Deep Dive' },
+  { id: 'problem', labelEn: 'The Problem', labelZh: '核心问题' },
+  { id: 'challenge', labelEn: 'Why It\'s Hard', labelZh: '为什么难' },
+  { id: 'insight', labelEn: 'Our Approach', labelZh: '我们的方法' },
+  { id: 'models', labelEn: 'Models', labelZh: '模型' },
+  { id: 'results', labelEn: 'Results', labelZh: '结果' },
+  { id: 'deep-dive', labelEn: 'Deep Dive', labelZh: '深入' },
 ];
 const base = import.meta.env.BASE_URL;
 ---
@@ -16,26 +16,48 @@ const base = import.meta.env.BASE_URL;
     <a href={`${base}/`} class="nav-brand">IPS</a>
     <div class="nav-links">
       {sections.map((s) => (
-        <a href={`${base}/#${s.id}`} class="nav-link">{s.label}</a>
+        <a
+          href={`${base}/#${s.id}`}
+          class="nav-link"
+          data-i18n-en={s.labelEn}
+          data-i18n-zh={s.labelZh}
+        >{s.labelEn}</a>
       ))}
       <span class="nav-separator"></span>
-      <a href={`${base}/demo/`} class="nav-link nav-link-page">Demo</a>
-      <a href={`${base}/code/overview/`} class="nav-link nav-link-page">Code</a>
+      <a href={`${base}/demo/`} class="nav-link nav-link-page" data-i18n-en="Demo" data-i18n-zh="演示">Demo</a>
+      <a href={`${base}/code/overview/`} class="nav-link nav-link-page" data-i18n-en="Code" data-i18n-zh="代码">Code</a>
       <a href={`${base}/code/api/`} class="nav-link nav-link-page">API</a>
     </div>
     <div class="nav-actions">
-      <button id="lang-toggle" class="toggle-btn active" title="Toggle language">EN</button>
-      <button id="nav-hamburger" class="nav-hamburger" aria-label="Menu">
+      <button
+        id="lang-toggle"
+        class="toggle-btn active"
+        title="Toggle language"
+        data-title-en="Toggle language"
+        data-title-zh="切换语言"
+      >EN</button>
+      <button
+        id="nav-hamburger"
+        class="nav-hamburger"
+        aria-label="Menu"
+        data-label-en="Menu"
+        data-label-zh="菜单"
+      >
         <span></span><span></span><span></span>
       </button>
     </div>
   </div>
   <div id="nav-mobile" class="nav-mobile">
     {sections.map((s) => (
-      <a href={`${base}/#${s.id}`} class="nav-mobile-link">{s.label}</a>
+      <a
+        href={`${base}/#${s.id}`}
+        class="nav-mobile-link"
+        data-i18n-en={s.labelEn}
+        data-i18n-zh={s.labelZh}
+      >{s.labelEn}</a>
     ))}
-    <a href={`${base}/demo/`} class="nav-mobile-link nav-link-page">Demo</a>
-    <a href={`${base}/code/overview/`} class="nav-mobile-link nav-link-page">Code</a>
+    <a href={`${base}/demo/`} class="nav-mobile-link nav-link-page" data-i18n-en="Demo" data-i18n-zh="演示">Demo</a>
+    <a href={`${base}/code/overview/`} class="nav-mobile-link nav-link-page" data-i18n-en="Code" data-i18n-zh="代码">Code</a>
     <a href={`${base}/code/api/`} class="nav-mobile-link nav-link-page">API</a>
   </div>
 </nav>
@@ -196,17 +218,44 @@ const base = import.meta.env.BASE_URL;
 <script>
   // Language toggle
   const langBtn = document.getElementById('lang-toggle');
-  let currentLang = localStorage.getItem('ips-lang') || 'en';
+  const hamburger = document.getElementById('nav-hamburger');
+  const docLang = document.documentElement.lang.toLowerCase();
+  let currentLang = localStorage.getItem('ips-lang') || (docLang.startsWith('zh') ? 'zh' : 'en');
 
   function updateLang() {
     if (langBtn) langBtn.textContent = currentLang.toUpperCase();
+    if (langBtn) {
+      const title = currentLang === 'en' ? langBtn.dataset.titleEn : langBtn.dataset.titleZh;
+      if (title) langBtn.title = title;
+    }
+    if (hamburger) {
+      const label = currentLang === 'en' ? hamburger.dataset.labelEn : hamburger.dataset.labelZh;
+      if (label) hamburger.setAttribute('aria-label', label);
+    }
     document.documentElement.lang = currentLang;
     document.querySelectorAll('[data-i18n-en]').forEach((el) => {
       const text = currentLang === 'en'
         ? el.getAttribute('data-i18n-en')
         : el.getAttribute('data-i18n-zh');
-      if (text) el.textContent = text;
+      if (text) el.innerHTML = text;
     });
+    document.querySelectorAll<HTMLElement>('[data-title-en]').forEach((el) => {
+      const title = currentLang === 'en' ? el.dataset.titleEn : el.dataset.titleZh;
+      if (title) el.title = title;
+    });
+    document.querySelectorAll<HTMLElement>('[data-aria-label-en]').forEach((el) => {
+      const label = currentLang === 'en' ? el.dataset.ariaLabelEn : el.dataset.ariaLabelZh;
+      if (label) el.setAttribute('aria-label', label);
+    });
+    const pageTitle = document.querySelector('title[data-title-en]');
+    if (pageTitle instanceof HTMLTitleElement) {
+      pageTitle.textContent = currentLang === 'en' ? pageTitle.dataset.titleEn || '' : pageTitle.dataset.titleZh || '';
+    }
+    document.querySelectorAll<HTMLMetaElement>('meta[data-content-en]').forEach((el) => {
+      const content = currentLang === 'en' ? el.dataset.contentEn : el.dataset.contentZh;
+      if (content) el.setAttribute('content', content);
+    });
+    window.dispatchEvent(new CustomEvent('ips:langchange', { detail: { lang: currentLang } }));
   }
 
   langBtn?.addEventListener('click', () => {
@@ -223,7 +272,8 @@ const base = import.meta.env.BASE_URL;
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           document.querySelectorAll('.nav-link').forEach((link) => {
-            link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+            const href = link.getAttribute('href') || '';
+            link.classList.toggle('active', href.endsWith(`#${entry.target.id}`));
           });
         }
       });
@@ -234,7 +284,6 @@ const base = import.meta.env.BASE_URL;
   document.querySelectorAll('section[id]').forEach((sec) => observer.observe(sec));
 
   // Hamburger menu toggle
-  const hamburger = document.getElementById('nav-hamburger');
   const mobileMenu = document.getElementById('nav-mobile');
   hamburger?.addEventListener('click', () => {
     hamburger.classList.toggle('open');

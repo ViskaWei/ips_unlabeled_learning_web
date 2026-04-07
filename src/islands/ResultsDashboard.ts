@@ -4,20 +4,26 @@
  * 2. Dimension scaling color grid (4 models × 4 dims, NN ∇V)
  * Uses safe DOM construction (no innerHTML).
  */
+import { onLangChange, t } from './i18n';
 
 const container = document.getElementById('results-heatmap');
+let cachedRows: any[] = [];
 
 if (container) {
   loadAndRender();
+  onLangChange(() => {
+    if (cachedRows.length > 0) render(cachedRows);
+  });
 
   async function loadAndRender() {
     const base = import.meta.env.BASE_URL || '/ips_unlabeled_learning_web';
     try {
       const resp = await fetch(`${base}/data/cross_method.json`);
       const data = await resp.json();
-      render(data.data);
+      cachedRows = data.data;
+      render(cachedRows);
     } catch {
-      container!.textContent = 'Loading results data...';
+      container!.textContent = t('Failed to load results data.', '结果数据加载失败。');
     }
   }
 
@@ -42,11 +48,11 @@ if (container) {
     return 'rgba(239, 68, 68, 0.35)';
   }
 
-  const MODEL_LABELS: Record<string, string> = {
-    A: 'A: Smooth',
-    B: 'B: Cond.',
-    C: 'C: LJ',
-    D: 'D: Morse',
+  const MODEL_LABELS: Record<string, { en: string; zh: string }> = {
+    A: { en: 'A: Smoothness', zh: 'A：光滑性' },
+    B: { en: 'B: Conditioning', zh: 'B：条件数' },
+    C: { en: 'C: LJ', zh: 'C：LJ' },
+    D: { en: 'D: Morse', zh: 'D：Morse' },
   };
 
   function render(rows: any[]) {
@@ -55,7 +61,7 @@ if (container) {
     // === Section 1: NN vs Basis Bar Chart (d=2 only) ===
     const d2Rows = rows.filter((r: any) => r.d === 2);
     const barSection = el('div');
-    const barTitle = el('h3', undefined, 'Self-Test: LSE vs NN (d=2)');
+    const barTitle = el('h3', undefined, t('Self-Test: LSE vs NN (d=2)', '自测：LSE vs NN（d=2）'));
     Object.assign(barTitle.style, {
       fontSize: '1rem',
       fontWeight: '600',
@@ -69,9 +75,9 @@ if (container) {
     headerRow.style.borderBottom = '2px solid rgba(255,255,255,0.1)';
     headerRow.style.paddingBottom = '0.25rem';
     headerRow.appendChild(el('div', undefined, ''));
-    const hV = el('div', undefined, '∇V error %');
+    const hV = el('div', undefined, t('∇V error %', '∇V 误差 %'));
     Object.assign(hV.style, { fontSize: '0.75rem', color: '#64748b', textAlign: 'center' });
-    const hPhi = el('div', undefined, '∇Φ error %');
+    const hPhi = el('div', undefined, t('∇Φ error %', '∇Φ 误差 %'));
     Object.assign(hPhi.style, { fontSize: '0.75rem', color: '#64748b', textAlign: 'center' });
     headerRow.appendChild(hV);
     headerRow.appendChild(hPhi);
@@ -82,7 +88,7 @@ if (container) {
     const maxPhi = 20;
 
     for (const row of d2Rows) {
-      const label = MODEL_LABELS[row.model] || row.model;
+      const label = MODEL_LABELS[row.model] ? t(MODEL_LABELS[row.model].en, MODEL_LABELS[row.model].zh) : row.model;
       const barRow = el('div', 'nn-bar-row');
 
       // Model label
@@ -116,7 +122,10 @@ if (container) {
       color: '#22c55e',
       fontWeight: '600',
     });
-    summary.textContent = `NN wins ∇V in ${nnWinsV}/${d2Rows.length} models at d=2 — without knowing the potential form`;
+    summary.textContent = t(
+      `In the d=2 benchmarks, NN wins ∇V in ${nnWinsV}/${d2Rows.length} models without knowing the potential form`,
+      `在 d=2 的 benchmark 中，NN 在 ${nnWinsV}/${d2Rows.length} 个模型上赢下 ∇V，而且不需要预先知道势函数形式`,
+    );
     barSection.appendChild(summary);
 
     container!.appendChild(barSection);
@@ -134,7 +143,7 @@ if (container) {
 
     // === Section 2: Dimension Scaling Grid (NN ∇V) ===
     const gridSection = el('div');
-    const gridTitle = el('h3', undefined, 'Dimension Scaling: NN ∇V (%)');
+    const gridTitle = el('h3', undefined, t('Dimension Scaling: NN ∇V (%)', '维度标度：NN ∇V（%）'));
     Object.assign(gridTitle.style, {
       fontSize: '1rem',
       fontWeight: '600',
@@ -145,7 +154,7 @@ if (container) {
 
     const gridSub = el('p');
     Object.assign(gridSub.style, { fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem' });
-    gridSub.textContent = 'Green ≤5%  ·  Amber 5–20%  ·  Red >20%';
+    gridSub.textContent = t('Green ≤5%  ·  Amber 5–20%  ·  Red >20%', '绿色 ≤5%  ·  黄色 5–20%  ·  红色 >20%');
     gridSection.appendChild(gridSub);
 
     const dims = [2, 5, 10, 20];
@@ -161,7 +170,7 @@ if (container) {
 
     // Data rows
     for (const m of models) {
-      const label = MODEL_LABELS[m] || m;
+      const label = MODEL_LABELS[m] ? t(MODEL_LABELS[m].en, MODEL_LABELS[m].zh) : m;
       grid.appendChild(el('div', 'dim-grid-model', label));
       for (const d of dims) {
         const row = rows.find((r: any) => r.model === m && r.d === d);
@@ -203,7 +212,10 @@ if (container) {
         if (row?.nn_V != null && row.nn_V <= 5) under5++;
       }
     }
-    gridSummary.textContent = `V universally learnable: ${under5}/${total} settings have NN ∇V ≤ 5%`;
+    gridSummary.textContent = t(
+      `In these benchmarks, NN ∇V stays below 5% in ${under5}/${total} settings`,
+      `在这些 benchmark 中，NN ∇V 在 ${under5}/${total} 个设置里保持在 5% 以下`,
+    );
     gridSection.appendChild(gridSummary);
 
     // === Section 3: Dimension Scaling Grid (NN ∇Φ) ===
@@ -211,7 +223,7 @@ if (container) {
     Object.assign(phiDivider.style, { height: '1.5rem' });
     gridSection.appendChild(phiDivider);
 
-    const phiTitle = el('h3', undefined, 'Dimension Scaling: NN ∇Φ (%)');
+    const phiTitle = el('h3', undefined, t('Dimension Scaling: NN ∇Φ (%)', '维度标度：NN ∇Φ（%）'));
     Object.assign(phiTitle.style, {
       fontSize: '1rem',
       fontWeight: '600',
@@ -230,7 +242,7 @@ if (container) {
 
     // Data rows
     for (const m of models) {
-      const label = MODEL_LABELS[m] || m;
+      const label = MODEL_LABELS[m] ? t(MODEL_LABELS[m].en, MODEL_LABELS[m].zh) : m;
       phiGrid.appendChild(el('div', 'dim-grid-model', label));
       for (const d of dims) {
         const row = rows.find((r: any) => r.model === m && r.d === d);
@@ -261,7 +273,7 @@ if (container) {
       color: '#f59e0b',
       fontWeight: '600',
     });
-    phiSummary.textContent = 'Φ is the bottleneck — model-dependent and dimension-sensitive';
+    phiSummary.textContent = t('In these benchmarks, Φ remains the bottleneck — model-dependent and dimension-sensitive', '在这些 benchmark 中，Φ 仍然是瓶颈，并且依赖模型且对维度敏感');
     gridSection.appendChild(phiSummary);
 
     container!.appendChild(gridSection);

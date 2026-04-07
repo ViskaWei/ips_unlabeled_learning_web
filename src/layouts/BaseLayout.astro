@@ -1,12 +1,16 @@
 ---
 interface Props {
   title?: string;
+  titleZh?: string;
   description?: string;
+  descriptionZh?: string;
 }
 
 const {
   title = 'Learning from Unlabeled Data for IPS',
+  titleZh = '从无标签数据学习相互作用粒子系统',
   description = 'Interactive research promotion website for trajectory-free learning of particle interaction potentials',
+  descriptionZh = '用于展示无轨迹相互作用粒子系统势函数学习的交互式研究网站',
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
@@ -17,8 +21,17 @@ const base = import.meta.env.BASE_URL;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
+    <script is:inline>
+      try {
+        const storedLang = localStorage.getItem('ips-lang');
+        const preferredLang = storedLang || (navigator.language?.toLowerCase().startsWith('zh') ? 'zh' : 'en');
+        document.documentElement.lang = preferredLang;
+      } catch {
+        document.documentElement.lang = 'en';
+      }
+    </script>
+    <meta name="description" content={description} data-content-en={description} data-content-zh={descriptionZh} />
+    <title data-title-en={title} data-title-zh={titleZh}>{title}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -45,14 +58,14 @@ const base = import.meta.env.BASE_URL;
     <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2604.02581" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={title} data-content-en={title} data-content-zh={titleZh} />
+    <meta property="og:description" content={description} data-content-en={description} data-content-zh={descriptionZh} />
     <meta property="og:type" content="website" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content={title} data-content-en={title} data-content-zh={titleZh} />
+    <meta name="twitter:description" content={description} data-content-en={description} data-content-zh={descriptionZh} />
 
     <!-- Favicon -->
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />

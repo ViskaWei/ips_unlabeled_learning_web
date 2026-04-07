@@ -4,6 +4,7 @@
  * Uses Reference model (Model E) data from paper Table 2.
  * NN Self-Test (our method) is green.
  */
+import { t } from './i18n';
 
 const vizContainer = document.getElementById('dt-slider-viz');
 const slider = document.getElementById('dt-slider') as HTMLInputElement;
@@ -34,10 +35,10 @@ if (vizContainer && slider) {
   let animatedValues: Record<string, number> = {};
 
   const methods = [
-    { key: 'nn',       name: 'Self-Test NN ★',      dot: '#22c55e', ring: '#16a34a', label: '#22c55e' },
-    { key: 'oracle',   name: 'Self-Test LSE ★',     dot: '#4ade80', ring: '#16a34a', label: '#4ade80' },
-    { key: 'sinkhorn', name: 'Sinkhorn MLE',        dot: '#a78bfa', ring: '#7c3aed', label: '#a78bfa' },
-    { key: 'mle',      name: 'Labeled MLE',         dot: '#94a3b8', ring: '#64748b', label: '#94a3b8' },
+    { key: 'nn',       nameEn: 'Self-Test NN ★',      nameZh: '自测 NN ★', dot: '#22c55e', ring: '#16a34a', label: '#22c55e' },
+    { key: 'oracle',   nameEn: 'Self-Test LSE ★',     nameZh: '自测 LSE ★', dot: '#4ade80', ring: '#16a34a', label: '#4ade80' },
+    { key: 'sinkhorn', nameEn: 'Sinkhorn MLE',        nameZh: 'Sinkhorn MLE', dot: '#a78bfa', ring: '#7c3aed', label: '#a78bfa' },
+    { key: 'mle',      nameEn: 'Labeled MLE',         nameZh: '有标签 MLE', dot: '#94a3b8', ring: '#64748b', label: '#94a3b8' },
   ];
 
   interface MethodValues {
@@ -103,7 +104,7 @@ if (vizContainer && slider) {
       ctx.fillStyle = row.method.label;
       ctx.font = '11px Inter, sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(row.method.name, gaugeX - 10, gaugeY + gaugeH / 2 + 4);
+      ctx.fillText(t(row.method.nameEn, row.method.nameZh), gaugeX - 10, gaugeY + gaugeH / 2 + 4);
 
       if (row.val == null) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
@@ -113,7 +114,7 @@ if (vizContainer && slider) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.font = '11px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('N/A', gaugeX + gaugeW / 2, gaugeY + gaugeH / 2 + 4);
+        ctx.fillText(t('N/A', '无'), gaugeX + gaugeW / 2, gaugeY + gaugeH / 2 + 4);
         y += rowH;
         continue;
       }
@@ -223,7 +224,7 @@ if (vizContainer && slider) {
     const halfW = w / 2;
 
     // Left panel: ∇V
-    drawPanel(ctx, 0, halfW - 8, h, '\u2207V Error', vRows);
+    drawPanel(ctx, 0, halfW - 8, h, t('\u2207V Error', '\u2207V 误差'), vRows);
 
     // Vertical separator
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
@@ -234,21 +235,24 @@ if (vizContainer && slider) {
     ctx.stroke();
 
     // Right panel: ∇Φ
-    drawPanel(ctx, halfW + 8, halfW - 8, h, '\u2207\u03A6 Error', phiRows);
+    drawPanel(ctx, halfW + 8, halfW - 8, h, t('\u2207\u03A6 Error', '\u2207\u03A6 误差'), phiRows);
 
     // Bottom center: model info + crossover
     ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
     ctx.font = '11px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`Reference model  \u0394t = ${dtLabels[currentIdx]}  (d=2, M=2000, N=10)`, w / 2, h - 28);
+    ctx.fillText(
+      t(`Reference model  \u0394t = ${dtLabels[currentIdx]}  (d=2, M=2000, N=10)`, `基准模型  \u0394t = ${dtLabels[currentIdx]}  (d=2, M=2000, N=10)`),
+      w / 2, h - 28,
+    );
 
     if (currentIdx >= 2) {
       ctx.fillStyle = '#22c55e';
       ctx.font = 'bold 11px Inter, sans-serif';
       ctx.fillText(
         currentIdx === 3
-          ? '\u2605 At large \u0394t, self-test is the ONLY viable method'
-          : '\u2605 Crossover: self-test begins to dominate',
+          ? t('\u2605 At large \u0394t, self-test is the ONLY viable method', '\u2605 在大 \u0394t 下，自测是唯一可行的方法')
+          : t('\u2605 Crossover: self-test begins to dominate', '\u2605 转折点：自测开始占优'),
         w / 2, h - 10,
       );
     }

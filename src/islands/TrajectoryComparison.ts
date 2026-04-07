@@ -22,6 +22,7 @@ import {
   type ConfinementPotential,
   type InteractionPotential,
 } from '../sim/potentials';
+import { onLangChange, t } from './i18n';
 
 const canvasTrue = document.getElementById('traj-true-canvas') as HTMLCanvasElement;
 const canvasPred = document.getElementById('traj-pred-canvas') as HTMLCanvasElement;
@@ -133,14 +134,20 @@ if (canvasTrue && canvasPred) {
   const resetBtn = document.getElementById('compare-reset-btn');
   const modelBtns = document.querySelectorAll('[data-compare-traj-model]');
 
+  function updateControlLabels() {
+    if (playBtn) playBtn.textContent = t(playing ? 'Pause' : 'Play', playing ? '暂停' : '播放');
+    if (overlayBtn) overlayBtn.textContent = t(overlay ? 'Split View' : 'Overlay', overlay ? '分开展示' : '叠加');
+    if (resetBtn) resetBtn.textContent = t('Reset', '重置');
+  }
+
   playBtn?.addEventListener('click', () => {
     playing = !playing;
-    playBtn.textContent = playing ? 'Pause' : 'Play';
+    updateControlLabels();
   });
 
   overlayBtn?.addEventListener('click', () => {
     overlay = !overlay;
-    overlayBtn.textContent = overlay ? 'Split View' : 'Overlay';
+    updateControlLabels();
     canvasPred.style.display = overlay ? 'none' : '';
     // Resize to fill space when in overlay mode
     resizeAll();
@@ -252,7 +259,7 @@ if (canvasTrue && canvasPred) {
       ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
       ctx.font = '11px var(--font-mono, monospace)';
       ctx.textAlign = 'right';
-      ctx.fillText(`L\u00B2 div: ${l2.toFixed(3)}`, w - 10, 20);
+      ctx.fillText(`${t('L² div', 'L² 偏差')}: ${l2.toFixed(3)}`, w - 10, 20);
     }
   }
 
@@ -281,18 +288,20 @@ if (canvasTrue && canvasPred) {
 
     if (overlay) {
       drawPanel(ctxTrue, canvasTrue, trailsTrue, stateTrue,
-        'True (solid) vs Predicted (dashed)', '#22c55e',
+        t('True (solid) vs Predicted (dashed)', '真值（实线）vs 预测（虚线）'), '#22c55e',
         trailsPred, statePred);
     } else {
       drawPanel(ctxTrue, canvasTrue, trailsTrue, stateTrue,
-        'True Trajectories', '#22c55e');
+        t('True Trajectories', '真值轨迹'), '#22c55e');
       drawPanel(ctxPred, canvasPred, trailsPred, statePred,
-        'Predicted (Learned V\u0302, \u03A6\u0302)', '#f59e0b');
+        t('Predicted (Learned V\u0302, \u03A6\u0302)', '预测轨迹（学习到的 V̂, Φ̂）'), '#f59e0b');
     }
 
     requestAnimationFrame(draw);
   }
 
+  updateControlLabels();
+  onLangChange(updateControlLabels);
   initModel('model_e');
   resizeAll();
   window.addEventListener('resize', resizeAll);

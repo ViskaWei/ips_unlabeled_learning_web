@@ -1,12 +1,13 @@
 /**
  * L-curve Demo — Interactive visualization of Tikhonov regularization.
- * Shows how the L-curve method selects the optimal regularization parameter λ
- * by finding the point of maximum curvature on the log-log trade-off curve.
+ * Shows how the L-curve heuristic selects a regularization parameter λ
+ * by locating a high-curvature corner on the log-log trade-off curve.
  *
  * Left plot: L-curve (log ||x_λ|| vs log ||Ax_λ - b||)
- * Right plot: Curvature κ(λ) — peak indicates optimal λ
+ * Right plot: Curvature κ(λ) — the corner heuristic peaks near the selected λ
  * Bottom: Recovered solution bars compared to truth
  */
+import { t } from './i18n';
 
 const container = document.getElementById('lcurve-viz');
 const lambdaSlider = document.getElementById('lambda-slider') as HTMLInputElement;
@@ -221,7 +222,7 @@ if (container) {
     const curDotY = lcY(curPt.logRes);
     const markerDist = Math.sqrt((optX - curDotX) ** 2 + (optY - curDotY) ** 2);
 
-    // Optimal λ — green star
+    // Selected λ from the corner heuristic — green star
     {
       // Glow
       ctx.beginPath(); ctx.arc(optX, optY, 14, 0, Math.PI * 2);
@@ -251,27 +252,27 @@ if (container) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.font = '11px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('log \u2016x\u03BB\u2016 (solution norm)', padL + lcW / 2, padT + lcH + 18);
+    ctx.fillText(t('log \u2016x\u03BB\u2016 (solution norm)', 'log \u2016x\u03BB\u2016（解范数）'), padL + lcW / 2, padT + lcH + 18);
     ctx.save();
     ctx.translate(12, padT + lcH / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText('log \u2016Ax\u03BB\u2212b\u2016 (residual)', 0, 0);
+    ctx.fillText(t('log \u2016Ax\u03BB\u2212b\u2016 (residual)', 'log \u2016Ax\u03BB\u2212b\u2016（残差）'), 0, 0);
     ctx.restore();
 
     // L-curve title
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.font = 'bold 13px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('L-curve', padL + lcW / 2, padT - 10);
+    ctx.fillText(t('L-curve', 'L-曲线'), padL + lcW / 2, padT - 10);
 
     // Annotations: under-regularized (right) and over-regularized (left)
     const annotY = padT + lcH - 15;
     ctx.font = '10px Inter, sans-serif';
     ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
     ctx.textAlign = 'left';
-    ctx.fillText('\u2190 over-regularized', padL + 5, annotY);
+    ctx.fillText(t('\u2190 over-regularized', '\u2190 过度正则化'), padL + 5, annotY);
     ctx.textAlign = 'right';
-    ctx.fillText('under-regularized \u2192', padL + lcW - 5, padT + 20);
+    ctx.fillText(t('under-regularized \u2192', '欠正则化 \u2192'), padL + lcW - 5, padT + 20);
 
     // ─── Right: Curvature plot ───
     const curveL = splitX + gap / 2;
@@ -314,7 +315,7 @@ if (container) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Optimal λ marker on curvature
+    // Selected λ marker on curvature
     {
       const x = curX(logLambdas[optIdx]);
       const y = curY(kappa[optIdx]);
@@ -335,11 +336,11 @@ if (container) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.font = 'bold 13px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Curvature \u03BA(\u03BB)', curveL + curveW / 2, padT - 10);
+    ctx.fillText(t('Curvature \u03BA(\u03BB)', '曲率 \u03BA(\u03BB)'), curveL + curveW / 2, padT - 10);
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.font = '11px Inter, sans-serif';
-    ctx.fillText('log \u03BB', curveL + curveW / 2, padT + curveH + 18);
+    ctx.fillText(t('log \u03BB', 'log \u03BB'), curveL + curveW / 2, padT + curveH + 18);
 
     // ─── Right-bottom: Solution bars ───
     const barTop = padT + curveH + 35;
@@ -355,7 +356,7 @@ if (container) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.font = '11px Inter, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Recovered vs True Solution', curveL + curveW / 2, barTop - 5);
+    ctx.fillText(t('Recovered vs True Solution', '恢复解 vs 真值解'), curveL + curveW / 2, barTop - 5);
 
     for (let i = 0; i < p; i++) {
       const bx = curveL + i * barW;
@@ -391,10 +392,10 @@ if (container) {
     ctx.font = '10px Inter, sans-serif';
     ctx.fillStyle = '#06b6d4';
     ctx.textAlign = 'right';
-    ctx.fillText('\u25A0 True', curveL + curveW / 2 - 5, legY);
+    ctx.fillText(t('\u25A0 True', '\u25A0 真值'), curveL + curveW / 2 - 5, legY);
     ctx.fillStyle = '#f59e0b';
     ctx.textAlign = 'left';
-    ctx.fillText('\u25A0 Recovered', curveL + curveW / 2 + 5, legY);
+    ctx.fillText(t('\u25A0 Recovered', '\u25A0 恢复'), curveL + curveW / 2 + 5, legY);
 
     // ─── Info panel ───
     const infoY = padT + lcH + 30;
