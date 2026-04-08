@@ -1,12 +1,14 @@
 /**
- * Mean-Field Failure Demo
- * Shows that empirical measure is lumpy/discrete for finite N,
- * only converging to smooth density as N → ∞.
- * Slider: N from 5 to 200.
- * At bottom: "Our setting: N = 10"
+ * Mean-Field Failure Demo — HISTOGRAM VERSION
+ *
+ * Shows WHY mean-field theory fails at finite N.
+ * Blue bars = empirical measure (histogram of N particle positions).
+ * Green line = true smooth density (what mean-field assumes you already have).
+ * At N=5: only 5 bars — clearly NOT a smooth density.
+ * At N=200: histogram starts to look smooth — but paper uses N=10.
  */
 import { PRNG } from '../sim/prng';
-import { t } from './i18n';
+import { onLangChange, t } from './i18n';
 
 const canvas = document.getElementById('mean-field-canvas') as HTMLCanvasElement;
 const slider = document.getElementById('mean-field-n-slider') as HTMLInputElement;
@@ -14,18 +16,36 @@ const valueLabel = document.getElementById('mean-field-n-value');
 
 if (canvas) {
   const ctx = canvas.getContext('2d')!;
-  const prng = new PRNG(42);
+  const NUM_BINS = 15;
+  const X_MIN = -2.2, X_MAX = 2.2;
+  const SIGMA = 0.72;
 
-  // Sample positions from a 2D Gaussian (what the true density looks like)
-  function sampleGaussian2D(n: number): [number, number][] {
-    const points: [number, number][] = [];
-    for (let i = 0; i < n; i++) {
-      const u1 = prng.random(), u2 = prng.random();
-      const r = Math.sqrt(-2 * Math.log(u1 + 1e-10));
-      const theta = 2 * Math.PI * u2;
-      points.push([r * Math.cos(theta) * 0.5, r * Math.sin(theta) * 0.4]);
+  function gaussianPDF(x: number): number {
+    return Math.exp(-x * x / (2 * SIGMA * SIGMA)) / (SIGMA * Math.sqrt(2 * Math.PI));
+  }
+
+  // Fixed seed per N for reproducible histograms
+  function samplePositions(N: number): number[] {
+    const prng = new PRNG(42 + N * 7);
+    const pts: number[] = [];
+    for (let i = 0; i < N; i++) {
+      const u1 = Math.max(prng.random(), 1e-10);
+      const u2 = prng.random();
+      const r = Math.sqrt(-2 * Math.log(u1));
+      pts.push(r * Math.cos(2 * Math.PI * u2) * SIGMA);
     }
-    return points;
+    return pts;
+  }
+
+  // Normalize histogram to density (area sums to 1)
+  function buildHistogram(pts: number[]): number[] {
+    const counts = new Array(NUM_BINS).fill(0);
+    const binWidth = (X_MAX - X_MIN) / NUM_BINS;
+    for (const x of pts) {
+      const bin = Math.floor((x - X_MIN) / binWidth);
+      if (bin >= 0 && bin < NUM_BINS) counts[bin]++;
+    }
+    return counts.map(c => c / (pts.length * binWidth));
   }
 
   function resize() {
@@ -41,108 +61,136 @@ if (canvas) {
     const N = parseInt(slider?.value ?? '10');
     if (valueLabel) valueLabel.textContent = N.toString();
 
-    const W = canvas.width / devicePixelRatio;
-    const H = canvas.height / devicePixelRatio;
+    const W = canvas.width / window.devicePixelRatio;
+    const H = canvas.height / window.devicePixelRatio;
     ctx.clearRect(0, 0, W, H);
 
-    // Draw in TWO panels: left = empirical measure (delta spikes), right = smooth density
-    const half = W / 2 - 10;
-    const scale = Math.min(half, H) * 0.75;
-    const cx1 = half / 2, cy = H / 2;
-    const cx2 = W / 2 + 10 + half / 2;
+    const PAD_L = 36, PAD_R = 16, PAD_T = 38, PAD_B = 52;
+    const chartW = W - PAD_L - PAD_R;
+    const chartH = H - PAD_T - PAD_B;
+    const binWidth = (X_MAX - X_MIN) / NUM_BINS;
 
-    // Divider line
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    const pts = samplePositions(N);
+    const hist = buildHistogram(pts);
+    const maxPDF = gaussianPDF(0) * 1.25;
+
+    const toSX = (x: number) => PAD_L + ((x - X_MIN) / (X_MAX - X_MIN)) * chartW;
+    const toSY = (d: number) => PAD_T + chartH * (1 - Math.min(d, maxPDF) / maxPDF);
+
+    // Title
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      t('Empirical measure (blue bars) vs true smooth density (green curve)', '经验测度（蓝色条形）vs 真实光滑密度（绿色曲线）'),
+      W / 2, 14,
+    );
+
+    // X-axis
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(W / 2, 30);
-    ctx.lineTo(W / 2, H - 20);
+    ctx.moveTo(PAD_L, PAD_T + chartH);
+    ctx.lineTo(PAD_L + chartW, PAD_T + chartH);
     ctx.stroke();
 
-    // Panel labels
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.font = '12px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(t(`Empirical measure μₙ (N=${N})`, `经验测度 μₙ (N=${N})`), cx1, 18);
-    ctx.fillText(t('True density ρ (N→∞)', '真实密度 ρ (N→∞)'), cx2, 18);
-
-    // Generate N samples
-    const pts = sampleGaussian2D(N);
-
-    // LEFT: empirical measure (delta spikes as dots with spike lines)
-    const dotRadius = N > 100 ? 2 : N > 60 ? 3 : 5;
-    pts.forEach(([x, y]) => {
-      const sx = cx1 + x * scale;
-      const rawSy = cy - y * scale;
-      const spikeCap = Math.max(8, H * 0.05);
-      const sy = Math.max(spikeCap, rawSy);
-      // Spike line
-      ctx.beginPath();
-      ctx.moveTo(sx, H * 0.85);
-      ctx.lineTo(sx, sy);
-      ctx.strokeStyle = 'rgba(79, 156, 249, 0.4)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      // Dot
-      ctx.beginPath();
-      ctx.arc(sx, sy, dotRadius, 0, Math.PI * 2);
-      ctx.fillStyle = '#4f9cf9';
-      ctx.fill();
+    // X-axis ticks
+    [-1.5, -1, 0, 1, 1.5].forEach(tick => {
+      const sx = toSX(tick);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '9px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(tick.toFixed(1), sx, PAD_T + chartH + 11);
     });
 
-    // "Our setting: N=10" fixed annotation when slider > 10
-    if (N > 10) {
-      const n10x = cx1;
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.6)';
+    // Histogram bars (empirical measure — blue)
+    for (let i = 0; i < NUM_BINS; i++) {
+      const x0 = toSX(X_MIN + i * binWidth);
+      const x1 = toSX(X_MIN + (i + 1) * binWidth);
+      const barTopY = toSY(hist[i]);
+      const barBotY = PAD_T + chartH;
+      const barH_px = Math.max(0, barBotY - barTopY);
+      if (barH_px < 0.5) continue;
+      ctx.fillStyle = 'rgba(79, 156, 249, 0.55)';
+      ctx.fillRect(x0 + 1, barTopY, x1 - x0 - 2, barH_px);
+      ctx.strokeStyle = 'rgba(79, 156, 249, 0.85)';
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(n10x, 28);
-      ctx.lineTo(n10x, H * 0.85);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 10px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(t('Our setting: N=10', '我们的设置：N=10'), n10x, H * 0.85 + 12);
+      ctx.strokeRect(x0 + 1, barTopY, x1 - x0 - 2, barH_px);
     }
 
-    // RIGHT: smooth density (Gaussian bell curve, 2D projection as 1D cross-section)
+    // True smooth density — green curve (always shown)
     ctx.beginPath();
-    const steps = 100;
+    const steps = 120;
     for (let i = 0; i <= steps; i++) {
-      const x = -1.5 + (i / steps) * 3;
-      const y = Math.exp(-x * x / (2 * 0.25)) / (Math.sqrt(2 * Math.PI) * 0.5);
-      const sx = cx2 + x * scale;
-      const sy = H * 0.85 - y * scale * 0.5;
-      if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+      const x = X_MIN + (i / steps) * (X_MAX - X_MIN);
+      const sy = toSY(gaussianPDF(x));
+      if (i === 0) ctx.moveTo(toSX(x), sy); else ctx.lineTo(toSX(x), sy);
     }
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // Fill under the curve
-    ctx.lineTo(cx2 + 1.5 * scale, H * 0.85);
-    ctx.lineTo(cx2 - 1.5 * scale, H * 0.85);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
-    ctx.fill();
+    // Y-axis label
+    ctx.save();
+    ctx.translate(12, PAD_T + chartH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '9px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(t('density', '密度'), 0, 0);
+    ctx.restore();
 
-    // Annotation
-    if (N <= 15) {
+    // Legend
+    const lx = PAD_L + 8, ly = PAD_T + 8;
+    ctx.fillStyle = 'rgba(79,156,249,0.55)';
+    ctx.fillRect(lx, ly, 12, 10);
+    ctx.strokeStyle = 'rgba(79,156,249,0.85)'; ctx.lineWidth = 1;
+    ctx.strokeRect(lx, ly, 12, 10);
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(t(`Empirical (N=${N})`, `经验测度 (N=${N})`), lx + 16, ly + 9);
+
+    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(lx, ly + 22); ctx.lineTo(lx + 12, ly + 22); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.fillText(t('True density (N→∞)', '真实密度 (N→∞)'), lx + 16, ly + 26);
+
+    // Bottom annotation
+    const annotY = PAD_T + chartH + 34;
+    ctx.textAlign = 'center';
+    if (N <= 10) {
       ctx.fillStyle = '#f59e0b';
       ctx.font = 'bold 11px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(t('⚠ Lumpy! Mean-field approximation invalid here', '⚠ 离散！均场近似在此失效'), cx1, H - 10);
-    } else if (N >= 100) {
-      ctx.fillStyle = '#22c55e';
+      ctx.fillText(
+        t(`N=${N}: only ${N} bars — clearly discrete. Mean-field invalid here.`, `N=${N}：只有 ${N} 个条形——明显是离散的。均场近似在此失效。`),
+        W / 2, annotY,
+      );
+    } else if (N <= 50) {
+      ctx.fillStyle = '#f59e0b';
       ctx.font = '11px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(t('Converging to smooth density — but N=100 is not our regime', '逼近光滑密度——但我们的设置是 N=10'), cx1, H - 10);
+      ctx.fillText(
+        t(`N=${N}: lumpy histogram ≠ smooth density. Paper uses N=10 (even lumpier).`, `N=${N}：颗粒状直方图 ≠ 光滑密度。论文用 N=10（更加离散）。`),
+        W / 2, annotY,
+      );
+    } else if (N < 150) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillText(
+        t(`N=${N}: smoother — but paper uses N=10, not N=${N}.`, `N=${N}：更光滑了——但论文用的是 N=10，不是 N=${N}。`),
+        W / 2, annotY,
+      );
+    } else {
+      ctx.fillStyle = 'rgba(100,200,100,0.8)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillText(
+        t(`N=${N}: histogram ≈ density (N→∞ regime) — but irrelevant. Paper: N=10.`, `N=${N}：直方图 ≈ 密度（N→∞ 范围）——但与论文无关。论文：N=10。`),
+        W / 2, annotY,
+      );
     }
   }
 
   if (slider) slider.addEventListener('input', draw);
+  onLangChange(draw);
   resize();
   window.addEventListener('resize', resize);
 }

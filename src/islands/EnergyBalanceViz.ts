@@ -1,11 +1,22 @@
 /**
- * Energy Balance Visualization — animated energy ledger with V/Phi sliders.
- * Shows how wrong potentials break the energy balance.
- * Uses Reference model (Model E) — quadratic confinement + Gaussian interaction.
+ * Energy Balance Visualization — Self-test loss running average.
+ *
+ * KEY INSIGHT: E[L(V*, Φ*)] = −½ E[J_diss · Δt] < 0 (always negative at true potentials).
+ * This visualization shows a RUNNING AVERAGE converging BELOW ZERO when sliders are at 1.0.
+ * When V or Φ sliders deviate from 1.0, the average shifts UPWARD toward zero or positive.
+ *
+ * The self-test loss formula:
+ *   L = ½ J_diss Δt − (σ²/2) J_diff Δt + [E_f(X_{t+Δt}) − E_f(X_t)]
+ * where:
+ *   J_diss = (1/N) Σᵢ |∇V(Xᵢ) + (1/N)Σⱼ≠ᵢ ∇Φ(Xᵢ−Xⱼ)|²  (≥ 0)
+ *   J_diff = (1/N) Σᵢ ΔV(Xᵢ) + (1/N²) Σᵢ≠ⱼ ΔΦ(Xᵢ−Xⱼ)
+ *   E_f(X) = (1/N) Σᵢ V(Xᵢ) + (1/2N²) Σᵢ≠ⱼ Φ(Xᵢ−Xⱼ)
+ *
+ * Uses RING BUFFER of 300 samples for running mean instead of slow exponential smoothing.
  */
 import { ParticleSystem } from '../sim/euler-maruyama';
 import { MODELS } from '../sim/potentials';
-import { t } from './i18n';
+import { onLangChange, t } from './i18n';
 
 const canvas = document.getElementById('energy-canvas') as HTMLCanvasElement;
 const vSlider = document.getElementById('v-scale') as HTMLInputElement;
@@ -19,42 +30,32 @@ if (canvas && vSlider && phiSlider) {
   const sigma = 0.25;
   const dt = 0.008;
 
-  // True potentials — Reference model (Model E)
   const trueV = ref.V;
   const truePhi = ref.Phi;
 
-  // Simulation with true potentials
   const system = new ParticleSystem(trueV, truePhi, sigma, dt, N, d, 77);
   const state = system.initialize(1.0);
+  for (let i = 0; i < 500; i++) system.step(state);  // Long warmup for equilibrium
 
-  // Warmup
-  for (let i = 0; i < 300; i++) system.step(state);
+  // Ring buffer for self-test loss samples
+  const BUFFER = 300;
+  const lossBuf: number[] = [];
+  // Chart history of running means
+  const CHART_LEN = 200;
+  const meanHistory: number[] = [];
 
-  // Running averages for the energy ledger
-  let dissipation = 0;
-  let diffusion = 0;
-  let energyChange = 0;
-  let residual = 0;
-  const smoothing = 0.95;
-
-  // History for chart
-  const maxHistory = 200;
-  const residualHistory: number[] = [];
-
-  function computeEnergy(positions: Float64Array, vScale: number, phiScale: number): number {
-    let Vsum = 0;
-    let Phisum = 0;
-    const tmpX = new Float64Array(d);
-
+  // Energy: E_f(X; V_s, Φ_s) = (1/N) Σᵢ V_s(Xᵢ) + (1/2N²) Σᵢ≠ⱼ Φ_s(Xᵢ−Xⱼ)
+  function computeEf(positions: Float64Array, vScale: number, phiScale: number): number {
+    let Vsum = 0, Phisum = 0;
+    const tmp = new Float64Array(d);
     for (let i = 0; i < N; i++) {
-      for (let k = 0; k < d; k++) tmpX[k] = positions[i * d + k];
-      Vsum += trueV.evaluate(tmpX) * vScale;
-
+      for (let k = 0; k < d; k++) tmp[k] = positions[i * d + k];
+      Vsum += trueV.evaluate(tmp) * vScale;
       for (let j = i + 1; j < N; j++) {
         let rSq = 0;
         for (let k = 0; k < d; k++) {
-          const diff = positions[i * d + k] - positions[j * d + k];
-          rSq += diff * diff;
+          const dif = positions[i * d + k] - positions[j * d + k];
+          rSq += dif * dif;
         }
         Phisum += truePhi.evaluate(Math.sqrt(rSq)) * phiScale;
       }
@@ -62,82 +63,57 @@ if (canvas && vSlider && phiSlider) {
     return Vsum / N + Phisum / (N * N);
   }
 
-  function computeDissipation(positions: Float64Array, vScale: number, phiScale: number): number {
+  // J_diss = (1/N) Σᵢ |∇V(Xᵢ) + (1/N)Σⱼ≠ᵢ ∇Φ(Xᵢ−Xⱼ)|²
+  function computeJdiss(positions: Float64Array, vScale: number, phiScale: number): number {
     let sum = 0;
     const gradV = new Float64Array(d);
     const diff = new Float64Array(d);
     const tmpX = new Float64Array(d);
-
     for (let i = 0; i < N; i++) {
       for (let k = 0; k < d; k++) tmpX[k] = positions[i * d + k];
       trueV.gradient(tmpX, gradV);
-      for (let k = 0; k < d; k++) gradV[k] *= vScale;
-
-      // Interaction gradient
-      let gPhiX = 0, gPhiY = 0;
+      let gx = gradV[0] * vScale, gy = gradV[1] * vScale;
       for (let j = 0; j < N; j++) {
         if (i === j) continue;
         let rSq = 0;
-        for (let k = 0; k < d; k++) {
-          diff[k] = positions[i * d + k] - positions[j * d + k];
-          rSq += diff[k] * diff[k];
-        }
+        for (let k = 0; k < d; k++) { diff[k] = positions[i * d + k] - positions[j * d + k]; rSq += diff[k] * diff[k]; }
         const r = Math.max(Math.sqrt(rSq), 1e-10);
-        const dPhiDr = truePhi.gradient(r) * phiScale;
-        gPhiX += dPhiDr * diff[0] / r;
-        gPhiY += dPhiDr * diff[1] / r;
+        const dPhi = (truePhi.gradient(r) as number) * phiScale / N;
+        gx += dPhi * diff[0] / r;
+        gy += dPhi * diff[1] / r;
       }
-      gPhiX /= N;
-      gPhiY /= N;
-
-      const totalGradX = gradV[0] + gPhiX;
-      const totalGradY = gradV[1] + gPhiY;
-      sum += totalGradX * totalGradX + totalGradY * totalGradY;
+      sum += gx * gx + gy * gy;
     }
     return sum / N;
   }
 
-  function computeDiffusion(positions: Float64Array, vScale: number, phiScale: number): number {
+  // J_diff = (1/N) Σᵢ ΔV(Xᵢ) + (1/N²) Σᵢ≠ⱼ ΔΦ(Xᵢ−Xⱼ)
+  function computeJdiff(positions: Float64Array, vScale: number, phiScale: number): number {
     const h = 1e-4;
-    const tmpX = new Float64Array(d);
-    const tmpXp = new Float64Array(d);
-    const tmpXm = new Float64Array(d);
-
-    // (1/N) Σ_i ΔV(x_i) — numerical Laplacian via central differences
-    let lapVsum = 0;
+    const tmp = new Float64Array(d), tp = new Float64Array(d), tm = new Float64Array(d);
+    let lapV = 0;
     for (let i = 0; i < N; i++) {
-      for (let k = 0; k < d; k++) tmpX[k] = positions[i * d + k];
-      const vCenter = trueV.evaluate(tmpX);
-      let lapV_i = 0;
+      for (let k = 0; k < d; k++) tmp[k] = positions[i * d + k];
+      const v0 = trueV.evaluate(tmp);
       for (let k = 0; k < d; k++) {
-        tmpXp.set(tmpX); tmpXp[k] += h;
-        tmpXm.set(tmpX); tmpXm[k] -= h;
-        lapV_i += (trueV.evaluate(tmpXp) + trueV.evaluate(tmpXm) - 2 * vCenter) / (h * h);
+        tp.set(tmp); tp[k] += h;
+        tm.set(tmp); tm[k] -= h;
+        lapV += (trueV.evaluate(tp) + trueV.evaluate(tm) - 2 * v0) / (h * h);
       }
-      lapVsum += lapV_i;
     }
-
-    // (1/N²) Σ_{i≠j} ΔΦ(r_ij) — radial Laplacian: Φ''(r) + (d-1)/r·Φ'(r)
-    let lapPhiSum = 0;
+    let lapPhi = 0;
     for (let i = 0; i < N; i++) {
       for (let j = 0; j < N; j++) {
         if (i === j) continue;
         let rSq = 0;
-        for (let k = 0; k < d; k++) {
-          const dif = positions[i * d + k] - positions[j * d + k];
-          rSq += dif * dif;
-        }
+        for (let k = 0; k < d; k++) { const dif = positions[i * d + k] - positions[j * d + k]; rSq += dif * dif; }
         const r = Math.max(Math.sqrt(rSq), 1e-10);
-        const dPhiDr = truePhi.gradient(r) as number;
-        const rp = r + h;
-        const rm = Math.max(r - h, 1e-10);
-        const d2PhiDr2 = ((truePhi.gradient(rp) as number) - (truePhi.gradient(rm) as number)) / (rp - rm);
-        const lapPhi = d2PhiDr2 + (d - 1) / r * dPhiDr;
-        lapPhiSum += lapPhi;
+        const rp = r + h, rm = Math.max(r - h, 1e-10);
+        const d2 = ((truePhi.gradient(rp) as number) - (truePhi.gradient(rm) as number)) / (rp - rm);
+        lapPhi += d2 + (d - 1) / r * (truePhi.gradient(r) as number);
       }
     }
-
-    return vScale * lapVsum / N + phiScale * lapPhiSum / (N * N);
+    return vScale * lapV / N + phiScale * lapPhi / (N * N);
   }
 
   function resize() {
@@ -148,202 +124,143 @@ if (canvas && vSlider && phiSlider) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  // Save previous positions for energy change
-  let prevPositions = new Float64Array(state.positions);
+  const prevPos = new Float64Array(state.positions);
 
   function draw() {
-    const w = canvas.width / window.devicePixelRatio;
-    const h = canvas.height / window.devicePixelRatio;
-    ctx.clearRect(0, 0, w, h);
+    const W = canvas.width / window.devicePixelRatio;
+    const H = canvas.height / window.devicePixelRatio;
+    ctx.clearRect(0, 0, W, H);
 
     const vScale = parseFloat(vSlider.value);
     const phiScale = parseFloat(phiSlider.value);
 
-    // Step simulation (multiple substeps for smoother motion)
-    for (let s = 0; s < 3; s++) system.step(state);
+    // Step ONE simulation step, compute instantaneous loss
+    const Ef_prev = computeEf(prevPos, vScale, phiScale);
+    system.step(state);
+    const Ef_curr = computeEf(state.positions, vScale, phiScale);
+    const Jdiss = computeJdiss(prevPos, vScale, phiScale);
+    const Jdiff = computeJdiff(prevPos, vScale, phiScale);
+    // L_inst = ½ J_diss Δt − (σ²/2) J_diff Δt + δE_f
+    const L_inst = 0.5 * Jdiss * dt - (sigma * sigma / 2) * Jdiff * dt + (Ef_curr - Ef_prev);
+    prevPos.set(state.positions);
 
-    // Compute energy terms with GUESSED potentials (scaled)
-    const E_prev = computeEnergy(prevPositions, vScale, phiScale);
-    const E_curr = computeEnergy(state.positions, vScale, phiScale);
-    const dE = E_curr - E_prev;
-    const J_diss = computeDissipation(prevPositions, vScale, phiScale) * dt;
-    const J_diff_dt = computeDiffusion(prevPositions, vScale, phiScale) * dt;
+    lossBuf.push(L_inst);
+    if (lossBuf.length > BUFFER) lossBuf.shift();
 
-    // Smoothed values — L = (1/2)·J_diss·Δt − (σ²/2)·J_diff·Δt + δE
-    dissipation = smoothing * dissipation + (1 - smoothing) * (0.5 * J_diss);
-    diffusion = smoothing * diffusion + (1 - smoothing) * (sigma * sigma / 2 * J_diff_dt);
-    energyChange = smoothing * energyChange + (1 - smoothing) * dE;
-    const selfTestLoss = dissipation - diffusion + energyChange;
-    residual = smoothing * residual + (1 - smoothing) * selfTestLoss;
+    const runMean = lossBuf.reduce((a, b) => a + b, 0) / lossBuf.length;
+    meanHistory.push(runMean);
+    if (meanHistory.length > CHART_LEN) meanHistory.shift();
 
-    residualHistory.push(residual);
-    if (residualHistory.length > maxHistory) residualHistory.shift();
+    const atTruth = Math.abs(vScale - 1) < 0.08 && Math.abs(phiScale - 1) < 0.08;
+    const meanColor = runMean < -0.0001 ? '#22c55e' : runMean < 0.0001 ? '#f59e0b' : '#ef4444';
 
-    prevPositions.set(state.positions);
+    // ── Layout ────────────────────────────────────────────────────
+    const simW = Math.min(W * 0.38, 220);
+    const rX = simW + 24;
+    const rW = W - rX - 16;
 
-    // ─── Draw Layout ───
-    const simW = w * 0.4;
-    const ledgerX = simW + 30;
+    // ── Left: Particle simulation ─────────────────────────────────
+    const scale = Math.min(simW, H) * 0.36;
+    const cx = simW / 2, cy = H * 0.45;
 
-    // Left: Particle simulation
-    const simScale = Math.min(simW, h) / 3.0;
-    const cx = simW / 2;
-    const cy = h / 2;
-
-    // Faint ring at |x|=1 (double-well equilibrium)
-    ctx.beginPath();
-    ctx.arc(cx, cy, simScale, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Particle color encodes how far guessed potentials are from truth
-    const vErr = Math.abs(vScale - 1);
-    const phiErr = Math.abs(phiScale - 1);
-    const totalErr = Math.min(1, (vErr + phiErr) / 2);
-    // Green (correct) → Red (wrong), with size pulsing
-    const pR = Math.round(34 + 205 * totalErr);
-    const pG = Math.round(197 - 150 * totalErr);
-    const pB = Math.round(94 - 26 * totalErr);
-    const particleColor = `rgb(${pR}, ${pG}, ${pB})`;
-    const particleRadius = 12 + totalErr * 6; // grow when wrong
-    const glowRadius = 20 + totalErr * 10;
-
+    // Color particles green (correct) → red (wrong)
+    const err = Math.min(1, (Math.abs(vScale - 1) + Math.abs(phiScale - 1)) / 2);
+    const pR = Math.round(34 + 205 * err), pG = Math.round(197 - 150 * err), pB = 68;
     for (let i = 0; i < N; i++) {
-      const sx = cx + state.positions[i * 2] * simScale;
-      const sy = cy - state.positions[i * 2 + 1] * simScale;
-
-      // Glow
+      const sx = cx + state.positions[i * 2] * scale;
+      const sy = cy - state.positions[i * 2 + 1] * scale;
       ctx.beginPath();
-      ctx.arc(sx, sy, glowRadius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${pR}, ${pG}, ${pB}, 0.12)`;
+      ctx.arc(sx, sy, 14, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${pR},${pG},${pB},0.85)`;
       ctx.fill();
-
-      // Particle
-      ctx.beginPath();
-      ctx.arc(sx, sy, particleRadius, 0, Math.PI * 2);
-      ctx.fillStyle = particleColor;
-      ctx.globalAlpha = 0.8;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-
-      // Ring when wrong
-      if (totalErr > 0.1) {
-        ctx.beginPath();
-        ctx.arc(sx, sy, particleRadius + 3, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(239, 68, 68, ${totalErr * 0.5})`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
     }
 
-    // Right: Energy ledger
-    const ledgerW = w - ledgerX - 20;
-    const barH = 22;
-    const ledgerY = 30;
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(t('V×' + vScale.toFixed(1) + '  Φ×' + phiScale.toFixed(1), 'V×' + vScale.toFixed(1) + '  Φ×' + phiScale.toFixed(1)), cx, H * 0.9);
 
-    // Title
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.font = 'bold 13px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(t('Free-Energy Terms', '自由能项'), ledgerX, ledgerY);
+    // ── Right top: Gauge bar ──────────────────────────────────────
+    const gaugeY = 20, gaugeH = 28;
+    const GAUGE_RANGE = 0.006;   // ±0.006 range
+    const zeroPx = rX + rW * 0.5;
+    const scalePx = rW / (2 * GAUGE_RANGE);
 
-    // Dissipation bar (red) — amplified for visual clarity
-    const maxBar = ledgerW * 0.8;
-    const dissBar = Math.min(Math.abs(dissipation) * 5000, maxBar);
-    const row1Y = ledgerY + 25;
+    // Background track
+    ctx.fillStyle = 'rgba(239,68,68,0.12)';
+    ctx.fillRect(zeroPx, gaugeY, rX + rW - zeroPx - 4, gaugeH);
+    ctx.fillStyle = 'rgba(34,197,94,0.12)';
+    ctx.fillRect(rX + 4, gaugeY, zeroPx - rX - 4, gaugeH);
 
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
-    ctx.fillRect(ledgerX, row1Y, ledgerW, barH);
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
-    ctx.fillRect(ledgerX, row1Y, dissBar, barH);
-    ctx.fillStyle = '#ef4444';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillText(t('Dissipation', '耗散'), ledgerX + 5, row1Y + 15);
-    // Value label at bar end
-    ctx.textAlign = 'right';
-    ctx.fillText(dissipation.toFixed(5), ledgerX + ledgerW - 4, row1Y + 15);
-    ctx.textAlign = 'left';
+    // Mean marker
+    const markerX = Math.max(rX + 6, Math.min(rX + rW - 6, zeroPx + runMean * scalePx));
+    ctx.fillStyle = meanColor;
+    ctx.fillRect(markerX - 3, gaugeY, 6, gaugeH);
 
-    // Diffusion bar (cyan)
-    const row2Y = row1Y + barH + 6;
-    const diffBar = Math.min(Math.abs(diffusion) * 5000, maxBar);
+    // Zero line
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(zeroPx, gaugeY - 4); ctx.lineTo(zeroPx, gaugeY + gaugeH + 4); ctx.stroke();
 
-    ctx.fillStyle = 'rgba(6, 182, 212, 0.15)';
-    ctx.fillRect(ledgerX, row2Y, ledgerW, barH);
-    ctx.fillStyle = 'rgba(6, 182, 212, 0.6)';
-    ctx.fillRect(ledgerX, row2Y, diffBar, barH);
-    ctx.fillStyle = '#06b6d4';
-    ctx.fillText(t('Diffusion', '扩散'), ledgerX + 5, row2Y + 15);
-    ctx.textAlign = 'right';
-    ctx.fillText(diffusion.toFixed(5), ledgerX + ledgerW - 4, row2Y + 15);
-    ctx.textAlign = 'left';
+    // Gauge labels
+    ctx.fillStyle = '#22c55e'; ctx.font = '9px Inter, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(t('negative (correct)', '负值（正确）'), zeroPx - 4, gaugeY + 18);
+    ctx.fillStyle = '#ef4444'; ctx.textAlign = 'left';
+    ctx.fillText(t('positive (wrong)', '正值（错误）'), zeroPx + 4, gaugeY + 18);
 
-    // Energy change bar (amber)
-    const row3Y = row2Y + barH + 6;
-    const eBar = Math.min(Math.abs(energyChange) * 5000, maxBar);
-
-    ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
-    ctx.fillRect(ledgerX, row3Y, ledgerW, barH);
-    ctx.fillStyle = energyChange < 0 ? 'rgba(34, 197, 94, 0.6)' : 'rgba(245, 158, 11, 0.6)';
-    ctx.fillRect(ledgerX, row3Y, eBar, barH);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillText(t('Free-energy change', '自由能变化'), ledgerX + 5, row3Y + 15);
-    ctx.textAlign = 'right';
-    ctx.fillText(energyChange.toFixed(5), ledgerX + ledgerW - 4, row3Y + 15);
-    ctx.textAlign = 'left';
-
-    // Residual (self-test loss)
-    const row4Y = row3Y + barH + 12;
-    const resColor = Math.abs(residual) < 0.001 ? '#22c55e' : '#ef4444';
-    ctx.fillStyle = resColor;
-    ctx.font = 'bold 13px Inter, sans-serif';
-    ctx.fillText(`${t('Displayed self-test loss', '展示的自测损失')}: ${residual.toFixed(5)}`, ledgerX, row4Y + 5);
-
-    // Scale labels
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.font = '11px Inter, sans-serif';
+    // Running mean value
+    ctx.fillStyle = meanColor;
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'center';
     ctx.fillText(
-      `${t('V scale', 'V 缩放')}: ${vScale.toFixed(1)}×  |  ${t('Φ scale', 'Φ 缩放')}: ${phiScale.toFixed(1)}×`,
-      ledgerX,
-      row4Y + 25,
+      t(`Running avg L(V,Φ) = ${runMean.toFixed(5)} (last ${lossBuf.length} steps)`,
+        `平均 L(V,Φ) = ${runMean.toFixed(5)}（最近 ${lossBuf.length} 步）`),
+      rX + rW / 2, gaugeY + gaugeH + 16,
     );
 
-    const atTruth = Math.abs(vScale - 1) < 0.05 && Math.abs(phiScale - 1) < 0.05;
+    // Status message
     ctx.fillStyle = atTruth ? '#22c55e' : '#f59e0b';
-    ctx.fillText(
-      atTruth
-        ? t('✓ Near ground-truth scales, the displayed loss is negative', '✓ 在接近真值的缩放下，展示的损失为负')
-        : t('✗ Rescaling the potentials usually increases the displayed residual', '✗ 改变势函数缩放通常会增大展示的残差'),
-      ledgerX,
-      row4Y + 45,
-    );
+    ctx.font = '10px Inter, sans-serif';
+    const msg = atTruth
+      ? t('✓ True potentials: avg converges to −½⟨J_diss⟩Δt < 0', '✓ 真实势函数：均值收敛到 −½⟨J_diss⟩Δt < 0')
+      : t('Perturbed potentials: loss shifts toward 0 or positive', '扰动势函数：损失趋向 0 或正值');
+    ctx.fillText(msg, rX + rW / 2, gaugeY + gaugeH + 32);
 
-    // Mini chart of residual history
-    const chartY = row4Y + 65;
-    const chartH = h - chartY - 20;
-    if (chartH > 40 && residualHistory.length > 2) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    // ── Right bottom: time series chart ──────────────────────────
+    const chartY = gaugeY + gaugeH + 50;
+    const chartH_px = H - chartY - 20;
+    if (chartH_px > 40 && meanHistory.length > 2) {
+      // Chart background
+      ctx.fillStyle = 'rgba(255,255,255,0.02)';
+      ctx.fillRect(rX, chartY, rW, chartH_px);
+
+      // Zero line
+      const zeroY = chartY + chartH_px / 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(ledgerX, chartY + chartH / 2);
-      ctx.lineTo(ledgerX + ledgerW, chartY + chartH / 2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(rX, zeroY); ctx.lineTo(rX + rW, zeroY); ctx.stroke();
 
-      const minR = Math.min(...residualHistory, -0.01);
-      const maxR = Math.max(...residualHistory, 0.01);
-      const range = maxR - minR || 0.01;
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.font = '9px Inter, sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText('0', rX - 2, zeroY + 3);
 
+      // Plot running mean history
+      const minM = Math.min(...meanHistory, -GAUGE_RANGE * 0.5);
+      const maxM = Math.max(...meanHistory, GAUGE_RANGE * 0.5);
+      const rangeM = Math.max(maxM - minM, 0.001);
       ctx.beginPath();
-      ctx.strokeStyle = resColor;
+      ctx.strokeStyle = meanColor;
       ctx.lineWidth = 1.5;
-      for (let i = 0; i < residualHistory.length; i++) {
-        const x = ledgerX + (i / maxHistory) * ledgerW;
-        const y = chartY + chartH - ((residualHistory[i] - minR) / range) * chartH;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      for (let i = 0; i < meanHistory.length; i++) {
+        const x = rX + (i / CHART_LEN) * rW;
+        const y = chartY + chartH_px - ((meanHistory[i] - minM) / rangeM) * chartH_px;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '9px Inter, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(t('Running mean over time →', '随时间的滑动均值 →'), rX + 4, chartY + chartH_px - 4);
     }
 
     requestAnimationFrame(draw);
@@ -351,5 +268,6 @@ if (canvas && vSlider && phiSlider) {
 
   resize();
   window.addEventListener('resize', resize);
+  onLangChange(() => {});
   draw();
 }

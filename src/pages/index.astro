@@ -830,25 +830,121 @@ import Math from '../components/Math.astro';
     <p class="section-label"
       data-i18n-en="Theory Validation"
       data-i18n-zh="理论验证">Theory Validation</p>
-    <h2 data-i18n-en="Error Bound &amp; Scaling"
-        data-i18n-zh="误差界与标度律">Error Bound &amp; Scaling</h2>
+    <h2 data-i18n-en="Does the method work? Three questions."
+        data-i18n-zh="方法有效吗？三个问题。">Does the method work? Three questions.</h2>
+
+    <!-- ── Q1: Does more data help? ── -->
+    <h3 style="margin-top: 1.5rem; color: var(--accent-cyan);"
+      data-i18n-en="Question 1: Does collecting more snapshots improve accuracy?"
+      data-i18n-zh="问题 1：收集更多快照能提高精度吗？">Question 1: Does collecting more snapshots improve accuracy?</h3>
+
+    <p data-i18n-en="Yes. The error has two independent parts — a statistical part that shrinks with more data, and a discretization floor set by how far apart the snapshots are."
+       data-i18n-zh="是的。误差有两个独立部分——随着更多数据缩小的统计部分，以及由快照间隔决定的离散化下限。">
+      Yes. The error has two independent parts — a statistical part that shrinks with more data, and a discretization floor set by how far apart the snapshots are.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+      <div style="padding: 1rem; background: rgba(79,156,249,0.06); border-radius: 8px; border-left: 3px solid var(--accent-cyan);">
+        <p style="font-weight: 600; color: var(--accent-cyan); margin: 0 0 0.4rem;"
+          data-i18n-en="Statistical part: 1/√M"
+          data-i18n-zh="统计部分：1/√M">Statistical part: 1/√M</p>
+        <p style="font-size: 0.85rem; margin: 0;"
+          data-i18n-en="Collect more snapshot pairs M → error decreases as 1/√M. Double M → error drops ~30%."
+          data-i18n-zh="收集更多快照对 M → 误差按 1/√M 下降。M 加倍 → 误差降低约 30%。">
+          Collect more snapshot pairs M → error decreases as 1/√M. Double M → error drops ~30%.
+        </p>
+      </div>
+      <div style="padding: 1rem; background: rgba(245,158,11,0.06); border-radius: 8px; border-left: 3px solid var(--accent-amber);">
+        <p style="font-weight: 600; color: var(--accent-amber); margin: 0 0 0.4rem;"
+          data-i18n-en="Discretization floor: (Δt)^α"
+          data-i18n-zh="离散化下限：(Δt)^α">Discretization floor: (Δt)^α</p>
+        <p style="font-size: 0.85rem; margin: 0;"
+          data-i18n-en="Set by the quadrature rule. α=1 (Riemann): floor ∝ Δt. α=2 (Trapezoidal): floor ∝ (Δt)². Once you hit this floor, more snapshots don't help — use finer time steps instead."
+          data-i18n-zh="由积分法则决定。α=1（黎曼）：下限 ∝ Δt。α=2（梯形）：下限 ∝ (Δt)²。一旦触及此下限，更多快照无济于事——改用更细的时间步。">
+          Set by the quadrature rule. α=1 (Riemann): floor ∝ Δt. α=2 (Trapezoidal): floor ∝ (Δt)². Once you hit this floor, more snapshots don't help.
+        </p>
+      </div>
+    </div>
 
     <div class="math-block" style="border-left-color: var(--accent-green);">
       <Math tex={String.raw`|\widehat{\theta}_{M,\Delta t} - \theta_*| \;\le\; C\!\left(\underbrace{(\Delta t)^\alpha}_{\text{discretization}} + \underbrace{\frac{1}{\sqrt{M}}}_{\text{statistical}}\right)`} />
     </div>
-    <p data-i18n-en="More snapshots M &rarr; statistical error drops as 1/&radic;M. The discretization bias depends on the quadrature rule: &alpha;=1 for Riemann sum (O(&Delta;t) floor), &alpha;=2 for trapezoidal/chordwise rule (O((&Delta;t)&sup2;) floor). See Figure 2 below for the comparison."
-       data-i18n-zh="更多快照 M &rarr; 统计误差按 1/&radic;M 下降。离散化偏差取决于积分法则：Riemann 和对应 &alpha;=1（O(&Delta;t) 下限），梯形/chordwise 法则对应 &alpha;=2（O((&Delta;t)&sup2;) 下限）。见下方图 2 的对比。">
-      More snapshots M &rarr; statistical error drops as 1/&radic;M. The discretization bias depends on the quadrature rule: &alpha;=1 for Riemann sum (O(&Delta;t) floor), &alpha;=2 for trapezoidal/chordwise rule (O((&Delta;t)&sup2;) floor). See Figure 2 below for the comparison.
+
+    <!-- Figure 2: M-scaling — immediately after the claim it supports -->
+    <div class="paper-figure" style="margin-top: 1.5rem;">
+      <p class="prediction-label" style="font-size:0.8rem;color:var(--accent-cyan);font-style:italic;margin-bottom:0.5rem;padding:0.5rem 0.75rem;background:rgba(79,156,249,0.06);border-radius:6px;border-left:3px solid var(--accent-cyan);"
+        data-i18n-en="This figure verifies Q1: error ∝ 1/√M (statistical) then hits the discretization floor."
+        data-i18n-zh="此图验证问题 1：误差 ∝ 1/√M（统计），然后触及离散化下限。">
+        This figure verifies Q1: error ∝ 1/√M then hits the discretization floor.
+      </p>
+      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
+        data-i18n-en="Figure 2: M-scaling — Riemann vs Trapezoidal"
+        data-i18n-zh="图 2：M-标度 — 黎曼和 vs 梯形法则">Figure 2: M-scaling — Riemann vs Trapezoidal</h4>
+      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_zerogap_multi_dt.png`} alt="M-scaling convergence rates" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.06); border-radius: 8px; border-left: 3px solid #ef4444;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #ef4444; margin-bottom: 0.25rem;"
+            data-i18n-en="Left: Riemann (α=1) — floor at O(Δt)"
+            data-i18n-zh="左：黎曼（α=1）——下限为 O(Δt)">Left: Riemann (α=1) — floor at O(Δt)</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="Error drops as 1/√M, then saturates. More data doesn't help past this floor."
+            data-i18n-zh="误差按 1/√M 下降，然后饱和。超出此下限后增加数据无效。">
+            Error drops as 1/√M, then saturates.
+          </p>
+        </div>
+        <div style="padding: 0.75rem; background: rgba(34, 197, 94, 0.06); border-radius: 8px; border-left: 3px solid #22c55e;">
+          <p style="font-weight: 600; font-size: 0.8rem; color: #22c55e; margin-bottom: 0.25rem;"
+            data-i18n-en="Right: Trapezoidal (α=2) — floor at O((Δt)²)"
+            data-i18n-zh="右：梯形（α=2）——下限为 O((Δt)²)">Right: Trapezoidal (α=2) — floor at O((Δt)²)</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
+            data-i18n-en="Same statistical rate, but the floor is quadratically lower — why we use the trapezoidal rule."
+            data-i18n-zh="相同的统计速率，但下限低了二次方——这正是我们使用梯形法则的原因。">
+            Floor is quadratically lower — why we prefer the trapezoidal rule.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Q2: Large time gaps? ── -->
+    <h3 style="margin-top: 2.5rem; color: var(--accent-cyan);"
+      data-i18n-en="Question 2: What happens when snapshot pairs are far apart in time?"
+      data-i18n-zh="问题 2：当快照对在时间上相距很远时会怎样？">Question 2: What happens when snapshot pairs are far apart in time?</h3>
+
+    <p data-i18n-en="The discretization bias becomes intrinsic. When the observation gap Δt equals the fine simulation step δt (zero gap), refining the quadrature gives no extra benefit — the bias is built into the discrete model itself."
+       data-i18n-zh="离散化偏差变得内在。当观测间隔 Δt 等于精细模拟步长 δt（零间隙）时，细化积分不会带来额外好处——偏差内建于离散模型本身。">
+      The discretization bias becomes intrinsic. When Δt = δt (zero gap), refining quadrature gives no extra benefit.
     </p>
 
-    <!-- Condition Number Table -->
-    <h3 style="margin-top: 2rem;"
-      data-i18n-en="Condition Number &kappa;(A) by Model"
-      data-i18n-zh="各模型条件数 &kappa;(A)">Condition Number &kappa;(A) by Model</h3>
-    <p style="font-size: 0.85rem; color: var(--text-muted);"
-      data-i18n-en="d=2, Δt=10⁻², M=2000, oracle basis. Proposition 3 predicts κ = O(N)."
-      data-i18n-zh="d=2, Δt=10⁻², M=2000, oracle 基函数。命题 3 预测 κ = O(N)。">
-      d=2, &Delta;t=10<sup>&minus;2</sup>, M=2000, oracle basis. Proposition 3 predicts &kappa; = O(N).
+    <!-- Figure 3: Discrete-Model Bias — immediately after Q2 -->
+    <div class="paper-figure" style="margin-top: 1rem;">
+      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
+        data-i18n-en="Figure 3: Discrete-Model Bias (zero-gap regime)"
+        data-i18n-zh="图 3：离散模型偏差（零间隙区间）">Figure 3: Discrete-Model Bias (zero-gap regime)</h4>
+      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_discrete_bias.png`} alt="Discrete model bias" style="width: 70%; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
+      <div class="callout callout-insight" style="margin-top: 1rem;">
+        <p style="margin: 0; font-size: 0.85rem;"
+          data-i18n-en="To push accuracy below O(Δt): use finer simulation (δt &lt; Δt) and a higher-order quadrature rule. More snapshot pairs alone cannot overcome this floor."
+          data-i18n-zh="要将精度推到 O(Δt) 以下：使用更精细的模拟（δt &lt; Δt）和更高阶的积分法则。仅靠增加快照对无法克服此下限。">
+          To push accuracy below O(Δt): use finer simulation (δt &lt; Δt) and a higher-order quadrature rule.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Q3: Numerical stability? ── -->
+    <h3 style="margin-top: 2.5rem; color: var(--accent-cyan);"
+      data-i18n-en="Question 3: Is the least-squares solve numerically stable?"
+      data-i18n-zh="问题 3：最小二乘求解在数值上稳定吗？">Question 3: Is the least-squares solve numerically stable?</h3>
+
+    <p data-i18n-en="Mostly yes. The condition number κ(A) grows at most as O(N) — the matrix stays well-controlled even as the particle count grows. For typical models, κ is well below the O(N) ceiling."
+       data-i18n-zh="大体上是的。条件数 κ(A) 最多以 O(N) 增长——即使粒子数增加，矩阵仍然保持良态。对于典型模型，κ 远低于 O(N) 上限。">
+      Mostly yes. κ(A) grows at most as O(N) — the matrix stays controlled even as particle count grows.
+    </p>
+
+    <!-- Condition Number Table — right after Q3 claim -->
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;"
+      data-i18n-en="d=2, Δt=10⁻², M=2000, oracle basis. Theory predicts κ = O(N)."
+      data-i18n-zh="d=2, Δt=10⁻², M=2000, oracle 基函数。理论预测 κ = O(N)。">
+      d=2, &Delta;t=10<sup>&minus;2</sup>, M=2000, oracle basis. Theory predicts &kappa; = O(N).
     </p>
 
     <div class="demo-container" style="padding: 1.25rem;">
@@ -856,8 +952,7 @@ import Math from '../components/Math.astro';
         <table class="cond-table">
           <thead>
             <tr>
-              <th style="text-align:left;"
-                data-i18n-en="Model" data-i18n-zh="模型">Model</th>
+              <th style="text-align:left;" data-i18n-en="Model" data-i18n-zh="模型">Model</th>
               <th>N=5</th><th>N=10</th><th>N=20</th><th>N=50</th><th>N=100</th>
               <th data-i18n-en="Rate" data-i18n-zh="速率">Rate</th>
             </tr>
@@ -893,117 +988,27 @@ import Math from '../components/Math.astro';
       </div>
     </div>
 
-    <div class="callout callout-insight" style="margin-top: 1rem;">
-      <p style="margin:0; font-size: 0.9rem;"
-        data-i18n-en="Reference model has κ = O(N⁰·⁵), well below the O(N) ceiling. The table here is about conditioning only: it shows that test B is the ill-conditioned outlier, while LJ singularity (C) has nearly constant κ driven by the r⁻¹² blowup rather than by N."
-        data-i18n-zh="参考模型 κ = O(N⁰·⁵)，远低于 O(N) 上限。这里这张表只讨论条件数：它显示 B 是明显的病态离群点，而 LJ 奇异性 (C) 的 κ 近似恒定，主因是 r⁻¹² 爆炸而不是 N。">
-        Reference model has &kappa; = O(N<sup>0.5</sup>), well below the O(N) ceiling. The table here is about conditioning only: it shows that test B is the ill-conditioned outlier, while LJ singularity (C) has nearly constant &kappa; driven by the r<sup>&minus;12</sup> blowup rather than by N.
-      </p>
-    </div>
-  </section>
-
-  <!-- ═══ Paper Figures: Error Bound & Scaling ═══ -->
-  <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 3rem; max-width: 900px; margin-left: auto; margin-right: auto; padding: 0 1rem;">
-
-    <!-- Figure 2: M-scaling -->
-    <div class="paper-figure">
-      <p class="prediction-label" style="font-size:0.8rem;color:var(--accent-cyan);font-style:italic;margin-bottom:0.5rem;padding:0.5rem 0.75rem;background:rgba(79,156,249,0.06);border-radius:6px;border-left:3px solid var(--accent-cyan);"
-        data-i18n-en="Prediction from §Theory (Convergence): Error ∝ 1/√M — improves with more samples."
-        data-i18n-zh="来自§理论（收敛性）的预测：误差 ∝ 1/√M——随样本增多而改善。">
-        Prediction from &sect;Theory (Convergence): Error &prop; 1/&radic;M — improves with more samples.
-      </p>
-      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
-        data-i18n-en="Figure 2: M-scaling — Riemann vs Trapezoidal"
-        data-i18n-zh="图 2：M-标度 — 黎曼和 vs 梯形法则">Figure 2: M-scaling — Riemann vs Trapezoidal</h4>
-      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
-        data-i18n-en="This figure empirically supports the scaling law above. As the number of snapshots M increases, both ∇V and ∇Φ errors decrease — but they eventually hit a floor determined by the quadrature rule."
-        data-i18n-zh="此图从经验上支持上方的标度律。随着快照数 M 增加，∇V 和 ∇Φ 误差都下降——但最终会触底，底线由积分法则决定。">
-        This figure empirically supports the scaling law above. As the number of snapshots M increases, both &nabla;V and &nabla;&Phi; errors decrease — but they eventually hit a floor determined by the quadrature rule.
-      </p>
-      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_zerogap_multi_dt.png`} alt="M-scaling convergence rates" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.06); border-radius: 8px; border-left: 3px solid #ef4444;">
-          <p style="font-weight: 600; font-size: 0.8rem; color: #ef4444; margin-bottom: 0.25rem;"
-            data-i18n-en="Left pair: Riemann sum (&alpha;=1)"
-            data-i18n-zh="左图对：黎曼和（&alpha;=1）">Left pair: Riemann sum (&alpha;=1)</p>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
-            data-i18n-en="Error drops as 1/√M, then saturates at O(Δt) — the Riemann discretization floor. Adding more data doesn't help."
-            data-i18n-zh="误差按 1/&radic;M 下降，然后在 O(&Delta;t) 处饱和——黎曼离散化下限。增加更多数据也无济于事。">
-            Error drops as 1/&radic;M, then saturates at O(&Delta;t) — the Riemann discretization floor. Adding more data doesn't help.
-          </p>
-        </div>
-        <div style="padding: 0.75rem; background: rgba(34, 197, 94, 0.06); border-radius: 8px; border-left: 3px solid #22c55e;">
-          <p style="font-weight: 600; font-size: 0.8rem; color: #22c55e; margin-bottom: 0.25rem;"
-            data-i18n-en="Right pair: Trapezoidal rule (&alpha;=2)"
-            data-i18n-zh="右图对：梯形法则（&alpha;=2）">Right pair: Trapezoidal rule (&alpha;=2)</p>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;"
-            data-i18n-en="Same 1/√M statistical rate, but the floor drops to O((Δt)²) — quadratically better. This is why we use the trapezoidal rule."
-            data-i18n-zh="相同的 1/&radic;M 统计速率，但下限降至 O((&Delta;t)&sup2;)——二次方改进。这就是我们使用梯形法则的原因。">
-            Same 1/&radic;M statistical rate, but the floor drops to O((&Delta;t)&sup2;) — quadratically better. This is why we use the trapezoidal rule.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Figure 3: Discrete-Model Bias -->
-    <div class="paper-figure">
-      <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
-        data-i18n-en="Figure 3: Discrete-Model Bias"
-        data-i18n-zh="图 3：离散模型偏差">Figure 3: Discrete-Model Bias</h4>
-      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
-        data-i18n-en="What happens when you observe data at the same resolution you simulate? When the fine simulation step δt equals the observation gap Δt (zero gap), there is no room to refine the quadrature. The O(Δt) bias becomes intrinsic to the discrete model itself."
-        data-i18n-zh="当你以模拟的相同精度观测数据会怎样？当精细模拟步长 &delta;t 等于观测间隔 &Delta;t（零间隙）时，没有空间细化积分。O(&Delta;t) 偏差成为离散模型本身的内在属性。">
-        What happens when you observe data at the same resolution you simulate? When the fine simulation step &delta;t equals the observation gap &Delta;t (zero gap), there is no room to refine the quadrature. The O(&Delta;t) bias becomes intrinsic to the discrete model itself.
-      </p>
-      <img src={`${import.meta.env.BASE_URL}/figures/m_scaling_discrete_bias.png`} alt="Discrete model bias" style="width: 70%; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-      <div class="callout callout-insight" style="margin-top: 1rem;">
-        <p style="margin: 0; font-size: 0.85rem;"
-          data-i18n-en="Takeaway: in this regime, the error floor is set by the discrete-model bias rather than by numerical plotting artifacts. To push accuracy below O(Δt), you must use finer simulation (δt &lt; Δt) and a higher-order quadrature rule."
-          data-i18n-zh="要点：在这个区间里，误差下限主要由离散模型偏差决定，而不是数值绘图伪影。要将精度推到 O(&Delta;t) 以下，必须使用更精细的模拟（&delta;t &lt; &Delta;t）和更高阶的积分法则。">
-          Takeaway: in this regime, the error floor is set by the discrete-model bias rather than by numerical plotting artifacts. To push accuracy below O(&Delta;t), you must use finer simulation (&delta;t &lt; &Delta;t) and a higher-order quadrature rule.
-        </p>
-      </div>
-    </div>
-
-    <!-- Figure 4: Condition Number Scaling -->
-    <div class="paper-figure">
+    <!-- Figure 4: Condition Number Scaling — right after Q3 table -->
+    <div class="paper-figure" style="margin-top: 1.5rem;">
       <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
         data-i18n-en="Figure 4: Condition Number Scaling with N"
         data-i18n-zh="图 4：条件数随 N 的标度">Figure 4: Condition Number Scaling with N</h4>
       <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
-        data-i18n-en="The condition number κ controls how much noise gets amplified when solving the linear system. Three panels decompose the total κ into its V and Φ contributions, revealing which part drives the difficulty."
-        data-i18n-zh="条件数 &kappa; 控制求解线性系统时噪声被放大的程度。三个面板将总 &kappa; 分解为 V 和 &Phi; 的贡献，揭示了哪个部分驱动了问题难度。">
-        The condition number &kappa; controls how much noise gets amplified when solving the linear system. Three panels decompose the total &kappa; into its V and &Phi; contributions, revealing which part drives the difficulty.
+        data-i18n-en="Three panels: κ* (total), κ_VV (V part, N-independent), κ_ΦΦ (Φ part, O(N)). The Φ contribution drives the total condition number."
+        data-i18n-zh="三个面板：κ*（总体）、κ_VV（V 部分，与 N 无关）、κ_ΦΦ（Φ 部分，O(N)）。Φ 的贡献主导总条件数。">
+        Three panels: κ* (total), κ_VV (V part, N-independent), κ_ΦΦ (Φ part, O(N)).
       </p>
       <img src={`${import.meta.env.BASE_URL}/figures/condition_numbers_1x3.png`} alt="Condition number scaling" style="width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);" loading="lazy" />
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-top: 1rem;">
-        <div style="padding: 0.6rem; background: rgba(59, 130, 246, 0.06); border-radius: 8px; text-align: center;">
-          <p style="font-weight: 600; font-size: 0.8rem; color: #3b82f6; margin-bottom: 0.25rem;"
-            data-i18n-en="Left: &kappa;* (total)"
-            data-i18n-zh="左：&kappa;*（总）">Left: &kappa;* (total)</p>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;"
-            data-i18n-en="O(N) at d=10 — matches Proposition 3"
-            data-i18n-zh="O(N)（d=10）— 符合命题 3">O(N) at d=10 — matches Proposition 3</p>
-        </div>
-        <div style="padding: 0.6rem; background: rgba(34, 197, 94, 0.06); border-radius: 8px; text-align: center;">
-          <p style="font-weight: 600; font-size: 0.8rem; color: #22c55e; margin-bottom: 0.25rem;"
-            data-i18n-en="Center: &kappa;<sub>VV</sub>"
-            data-i18n-zh="中：&kappa;<sub>VV</sub>">Center: &kappa;<sub>VV</sub></p>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;"
-            data-i18n-en="N-independent — V is always well-conditioned"
-            data-i18n-zh="与 N 无关——V 始终良态">N-independent — V is always well-conditioned</p>
-        </div>
-        <div style="padding: 0.6rem; background: rgba(245, 158, 11, 0.06); border-radius: 8px; text-align: center;">
-          <p style="font-weight: 600; font-size: 0.8rem; color: #f59e0b; margin-bottom: 0.25rem;"
-            data-i18n-en="Right: &kappa;<sub>&Phi;&Phi;</sub>"
-            data-i18n-zh="右：&kappa;<sub>&Phi;&Phi;</sub>">Right: &kappa;<sub>&Phi;&Phi;</sub></p>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;"
-            data-i18n-en="O(N) — distance concentration makes &Phi; harder with more particles"
-            data-i18n-zh="O(N)——距离集中使 &Phi; 随粒子增加更难">O(N) — distance concentration makes &Phi; harder</p>
-        </div>
+
+      <div class="callout callout-insight" style="margin-top: 1rem;">
+        <p style="margin:0; font-size: 0.9rem;"
+          data-i18n-en="Reference model: κ = O(N⁰·⁵), well below the O(N) ceiling. Test B is the ill-conditioned outlier. LJ singularity (C) has nearly constant κ — driven by the r⁻¹² blowup, not by N."
+          data-i18n-zh="参考模型：κ = O(N⁰·⁵)，远低于 O(N) 上限。测试 B 是明显的病态离群点。LJ 奇异性 (C) 的 κ 近似恒定——由 r⁻¹² 爆炸驱动，而非 N。">
+          Reference model: κ = O(N⁰·⁵), well below O(N). Test B is the ill-conditioned outlier. LJ (C) has nearly constant κ driven by the r⁻¹² singularity.
+        </p>
       </div>
     </div>
-  </div>
+  </section>
 
   <div class="section-divider"></div>
 
@@ -1041,6 +1046,22 @@ import Math from '../components/Math.astro';
         <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 0.75rem;"
           data-i18n-en="Figure 5: Non-Radial Potential Recovery (d=2)"
           data-i18n-zh="图 5：非径向势恢复（d=2）">Figure 5: Non-Radial Potential Recovery (d=2)</h4>
+                <div style="background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.25); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="color: #8b5cf6; margin: 0 0 0.75rem;" data-i18n-en="The Non-Radial Model" data-i18n-zh="非径向势模型">The Non-Radial Model</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <p style="font-size: 0.8rem; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.4rem;" data-i18n-en="External potential V(x)" data-i18n-zh="外部势 V(x)">External potential V(x)</p>
+              <p style="font-size: 0.9rem; font-family: var(--font-mono); color: rgba(255,255,255,0.85); margin: 0 0 0.4rem;">V(x) = x₁² + 4x₂²</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;" data-i18n-en="Elliptic confinement: 4× stronger along y-axis. Equilibrium distribution is an ellipse, not a circle." data-i18n-zh="椭圆束缚势：沿 y 轴约束比 x 轴强 4 倍。平衡分布是椭圆，而非圆形。">Elliptic confinement: 4× stronger along y-axis.</p>
+            </div>
+            <div>
+              <p style="font-size: 0.8rem; color: var(--accent-purple, #8b5cf6); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.4rem;" data-i18n-en="Interaction potential Φ(z)" data-i18n-zh="交互势 Φ(z)">Interaction potential Φ(z)</p>
+              <p style="font-size: 0.9rem; font-family: var(--font-mono); color: rgba(255,255,255,0.85); margin: 0 0 0.4rem;">Φ(z) = 2 exp(−½(z₁²/0.5² + z₂²/1.5²))</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;" data-i18n-en="Direction-dependent: range 0.5 along z₁, range 1.5 along z₂. Force depends on direction between particles, not just distance." data-i18n-zh="方向相关：沿 z₁ 范围 0.5，沿 z₂ 范围 1.5。力取决于粒子间方向，而不仅仅是距离。">Direction-dependent interaction — range differs by axis.</p>
+            </div>
+          </div>
+          <p style="font-size: 0.85rem; margin: 0.75rem 0 0; border-top: 1px solid rgba(139,92,246,0.2); padding-top: 0.75rem;" data-i18n-en="Unlike all other test models (where Φ depends only on distance |x-y|), here Φ depends on the DIRECTION between particles. This tests whether the neural network can discover truly anisotropic interactions from unlabeled snapshots." data-i18n-zh="与所有其他测试模型不同（其中 Φ 只依赖于距离 |x-y|），此处 Φ 取决于粒子间的方向。这测试神经网络能否从无标签快照中发现真正的各向异性交互。">Unlike all other test models, this Φ depends on direction — a harder case for the neural network.</p>
+        </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;"
           data-i18n-en="All stress tests above use radial potentials V(|x|) and Φ(|z|). But real systems can be anisotropic — forces vary by direction. This figure tests whether the NN can recover non-radial potentials where each spatial axis has different parameters."
           data-i18n-zh="上面所有压力测试都用径向势 V(|x|) 和 &Phi;(|z|)。但真实系统可以是各向异性的——力随方向变化。此图测试 NN 能否恢复每个空间轴有不同参数的非径向势。">
