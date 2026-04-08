@@ -57,7 +57,7 @@ if (canvas && vSlider && phiSlider) {
           const dif = positions[i * d + k] - positions[j * d + k];
           rSq += dif * dif;
         }
-        Phisum += truePhi.evaluate(Math.sqrt(rSq)) * phiScale;
+        Phisum += (truePhi as any).evaluate(Math.sqrt(rSq)) * phiScale;
       }
     }
     return Vsum / N + Phisum / (N * N);
@@ -78,7 +78,7 @@ if (canvas && vSlider && phiSlider) {
         let rSq = 0;
         for (let k = 0; k < d; k++) { diff[k] = positions[i * d + k] - positions[j * d + k]; rSq += diff[k] * diff[k]; }
         const r = Math.max(Math.sqrt(rSq), 1e-10);
-        const dPhi = (truePhi.gradient(r) as number) * phiScale / N;
+        const dPhi = ((truePhi as any).gradient(r) as number) * phiScale / N;
         gx += dPhi * diff[0] / r;
         gy += dPhi * diff[1] / r;
       }
@@ -109,8 +109,8 @@ if (canvas && vSlider && phiSlider) {
         for (let k = 0; k < d; k++) { const dif = positions[i * d + k] - positions[j * d + k]; rSq += dif * dif; }
         const r = Math.max(Math.sqrt(rSq), 1e-10);
         const rp = r + h, rm = Math.max(r - h, 1e-10);
-        const d2 = ((truePhi.gradient(rp) as number) - (truePhi.gradient(rm) as number)) / (rp - rm);
-        lapPhi += d2 + (d - 1) / r * (truePhi.gradient(r) as number);
+        const d2 = (((truePhi as any).gradient(rp) as number) - ((truePhi as any).gradient(rm) as number)) / (rp - rm);
+        lapPhi += d2 + (d - 1) / r * ((truePhi as any).gradient(r) as number);
       }
     }
     return vScale * lapV / N + phiScale * lapPhi / (N * N);
